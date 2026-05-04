@@ -415,5 +415,556 @@
       {"type": "shape", "color": "YELLOW", "shape": "L_SHAPE"}
     ],
     "stars": {"twoStar": 7, "threeStar": 14}
+  },
+
+  {
+    "id": 26, "world": 4, "name": "Crystal Entry", "width": 7, "height": 7, "maxMoves": 18,
+    "tiles": [
+      ["RED","BLUE","GREEN","YELLOW","RED","BLUE","GREEN"],
+      ["BLUE","RED","YELLOW","GREEN","BLUE","GREEN","RED"],
+      ["GREEN","YELLOW","RED","BLUE","GREEN","RED","YELLOW"],
+      ["YELLOW","GREEN","BLUE","RED","YELLOW","BLUE","GREEN"],
+      ["RED","BLUE","GREEN","YELLOW","RED","GREEN","BLUE"],
+      ["BLUE","RED","YELLOW","GREEN","BLUE","RED","YELLOW"],
+      ["GREEN","YELLOW","RED","BLUE","GREEN","YELLOW","RED"]
+    ],
+    "frozen": [{"row": 3, "col": 3}, {"row": 1, "col": 5}],
+    "voids": [{"row": 0, "col": 0}, {"row": 6, "col": 6}],
+    "goals": [
+      {"type": "line", "color": "RED", "length": 4},
+      {"type": "square", "color": "BLUE"},
+      {"type": "shape", "color": "GREEN", "shape": "L_SHAPE"}
+    ],
+    "stars": {"twoStar": 5, "threeStar": 10}
+  },
+  {
+    "id": 27, "world": 4, "name": "Frost Shard", "width": 7, "height": 7, "maxMoves": 18,
+    "tiles": [
+      ["BLUE","GREEN","RED","YELLOW","BLUE","RED","GREEN"],
+      ["RED","BLUE","GREEN","BLUE","RED","GREEN","YELLOW"],
+      ["GREEN","RED","YELLOW","RED","GREEN","YELLOW","BLUE"],
+      ["YELLOW","GREEN","BLUE","GREEN","YELLOW","BLUE","RED"],
+      ["BLUE","RED","GREEN","YELLOW","BLUE","RED","GREEN"],
+      ["RED","YELLOW","BLUE","RED","GREEN","YELLOW","BLUE"],
+      ["GREEN","BLUE","YELLOW","GREEN","RED","BLUE","RED"]
+    ],
+    "frozen": [{"row": 2, "col": 2}, {"row": 4, "col": 4}, {"row": 3, "col": 0}],
+    "voids": [{"row": 0, "col": 6}, {"row": 6, "col": 0}],
+    "goals": [
+      {"type": "line", "color": "GREEN", "length": 4},
+      {"type": "line", "color": "YELLOW", "length": 4},
+      {"type": "shape", "color": "RED", "shape": "T_SHAPE"}
+    ],
+    "stars": {"twoStar": 5, "threeStar": 10}
+  },
+  {
+    "id": 28, "world": 4, "name": "Frozen Brook", "width": 7, "height": 7, "maxMoves": 20,
+    "tiles": [
+      ["GREEN","RED","BLUE","YELLOW","GREEN","RED","BLUE"],
+      ["RED","GREEN","YELLOW","GREEN","RED","BLUE","GREEN"],
+      ["BLUE","YELLOW","GREEN","RED","BLUE","GREEN","RED"],
+      ["YELLOW","GREEN","RED","BLUE","YELLOW","RED","YELLOW"],
+      ["GREEN","RED","BLUE","YELLOW","GREEN","YELLOW","BLUE"],
+      ["RED","BLUE","GREEN","RED","BLUE","GREEN","RED"],
+      ["BLUE","GREEN","YELLOW","GREEN","RED","BLUE","GREEN"]
+    ],
+    "frozen": [{"row": 1, "col": 3}, {"row": 5, "col": 3}, {"row": 3, "col": 1}],
+    "voids": [{"row": 0, "col": 0}, {"row": 0, "col": 6}],
+    "goals": [
+      {"type": "square", "color": "RED"},
+      {"type": "shape", "color": "BLUE", "shape": "L_SHAPE"},
+      {"type": "line", "color": "GREEN", "length": 4},
+      {"type": "line", "color": "YELLOW", "length": 3}
+    ],
+    "stars": {"twoStar": 6, "threeStar": 11}
+  },
+  {
+    "id": 29, "world": 4, "name": "Ice Lattice", "width": 7, "height": 7, "maxMoves": 22,
+    "tiles": [
+      ["RED","BLUE","GREEN","YELLOW","RED","BLUE","GREEN"],
+      ["BLUE","RED","YELLOW","GREEN","BLUE","GREEN","RED"],
+      ["GREEN","YELLOW","RED","BLUE","GREEN","RED","YELLOW"],
+      ["YELLOW","GREEN","BLUE","RED","YELLOW","BLUE","GREEN"],
+      ["RED","BLUE","GREEN","YELLOW","RED","GREEN","BLUE"],
+      ["BLUE","RED","YELLOW","GREEN","BLUE","RED","YELLOW"],
+      ["GREEN","YELLOW","RED","BLUE","GREEN","YELLOW","RED"]
+    ],
+    "frozen": [{"row": 1, "col": 1}, {"row": 3, "col": 5}, {"row": 5, "col": 2}, {"row": 2, "col": 4}],
+    "voids": [{"row": 0, "col": 0}, {"row": 6, "col": 6}, {"row": 6, "col": 0}],
+    "goals": [
+      {"type": "line", "color": "BLUE", "length": 5},
+      {"type": "square", "color": "GREEN"},
+      {"type": "line", "color": "RED", "length": 4},
+      {"type": "shape", "color": "YELLOW", "shape": "T_SHAPE"}
+    ],
+    "stars": {"twoStar": 6, "threeStar": 12}
+  },
+  {
+    "id": 30, "world": 4, "name": "Glacier Ridge", "width": 7, "height": 7, "maxMoves": 22,
+    "tiles": [
+      ["YELLOW","RED","BLUE","GREEN","YELLOW","RED","BLUE"],
+      ["RED","YELLOW","GREEN","BLUE","RED","YELLOW","GREEN"],
+      ["BLUE","GREEN","YELLOW","RED","GREEN","BLUE","YELLOW"],
+      ["GREEN","BLUE","RED","YELLOW","BLUE","GREEN","RED"],
+      ["YELLOW","RED","GREEN","BLUE","YELLOW","RED","BLUE"],
+      ["RED","YELLOW","BLUE","GREEN","RED","YELLOW","GREEN"],
+      ["BLUE","GREEN","YELLOW","RED","BLUE","GREEN","YELLOW"]
+    ],
+    "frozen": [{"row": 0, "col": 3}, {"row": 3, "col": 3}, {"row": 6, "col": 3}, {"row": 3, "col": 0}],
+    "voids": [{"row": 0, "col": 0}, {"row": 0, "col": 6}, {"row": 6, "col": 0}, {"row": 6, "col": 6}],
+    "goals": [
+      {"type": "shape", "color": "RED", "shape": "T_SHAPE"},
+      {"type": "square", "color": "YELLOW"},
+      {"type": "line", "color": "GREEN", "length": 4},
+      {"type": "shape", "color": "BLUE", "shape": "L_SHAPE"}
+    ],
+    "stars": {"twoStar": 6, "threeStar": 12}
+  },
+  {
+    "id": 31, "world": 4, "name": "Crystal Maze", "width": 7, "height": 7, "maxMoves": 24,
+    "tiles": [
+      ["RED","BLUE","GREEN","YELLOW","RED","BLUE","GREEN"],
+      ["BLUE","RED","YELLOW","GREEN","BLUE","GREEN","RED"],
+      ["GREEN","YELLOW","RED","BLUE","GREEN","RED","YELLOW"],
+      ["YELLOW","GREEN","BLUE","RED","YELLOW","BLUE","GREEN"],
+      ["RED","BLUE","GREEN","YELLOW","RED","GREEN","BLUE"],
+      ["BLUE","RED","YELLOW","GREEN","BLUE","RED","YELLOW"],
+      ["GREEN","YELLOW","RED","BLUE","GREEN","YELLOW","RED"]
+    ],
+    "frozen": [{"row": 2, "col": 3}, {"row": 3, "col": 2}, {"row": 3, "col": 4}, {"row": 4, "col": 3}, {"row": 1, "col": 1}],
+    "voids": [{"row": 0, "col": 0}, {"row": 0, "col": 6}, {"row": 6, "col": 0}, {"row": 6, "col": 6}],
+    "goals": [
+      {"type": "shape", "color": "GREEN", "shape": "CROSS"},
+      {"type": "line", "color": "BLUE", "length": 5},
+      {"type": "square", "color": "RED"},
+      {"type": "shape", "color": "YELLOW", "shape": "T_SHAPE"}
+    ],
+    "stars": {"twoStar": 7, "threeStar": 13}
+  },
+  {
+    "id": 32, "world": 4, "name": "Frozen Heart", "width": 7, "height": 7, "maxMoves": 24,
+    "tiles": [
+      ["BLUE","RED","GREEN","YELLOW","BLUE","RED","GREEN"],
+      ["RED","BLUE","YELLOW","BLUE","RED","GREEN","BLUE"],
+      ["GREEN","YELLOW","BLUE","RED","BLUE","YELLOW","RED"],
+      ["YELLOW","BLUE","RED","BLUE","GREEN","BLUE","YELLOW"],
+      ["BLUE","RED","GREEN","YELLOW","BLUE","RED","GREEN"],
+      ["RED","GREEN","BLUE","RED","YELLOW","BLUE","RED"],
+      ["GREEN","BLUE","YELLOW","BLUE","RED","GREEN","BLUE"]
+    ],
+    "frozen": [{"row": 2, "col": 3}, {"row": 3, "col": 2}, {"row": 3, "col": 4}, {"row": 4, "col": 3}, {"row": 0, "col": 3}],
+    "voids": [{"row": 0, "col": 0}, {"row": 0, "col": 6}, {"row": 6, "col": 0}, {"row": 6, "col": 6}],
+    "goals": [
+      {"type": "shape", "color": "BLUE", "shape": "T_SHAPE"},
+      {"type": "shape", "color": "RED", "shape": "L_SHAPE"},
+      {"type": "line", "color": "YELLOW", "length": 5},
+      {"type": "square", "color": "GREEN"}
+    ],
+    "stars": {"twoStar": 7, "threeStar": 13}
+  },
+  {
+    "id": 33, "world": 4, "name": "Permafrost", "width": 7, "height": 7, "maxMoves": 26,
+    "tiles": [
+      ["RED","GREEN","BLUE","YELLOW","RED","GREEN","BLUE"],
+      ["GREEN","RED","YELLOW","RED","GREEN","BLUE","RED"],
+      ["BLUE","YELLOW","RED","GREEN","RED","YELLOW","GREEN"],
+      ["YELLOW","RED","GREEN","RED","BLUE","RED","YELLOW"],
+      ["RED","GREEN","BLUE","YELLOW","RED","GREEN","BLUE"],
+      ["GREEN","BLUE","RED","GREEN","YELLOW","RED","GREEN"],
+      ["BLUE","RED","YELLOW","BLUE","GREEN","YELLOW","RED"]
+    ],
+    "frozen": [{"row": 1, "col": 3}, {"row": 3, "col": 1}, {"row": 3, "col": 3}, {"row": 3, "col": 5}, {"row": 5, "col": 3}, {"row": 0, "col": 3}],
+    "voids": [{"row": 0, "col": 0}, {"row": 0, "col": 6}, {"row": 6, "col": 0}, {"row": 6, "col": 6}, {"row": 6, "col": 5}, {"row": 6, "col": 1}],
+    "goals": [
+      {"type": "shape", "color": "RED", "shape": "CROSS"},
+      {"type": "shape", "color": "GREEN", "shape": "T_SHAPE"},
+      {"type": "square", "color": "BLUE"},
+      {"type": "line", "color": "YELLOW", "length": 5}
+    ],
+    "stars": {"twoStar": 7, "threeStar": 14}
+  },
+
+  {
+    "id": 34, "world": 5, "name": "Broken Shore", "width": 7, "height": 7, "maxMoves": 20,
+    "tiles": [
+      ["RED","BLUE","GREEN","YELLOW","RED","BLUE","GREEN"],
+      ["BLUE","RED","YELLOW","GREEN","BLUE","GREEN","RED"],
+      ["GREEN","YELLOW","RED","BLUE","GREEN","RED","YELLOW"],
+      ["YELLOW","GREEN","BLUE","RED","YELLOW","BLUE","GREEN"],
+      ["RED","BLUE","GREEN","YELLOW","RED","GREEN","BLUE"],
+      ["BLUE","RED","YELLOW","GREEN","BLUE","RED","YELLOW"],
+      ["GREEN","YELLOW","RED","BLUE","GREEN","YELLOW","RED"]
+    ],
+    "frozen": [{"row": 3, "col": 3}, {"row": 2, "col": 5}],
+    "voids": [{"row": 0, "col": 0}, {"row": 0, "col": 6}, {"row": 6, "col": 0}, {"row": 6, "col": 6}],
+    "goals": [
+      {"type": "line", "color": "RED", "length": 4},
+      {"type": "square", "color": "GREEN"},
+      {"type": "shape", "color": "BLUE", "shape": "L_SHAPE"},
+      {"type": "line", "color": "YELLOW", "length": 4}
+    ],
+    "stars": {"twoStar": 6, "threeStar": 11}
+  },
+  {
+    "id": 35, "world": 5, "name": "Cliff Edge", "width": 7, "height": 7, "maxMoves": 20,
+    "tiles": [
+      ["BLUE","GREEN","RED","YELLOW","BLUE","RED","GREEN"],
+      ["RED","BLUE","GREEN","BLUE","RED","GREEN","YELLOW"],
+      ["GREEN","RED","YELLOW","RED","GREEN","YELLOW","BLUE"],
+      ["YELLOW","GREEN","BLUE","GREEN","YELLOW","BLUE","RED"],
+      ["BLUE","RED","GREEN","YELLOW","BLUE","RED","GREEN"],
+      ["RED","YELLOW","BLUE","RED","GREEN","YELLOW","BLUE"],
+      ["GREEN","BLUE","YELLOW","GREEN","RED","BLUE","RED"]
+    ],
+    "frozen": [{"row": 3, "col": 2}, {"row": 4, "col": 5}],
+    "voids": [{"row": 0, "col": 5}, {"row": 0, "col": 6}, {"row": 1, "col": 6}, {"row": 6, "col": 0}],
+    "goals": [
+      {"type": "line", "color": "BLUE", "length": 5},
+      {"type": "line", "color": "YELLOW", "length": 4},
+      {"type": "shape", "color": "RED", "shape": "T_SHAPE"},
+      {"type": "square", "color": "GREEN"}
+    ],
+    "stars": {"twoStar": 6, "threeStar": 11}
+  },
+  {
+    "id": 36, "world": 5, "name": "Crescent Isle", "width": 7, "height": 7, "maxMoves": 22,
+    "tiles": [
+      ["GREEN","RED","BLUE","YELLOW","GREEN","RED","BLUE"],
+      ["RED","GREEN","YELLOW","GREEN","RED","BLUE","GREEN"],
+      ["BLUE","YELLOW","GREEN","RED","BLUE","GREEN","RED"],
+      ["YELLOW","GREEN","RED","BLUE","YELLOW","RED","YELLOW"],
+      ["GREEN","RED","BLUE","YELLOW","GREEN","YELLOW","BLUE"],
+      ["RED","BLUE","GREEN","RED","BLUE","GREEN","RED"],
+      ["BLUE","GREEN","YELLOW","GREEN","RED","BLUE","GREEN"]
+    ],
+    "frozen": [{"row": 2, "col": 3}, {"row": 4, "col": 4}, {"row": 1, "col": 5}],
+    "voids": [{"row": 0, "col": 0}, {"row": 1, "col": 0}, {"row": 6, "col": 0}, {"row": 6, "col": 1}, {"row": 6, "col": 6}],
+    "goals": [
+      {"type": "square", "color": "RED"},
+      {"type": "shape", "color": "BLUE", "shape": "L_SHAPE"},
+      {"type": "line", "color": "GREEN", "length": 4},
+      {"type": "shape", "color": "YELLOW", "shape": "T_SHAPE"}
+    ],
+    "stars": {"twoStar": 6, "threeStar": 12}
+  },
+  {
+    "id": 37, "world": 5, "name": "Split Channel", "width": 7, "height": 7, "maxMoves": 22,
+    "tiles": [
+      ["RED","BLUE","GREEN","YELLOW","RED","BLUE","GREEN"],
+      ["BLUE","RED","YELLOW","GREEN","BLUE","GREEN","RED"],
+      ["GREEN","YELLOW","RED","BLUE","GREEN","RED","YELLOW"],
+      ["YELLOW","GREEN","BLUE","RED","YELLOW","BLUE","GREEN"],
+      ["RED","BLUE","GREEN","YELLOW","RED","GREEN","BLUE"],
+      ["BLUE","RED","YELLOW","GREEN","BLUE","RED","YELLOW"],
+      ["GREEN","YELLOW","RED","BLUE","GREEN","YELLOW","RED"]
+    ],
+    "frozen": [{"row": 1, "col": 1}, {"row": 5, "col": 5}, {"row": 3, "col": 0}],
+    "voids": [{"row": 2, "col": 3}, {"row": 3, "col": 3}, {"row": 4, "col": 3}, {"row": 0, "col": 0}],
+    "goals": [
+      {"type": "line", "color": "GREEN", "length": 5},
+      {"type": "square", "color": "YELLOW"},
+      {"type": "shape", "color": "RED", "shape": "T_SHAPE"},
+      {"type": "shape", "color": "BLUE", "shape": "CROSS"}
+    ],
+    "stars": {"twoStar": 6, "threeStar": 12}
+  },
+  {
+    "id": 38, "world": 5, "name": "Twin Peaks", "width": 7, "height": 7, "maxMoves": 24,
+    "tiles": [
+      ["YELLOW","RED","BLUE","GREEN","YELLOW","RED","BLUE"],
+      ["RED","YELLOW","GREEN","BLUE","RED","YELLOW","GREEN"],
+      ["BLUE","GREEN","YELLOW","RED","GREEN","BLUE","YELLOW"],
+      ["GREEN","BLUE","RED","YELLOW","BLUE","GREEN","RED"],
+      ["YELLOW","RED","GREEN","BLUE","YELLOW","RED","BLUE"],
+      ["RED","YELLOW","BLUE","GREEN","RED","YELLOW","GREEN"],
+      ["BLUE","GREEN","YELLOW","RED","BLUE","GREEN","YELLOW"]
+    ],
+    "frozen": [{"row": 3, "col": 3}, {"row": 2, "col": 3}, {"row": 4, "col": 3}],
+    "voids": [{"row": 0, "col": 0}, {"row": 0, "col": 1}, {"row": 1, "col": 0}, {"row": 0, "col": 5}, {"row": 0, "col": 6}, {"row": 1, "col": 6}],
+    "goals": [
+      {"type": "shape", "color": "BLUE", "shape": "CROSS"},
+      {"type": "line", "color": "RED", "length": 5},
+      {"type": "square", "color": "GREEN"},
+      {"type": "shape", "color": "YELLOW", "shape": "L_SHAPE"}
+    ],
+    "stars": {"twoStar": 7, "threeStar": 13}
+  },
+  {
+    "id": 39, "world": 5, "name": "Cross Island", "width": 7, "height": 7, "maxMoves": 26,
+    "tiles": [
+      ["RED","BLUE","GREEN","YELLOW","RED","BLUE","GREEN"],
+      ["BLUE","RED","YELLOW","GREEN","BLUE","GREEN","RED"],
+      ["GREEN","YELLOW","RED","BLUE","GREEN","RED","YELLOW"],
+      ["YELLOW","GREEN","BLUE","RED","YELLOW","BLUE","GREEN"],
+      ["RED","BLUE","GREEN","YELLOW","RED","GREEN","BLUE"],
+      ["BLUE","RED","YELLOW","GREEN","BLUE","RED","YELLOW"],
+      ["GREEN","YELLOW","RED","BLUE","GREEN","YELLOW","RED"]
+    ],
+    "frozen": [{"row": 2, "col": 3}, {"row": 3, "col": 2}, {"row": 3, "col": 4}, {"row": 4, "col": 3}],
+    "voids": [
+      {"row": 0, "col": 0}, {"row": 0, "col": 1}, {"row": 1, "col": 0},
+      {"row": 0, "col": 5}, {"row": 0, "col": 6}, {"row": 1, "col": 6},
+      {"row": 5, "col": 0}, {"row": 6, "col": 0}, {"row": 6, "col": 1},
+      {"row": 5, "col": 6}, {"row": 6, "col": 5}, {"row": 6, "col": 6}
+    ],
+    "goals": [
+      {"type": "shape", "color": "RED", "shape": "L_SHAPE"},
+      {"type": "shape", "color": "GREEN", "shape": "T_SHAPE"},
+      {"type": "line", "color": "BLUE", "length": 5},
+      {"type": "square", "color": "YELLOW"}
+    ],
+    "stars": {"twoStar": 7, "threeStar": 14}
+  },
+  {
+    "id": 40, "world": 5, "name": "Ring Atoll", "width": 7, "height": 7, "maxMoves": 24,
+    "tiles": [
+      ["BLUE","RED","GREEN","YELLOW","BLUE","RED","GREEN"],
+      ["RED","BLUE","YELLOW","BLUE","RED","GREEN","BLUE"],
+      ["GREEN","YELLOW","BLUE","RED","BLUE","YELLOW","RED"],
+      ["YELLOW","BLUE","RED","BLUE","GREEN","BLUE","YELLOW"],
+      ["BLUE","RED","GREEN","YELLOW","BLUE","RED","GREEN"],
+      ["RED","GREEN","BLUE","RED","YELLOW","BLUE","RED"],
+      ["GREEN","BLUE","YELLOW","BLUE","RED","GREEN","BLUE"]
+    ],
+    "frozen": [{"row": 3, "col": 3}, {"row": 1, "col": 3}],
+    "voids": [{"row": 2, "col": 2}, {"row": 2, "col": 4}, {"row": 4, "col": 2}, {"row": 4, "col": 4}],
+    "goals": [
+      {"type": "shape", "color": "YELLOW", "shape": "CROSS"},
+      {"type": "square", "color": "RED"},
+      {"type": "line", "color": "BLUE", "length": 5},
+      {"type": "shape", "color": "GREEN", "shape": "L_SHAPE"}
+    ],
+    "stars": {"twoStar": 7, "threeStar": 13}
+  },
+  {
+    "id": 41, "world": 5, "name": "Fragmented", "width": 7, "height": 7, "maxMoves": 26,
+    "tiles": [
+      ["RED","GREEN","BLUE","YELLOW","RED","GREEN","BLUE"],
+      ["GREEN","RED","YELLOW","RED","GREEN","BLUE","RED"],
+      ["BLUE","YELLOW","RED","GREEN","RED","YELLOW","GREEN"],
+      ["YELLOW","RED","GREEN","RED","BLUE","RED","YELLOW"],
+      ["RED","GREEN","BLUE","YELLOW","RED","GREEN","BLUE"],
+      ["GREEN","BLUE","RED","GREEN","YELLOW","RED","GREEN"],
+      ["BLUE","RED","YELLOW","BLUE","GREEN","YELLOW","RED"]
+    ],
+    "frozen": [{"row": 1, "col": 3}, {"row": 3, "col": 3}, {"row": 5, "col": 3}],
+    "voids": [
+      {"row": 0, "col": 0}, {"row": 0, "col": 6},
+      {"row": 2, "col": 0}, {"row": 2, "col": 6},
+      {"row": 4, "col": 0}, {"row": 4, "col": 6},
+      {"row": 6, "col": 0}, {"row": 6, "col": 6}
+    ],
+    "goals": [
+      {"type": "shape", "color": "RED", "shape": "CROSS"},
+      {"type": "shape", "color": "BLUE", "shape": "T_SHAPE"},
+      {"type": "square", "color": "GREEN"},
+      {"type": "line", "color": "YELLOW", "length": 5}
+    ],
+    "stars": {"twoStar": 7, "threeStar": 14}
+  },
+
+  {
+    "id": 42, "world": 6, "name": "Void Gate", "width": 8, "height": 8, "maxMoves": 20,
+    "tiles": [
+      ["RED","BLUE","GREEN","YELLOW","RED","BLUE","GREEN","YELLOW"],
+      ["BLUE","RED","YELLOW","GREEN","BLUE","GREEN","RED","BLUE"],
+      ["GREEN","YELLOW","RED","BLUE","GREEN","RED","YELLOW","GREEN"],
+      ["YELLOW","GREEN","BLUE","RED","YELLOW","BLUE","GREEN","RED"],
+      ["RED","BLUE","GREEN","YELLOW","RED","GREEN","BLUE","YELLOW"],
+      ["BLUE","RED","YELLOW","GREEN","BLUE","RED","YELLOW","GREEN"],
+      ["GREEN","YELLOW","RED","BLUE","GREEN","YELLOW","RED","BLUE"],
+      ["YELLOW","GREEN","BLUE","RED","YELLOW","GREEN","BLUE","RED"]
+    ],
+    "frozen": [{"row": 3, "col": 3}, {"row": 3, "col": 4}],
+    "voids": [{"row": 0, "col": 0}, {"row": 0, "col": 7}, {"row": 7, "col": 0}, {"row": 7, "col": 7}],
+    "goals": [
+      {"type": "shape", "color": "RED", "shape": "L_SHAPE"},
+      {"type": "shape", "color": "BLUE", "shape": "T_SHAPE"},
+      {"type": "square", "color": "GREEN"},
+      {"type": "line", "color": "YELLOW", "length": 4}
+    ],
+    "stars": {"twoStar": 6, "threeStar": 11}
+  },
+  {
+    "id": 43, "world": 6, "name": "Stone Watch", "width": 8, "height": 8, "maxMoves": 20,
+    "tiles": [
+      ["BLUE","GREEN","RED","YELLOW","BLUE","RED","GREEN","YELLOW"],
+      ["RED","BLUE","GREEN","BLUE","RED","GREEN","YELLOW","BLUE"],
+      ["GREEN","RED","YELLOW","RED","GREEN","YELLOW","BLUE","RED"],
+      ["YELLOW","GREEN","BLUE","GREEN","YELLOW","BLUE","RED","GREEN"],
+      ["BLUE","RED","GREEN","YELLOW","BLUE","RED","GREEN","YELLOW"],
+      ["RED","YELLOW","BLUE","RED","GREEN","YELLOW","BLUE","RED"],
+      ["GREEN","BLUE","YELLOW","GREEN","RED","BLUE","RED","GREEN"],
+      ["YELLOW","RED","GREEN","BLUE","YELLOW","GREEN","YELLOW","BLUE"]
+    ],
+    "frozen": [{"row": 2, "col": 4}, {"row": 4, "col": 2}, {"row": 5, "col": 5}],
+    "voids": [{"row": 0, "col": 0}, {"row": 0, "col": 7}, {"row": 7, "col": 0}, {"row": 7, "col": 7}],
+    "goals": [
+      {"type": "shape", "color": "GREEN", "shape": "CROSS"},
+      {"type": "shape", "color": "RED", "shape": "L_SHAPE"},
+      {"type": "square", "color": "BLUE"},
+      {"type": "line", "color": "YELLOW", "length": 4}
+    ],
+    "stars": {"twoStar": 6, "threeStar": 11}
+  },
+  {
+    "id": 44, "world": 6, "name": "Frozen Divide", "width": 8, "height": 8, "maxMoves": 22,
+    "tiles": [
+      ["GREEN","RED","BLUE","YELLOW","GREEN","RED","BLUE","YELLOW"],
+      ["RED","GREEN","YELLOW","GREEN","RED","BLUE","GREEN","RED"],
+      ["BLUE","YELLOW","GREEN","RED","BLUE","GREEN","RED","BLUE"],
+      ["YELLOW","GREEN","RED","BLUE","YELLOW","RED","YELLOW","GREEN"],
+      ["GREEN","RED","BLUE","YELLOW","GREEN","YELLOW","BLUE","RED"],
+      ["RED","BLUE","GREEN","RED","BLUE","GREEN","RED","YELLOW"],
+      ["BLUE","GREEN","YELLOW","GREEN","RED","BLUE","GREEN","BLUE"],
+      ["YELLOW","RED","GREEN","BLUE","YELLOW","RED","YELLOW","GREEN"]
+    ],
+    "frozen": [{"row": 3, "col": 0}, {"row": 3, "col": 2}, {"row": 3, "col": 5}, {"row": 3, "col": 7}],
+    "voids": [{"row": 0, "col": 0}, {"row": 0, "col": 7}, {"row": 7, "col": 0}, {"row": 0, "col": 1}, {"row": 7, "col": 7}, {"row": 7, "col": 6}],
+    "goals": [
+      {"type": "shape", "color": "BLUE", "shape": "CROSS"},
+      {"type": "shape", "color": "RED", "shape": "T_SHAPE"},
+      {"type": "square", "color": "YELLOW"},
+      {"type": "line", "color": "GREEN", "length": 5}
+    ],
+    "stars": {"twoStar": 6, "threeStar": 12}
+  },
+  {
+    "id": 45, "world": 6, "name": "Cracked Bastion", "width": 8, "height": 8, "maxMoves": 22,
+    "tiles": [
+      ["RED","BLUE","GREEN","YELLOW","RED","BLUE","GREEN","YELLOW"],
+      ["BLUE","RED","YELLOW","GREEN","BLUE","GREEN","RED","BLUE"],
+      ["GREEN","YELLOW","RED","BLUE","GREEN","RED","YELLOW","GREEN"],
+      ["YELLOW","GREEN","BLUE","RED","YELLOW","BLUE","GREEN","RED"],
+      ["RED","BLUE","GREEN","YELLOW","RED","GREEN","BLUE","YELLOW"],
+      ["BLUE","RED","YELLOW","GREEN","BLUE","RED","YELLOW","GREEN"],
+      ["GREEN","YELLOW","RED","BLUE","GREEN","YELLOW","RED","BLUE"],
+      ["YELLOW","GREEN","BLUE","RED","YELLOW","GREEN","BLUE","RED"]
+    ],
+    "frozen": [{"row": 2, "col": 2}, {"row": 2, "col": 5}, {"row": 5, "col": 2}],
+    "voids": [
+      {"row": 0, "col": 3}, {"row": 0, "col": 4},
+      {"row": 3, "col": 0}, {"row": 4, "col": 0},
+      {"row": 3, "col": 7}, {"row": 4, "col": 7},
+      {"row": 7, "col": 3}, {"row": 7, "col": 4}
+    ],
+    "goals": [
+      {"type": "shape", "color": "RED", "shape": "CROSS"},
+      {"type": "shape", "color": "GREEN", "shape": "L_SHAPE"},
+      {"type": "square", "color": "BLUE"},
+      {"type": "line", "color": "YELLOW", "length": 4}
+    ],
+    "stars": {"twoStar": 6, "threeStar": 12}
+  },
+  {
+    "id": 46, "world": 6, "name": "Obsidian Core", "width": 8, "height": 8, "maxMoves": 24,
+    "tiles": [
+      ["YELLOW","RED","BLUE","GREEN","YELLOW","RED","BLUE","GREEN"],
+      ["RED","YELLOW","GREEN","BLUE","RED","YELLOW","GREEN","BLUE"],
+      ["BLUE","GREEN","YELLOW","RED","GREEN","BLUE","YELLOW","RED"],
+      ["GREEN","BLUE","RED","YELLOW","BLUE","GREEN","RED","YELLOW"],
+      ["YELLOW","RED","GREEN","BLUE","YELLOW","RED","GREEN","BLUE"],
+      ["RED","YELLOW","BLUE","GREEN","RED","YELLOW","BLUE","GREEN"],
+      ["BLUE","GREEN","YELLOW","RED","BLUE","GREEN","YELLOW","RED"],
+      ["GREEN","BLUE","RED","YELLOW","GREEN","BLUE","RED","YELLOW"]
+    ],
+    "frozen": [{"row": 3, "col": 3}, {"row": 3, "col": 4}, {"row": 4, "col": 3}, {"row": 4, "col": 4}, {"row": 2, "col": 3}],
+    "voids": [
+      {"row": 0, "col": 0}, {"row": 0, "col": 1}, {"row": 1, "col": 0},
+      {"row": 0, "col": 6}, {"row": 0, "col": 7}, {"row": 1, "col": 7},
+      {"row": 6, "col": 0}, {"row": 7, "col": 0}
+    ],
+    "goals": [
+      {"type": "shape", "color": "YELLOW", "shape": "CROSS"},
+      {"type": "shape", "color": "RED", "shape": "T_SHAPE"},
+      {"type": "square", "color": "GREEN"},
+      {"type": "line", "color": "BLUE", "length": 5}
+    ],
+    "stars": {"twoStar": 7, "threeStar": 13}
+  },
+  {
+    "id": 47, "world": 6, "name": "Shattered Keep", "width": 8, "height": 8, "maxMoves": 24,
+    "tiles": [
+      ["RED","GREEN","BLUE","YELLOW","RED","GREEN","BLUE","YELLOW"],
+      ["GREEN","RED","YELLOW","RED","GREEN","BLUE","RED","GREEN"],
+      ["BLUE","YELLOW","RED","GREEN","RED","YELLOW","GREEN","BLUE"],
+      ["YELLOW","RED","GREEN","RED","BLUE","RED","YELLOW","RED"],
+      ["RED","GREEN","BLUE","YELLOW","RED","GREEN","BLUE","YELLOW"],
+      ["GREEN","BLUE","RED","GREEN","YELLOW","RED","GREEN","BLUE"],
+      ["BLUE","RED","YELLOW","BLUE","GREEN","YELLOW","RED","GREEN"],
+      ["YELLOW","GREEN","RED","YELLOW","BLUE","GREEN","YELLOW","RED"]
+    ],
+    "frozen": [{"row": 1, "col": 4}, {"row": 4, "col": 1}, {"row": 4, "col": 6}, {"row": 6, "col": 3}],
+    "voids": [
+      {"row": 0, "col": 5}, {"row": 0, "col": 6}, {"row": 0, "col": 7},
+      {"row": 1, "col": 6}, {"row": 1, "col": 7},
+      {"row": 2, "col": 7},
+      {"row": 5, "col": 7},
+      {"row": 6, "col": 6}, {"row": 6, "col": 7},
+      {"row": 7, "col": 5}
+    ],
+    "goals": [
+      {"type": "shape", "color": "RED", "shape": "CROSS"},
+      {"type": "shape", "color": "BLUE", "shape": "L_SHAPE"},
+      {"type": "square", "color": "GREEN"},
+      {"type": "line", "color": "YELLOW", "length": 5}
+    ],
+    "stars": {"twoStar": 7, "threeStar": 13}
+  },
+  {
+    "id": 48, "world": 6, "name": "Citadel Ruins", "width": 8, "height": 8, "maxMoves": 26,
+    "tiles": [
+      ["BLUE","RED","GREEN","YELLOW","BLUE","RED","GREEN","YELLOW"],
+      ["RED","BLUE","YELLOW","BLUE","RED","GREEN","BLUE","RED"],
+      ["GREEN","YELLOW","BLUE","RED","BLUE","YELLOW","RED","GREEN"],
+      ["YELLOW","BLUE","RED","BLUE","GREEN","BLUE","YELLOW","BLUE"],
+      ["BLUE","RED","GREEN","YELLOW","BLUE","RED","GREEN","YELLOW"],
+      ["RED","GREEN","BLUE","RED","YELLOW","BLUE","RED","GREEN"],
+      ["GREEN","BLUE","YELLOW","BLUE","RED","GREEN","BLUE","RED"],
+      ["YELLOW","RED","GREEN","YELLOW","GREEN","YELLOW","RED","BLUE"]
+    ],
+    "frozen": [{"row": 2, "col": 2}, {"row": 2, "col": 5}, {"row": 5, "col": 2}, {"row": 5, "col": 5}, {"row": 3, "col": 4}],
+    "voids": [
+      {"row": 0, "col": 0}, {"row": 0, "col": 1}, {"row": 0, "col": 2},
+      {"row": 0, "col": 5}, {"row": 0, "col": 6}, {"row": 0, "col": 7},
+      {"row": 1, "col": 0}, {"row": 1, "col": 7},
+      {"row": 6, "col": 0}, {"row": 6, "col": 7},
+      {"row": 7, "col": 0}, {"row": 7, "col": 1}, {"row": 7, "col": 2},
+      {"row": 7, "col": 5}, {"row": 7, "col": 6}, {"row": 7, "col": 7}
+    ],
+    "goals": [
+      {"type": "shape", "color": "BLUE", "shape": "CROSS"},
+      {"type": "shape", "color": "RED", "shape": "T_SHAPE"},
+      {"type": "shape", "color": "GREEN", "shape": "L_SHAPE"},
+      {"type": "line", "color": "YELLOW", "length": 4}
+    ],
+    "stars": {"twoStar": 7, "threeStar": 14}
+  },
+  {
+    "id": 49, "world": 6, "name": "Final Stand", "width": 8, "height": 8, "maxMoves": 28,
+    "tiles": [
+      ["RED","GREEN","BLUE","YELLOW","RED","GREEN","BLUE","YELLOW"],
+      ["GREEN","RED","YELLOW","RED","GREEN","BLUE","RED","GREEN"],
+      ["BLUE","YELLOW","RED","GREEN","RED","YELLOW","GREEN","BLUE"],
+      ["YELLOW","RED","GREEN","RED","BLUE","RED","YELLOW","RED"],
+      ["RED","GREEN","BLUE","YELLOW","RED","GREEN","BLUE","YELLOW"],
+      ["GREEN","BLUE","RED","GREEN","YELLOW","RED","GREEN","BLUE"],
+      ["BLUE","RED","YELLOW","BLUE","GREEN","YELLOW","RED","GREEN"],
+      ["YELLOW","GREEN","RED","YELLOW","BLUE","GREEN","YELLOW","RED"]
+    ],
+    "frozen": [{"row": 1, "col": 3}, {"row": 1, "col": 4}, {"row": 3, "col": 1}, {"row": 3, "col": 6}, {"row": 6, "col": 3}, {"row": 6, "col": 4}],
+    "voids": [
+      {"row": 0, "col": 0}, {"row": 0, "col": 1}, {"row": 1, "col": 0},
+      {"row": 0, "col": 6}, {"row": 0, "col": 7}, {"row": 1, "col": 7},
+      {"row": 6, "col": 0}, {"row": 7, "col": 0}, {"row": 7, "col": 1},
+      {"row": 6, "col": 7}, {"row": 7, "col": 6}, {"row": 7, "col": 7}
+    ],
+    "goals": [
+      {"type": "shape", "color": "RED", "shape": "CROSS"},
+      {"type": "shape", "color": "GREEN", "shape": "CROSS"},
+      {"type": "shape", "color": "BLUE", "shape": "T_SHAPE"},
+      {"type": "shape", "color": "YELLOW", "shape": "L_SHAPE"}
+    ],
+    "stars": {"twoStar": 8, "threeStar": 16}
   }
 ]

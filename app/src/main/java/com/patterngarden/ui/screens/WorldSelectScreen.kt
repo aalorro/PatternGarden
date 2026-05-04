@@ -16,7 +16,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
+import com.patterngarden.data.ProfileRepository
 import com.patterngarden.data.ProgressRepository
+import com.patterngarden.model.Difficulty
 import com.patterngarden.ui.navigation.Screen
 import com.patterngarden.ui.theme.*
 
@@ -41,7 +43,19 @@ private val worlds = listOf(
 fun WorldSelectScreen(navController: NavHostController) {
     val context = LocalContext.current
     val progressRepo = remember { ProgressRepository(context) }
+    val profileRepo = remember { ProfileRepository(context) }
     val totalStars by progressRepo.totalStarsFlow.collectAsState(initial = 0)
+    val profile by profileRepo.profileFlow.collectAsState(initial = null)
+    val difficulty = profile?.let { Difficulty.fromId(it.difficulty) }
+    val playerLevel = profile?.playerLevel ?: 0
+
+    // Worlds 1-2 disabled when player outgrows them:
+    // Hard mode: player level >= 30, Medium mode: player level >= 40
+    val easyWorldsDisabled = when (difficulty) {
+        Difficulty.HARD -> playerLevel >= 30
+        Difficulty.MEDIUM -> playerLevel >= 40
+        else -> false
+    }
 
     Column(
         modifier = Modifier
@@ -77,16 +91,18 @@ fun WorldSelectScreen(navController: NavHostController) {
         ) {
         worlds.forEach { world ->
             val unlocked = totalStars >= world.starsToUnlock
+            val tooEasy = easyWorldsDisabled && world.id <= 2
+            val accessible = unlocked && !tooEasy
             Card(
                 onClick = {
-                    if (unlocked) {
+                    if (accessible) {
                         navController.navigate(Screen.LevelSelect.create(world.id))
                     }
                 },
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(100.dp)
-                    .alpha(if (unlocked) 1f else 0.5f),
+                    .alpha(if (accessible) 1f else 0.5f),
                 shape = RoundedCornerShape(16.dp),
                 colors = CardDefaults.cardColors(
                     containerColor = world.color.copy(alpha = 0.15f)
@@ -111,7 +127,14 @@ fun WorldSelectScreen(navController: NavHostController) {
                             color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.6f)
                         )
                     }
-                    if (!unlocked) {
+                    if (tooEasy) {
+                        Text(
+                            text = "Too easy",
+                            fontSize = 14.sp,
+                            fontWeight = FontWeight.Medium,
+                            color = MaterialTheme.colorScheme.error.copy(alpha = 0.7f)
+                        )
+                    } else if (!unlocked) {
                         Text(
                             text = "${world.starsToUnlock} stars",
                             fontSize = 14.sp,
