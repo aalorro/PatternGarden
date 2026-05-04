@@ -206,7 +206,7 @@ fun GameScreen(
         LoseDialog(
             onRetry = { viewModel.resetLevel() },
             onMenu = { navController.popBackStack() },
-            onShowSolution = { viewModel.showSolution() }
+            onShowSolution = if (state.hasSolution) {{ viewModel.showSolution() }} else null
         )
     }
 
@@ -326,7 +326,7 @@ private fun WinOverlay(stars: Int, levelName: String, onStarLanded: () -> Unit =
 }
 
 @Composable
-private fun LoseDialog(onRetry: () -> Unit, onMenu: () -> Unit, onShowSolution: () -> Unit) {
+private fun LoseDialog(onRetry: () -> Unit, onMenu: () -> Unit, onShowSolution: (() -> Unit)?) {
     Dialog(onDismissRequest = {}) {
         Card(
             shape = RoundedCornerShape(24.dp),
@@ -351,14 +351,16 @@ private fun LoseDialog(onRetry: () -> Unit, onMenu: () -> Unit, onShowSolution: 
                     textAlign = TextAlign.Center
                 )
 
-                Button(
-                    onClick = onShowSolution,
-                    shape = RoundedCornerShape(20.dp),
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = MaterialTheme.colorScheme.tertiary
-                    )
-                ) {
-                    Text("Show Solution", color = MaterialTheme.colorScheme.onTertiary)
+                if (onShowSolution != null) {
+                    Button(
+                        onClick = onShowSolution,
+                        shape = RoundedCornerShape(20.dp),
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = MaterialTheme.colorScheme.tertiary
+                        )
+                    ) {
+                        Text("Show Solution", color = MaterialTheme.colorScheme.onTertiary)
+                    }
                 }
 
                 Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {

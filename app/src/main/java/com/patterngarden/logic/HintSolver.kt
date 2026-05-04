@@ -118,6 +118,24 @@ object HintSolver {
     }
 
     /**
+     * Verifies that replaying the given steps from the initial board
+     * completes ALL goals (cumulative tracking, matching game behavior).
+     */
+    fun verifySolution(
+        board: Board,
+        goals: List<Goal>,
+        steps: List<Pair<CellPos, CellPos>>
+    ): Boolean {
+        var current = board
+        var completed = emptySet<String>()
+        for ((from, to) in steps) {
+            current = BoardEngine.executeSwap(current, from, to)
+            completed = completed + BoardEngine.evaluateGoals(current, goals)
+        }
+        return goals.all { it.id in completed }
+    }
+
+    /**
      * Scores how close the board is to completing remaining goals.
      * Higher score = closer to completion.
      */

@@ -237,15 +237,23 @@ fun GameBoardCanvas(
                     )
                 }
 
-                // Goal completion border
+                // Goal completion border — bright green with glow
                 if (pos in completedGoalCells) {
-                    val tileInset = cs * 0.06f
+                    val tileInset = cs * 0.05f
+                    // Soft green glow behind the border
                     drawRoundRect(
-                        color = Color.Black,
+                        color = Color(0xFF43A047).copy(alpha = 0.25f),
+                        topLeft = Offset(c * cs + tileInset, r * cs + tileInset),
+                        size = Size(cs - tileInset * 2, cs - tileInset * 2),
+                        cornerRadius = CornerRadius(cornerR * 0.95f)
+                    )
+                    // Bold green border
+                    drawRoundRect(
+                        color = Color(0xFF2E7D32),
                         topLeft = Offset(c * cs + tileInset, r * cs + tileInset),
                         size = Size(cs - tileInset * 2, cs - tileInset * 2),
                         cornerRadius = CornerRadius(cornerR * 0.95f),
-                        style = Stroke(width = 2.dp.toPx())
+                        style = Stroke(width = 3.dp.toPx())
                     )
                 }
             }

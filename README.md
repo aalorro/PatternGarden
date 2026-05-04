@@ -1,4 +1,4 @@
-# Pattern Garden
+# Square Garden
 
 A tile-swap puzzle game for Android built with Kotlin and Jetpack Compose.
 

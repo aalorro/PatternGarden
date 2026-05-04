@@ -15,7 +15,8 @@ data class GameState(
     val difficulty: Difficulty = Difficulty.MEDIUM,
     val winsToRestoreLife: Int = 0,
     val initialBoard: Board? = null,
-    val solutionSteps: List<Pair<CellPos, CellPos>>? = null
+    val solutionSteps: List<Pair<CellPos, CellPos>>? = null,
+    val hasSolution: Boolean = false
 )
 
 data class SwapAnimation(

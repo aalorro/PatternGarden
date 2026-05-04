@@ -1,6 +1,6 @@
 # Changelog
 
-All notable changes to Pattern Garden are documented in this file.
+All notable changes to Square Garden are documented in this file.
 
 ## [1.2.0] - 2026-05-04
 
