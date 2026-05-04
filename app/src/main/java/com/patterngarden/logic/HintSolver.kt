@@ -50,7 +50,7 @@ object HintSolver {
         goals: List<Goal>,
         maxMoves: Int
     ): List<Pair<CellPos, CellPos>> {
-        val beamWidth = 25
+        val beamWidth = 80
 
         // Each search state tracks the board, cumulatively completed goals, and the swap sequence
         data class State(

@@ -59,10 +59,7 @@ class GameViewModel(
         }
     }
 
-    /**
-     * Generate a random board where no goals are already met.
-     */
-    private fun generateRandomBoard(): Board? {
+    private fun generateValidBoard(): Board {
         val colors = TileColor.entries.toTypedArray()
         val minRequired = mutableMapOf<TileColor, Int>()
         for (goal in level.goals) {
@@ -79,6 +76,33 @@ class GameViewModel(
         val frozenPositions = level.frozenCells
         val playableCells = totalCells - voids.size
 
+        repeat(200) {
+            val tileList = mutableListOf<Tile>()
+            for ((color, count) in minRequired) {
+                repeat(count) { tileList.add(Tile(color)) }
+            }
+            while (tileList.size < playableCells) {
+                tileList.add(Tile(colors.random()))
+            }
+            tileList.shuffle()
+
+            var idx = 0
+            val tiles = (0 until level.boardHeight).map { r ->
+                (0 until level.boardWidth).map { c ->
+                    val pos = CellPos(r, c)
+                    if (pos in voids) {
+                        Tile(TileColor.RED)
+                    } else {
+                        val tile = tileList[idx++]
+                        if (pos in frozenPositions) tile.copy(frozen = true) else tile
+                    }
+                }
+            }
+            val board = Board(level.boardWidth, level.boardHeight, tiles, voids)
+            val alreadyMet = BoardEngine.evaluateGoals(board, level.goals)
+            if (alreadyMet.isEmpty()) return board
+        }
+        // Fallback
         val tileList = mutableListOf<Tile>()
         for ((color, count) in minRequired) {
             repeat(count) { tileList.add(Tile(color)) }
@@ -87,7 +111,6 @@ class GameViewModel(
             tileList.add(Tile(colors.random()))
         }
         tileList.shuffle()
-
         var idx = 0
         val tiles = (0 until level.boardHeight).map { r ->
             (0 until level.boardWidth).map { c ->
@@ -100,54 +123,34 @@ class GameViewModel(
                 }
             }
         }
-        val board = Board(level.boardWidth, level.boardHeight, tiles, voids)
-        val alreadyMet = BoardEngine.evaluateGoals(board, level.goals)
-        return if (alreadyMet.isEmpty()) board else null
+        return Board(level.boardWidth, level.boardHeight, tiles, voids)
     }
 
     /**
-     * Generates a board that is verified solvable by the solver.
-     * Tries up to 60 random boards, running the solver on each.
-     * Returns the board and its pre-computed solution.
+     * Compute solution in background and update hasSolution flag when done.
+     * Stores any solution (even partial) so the player can see progress.
      */
-    private fun generateSolvableBoard(): Pair<Board, List<Pair<CellPos, CellPos>>?> {
-        var bestBoard: Board? = null
-        var bestSolution: List<Pair<CellPos, CellPos>> = emptyList()
-        var bestGoalCount = -1
-
-        repeat(60) {
-            val board = generateRandomBoard() ?: return@repeat
-
-            val solution = HintSolver.findSolution(board, level.goals, adjustedMaxMoves)
-            if (HintSolver.verifySolution(board, level.goals, solution)) {
-                // Found a fully solvable board
-                return Pair(board, solution)
+    private fun computeSolutionAsync(board: Board) {
+        precomputedSolution = null
+        viewModelScope.launch {
+            val solution = withContext(Dispatchers.Default) {
+                HintSolver.findSolution(board, level.goals, adjustedMaxMoves)
             }
-
-            // Track best partial result as fallback
-            val goalCount = solution.size
-            if (goalCount > bestGoalCount) {
-                bestGoalCount = goalCount
-                bestBoard = board
-                bestSolution = solution
+            if (solution.isNotEmpty()) {
+                precomputedSolution = solution
+                // Update flag — the button will appear even if dialog is already showing
+                val current = _state.value
+                if (current.initialBoard == board) {
+                    _state.value = current.copy(hasSolution = true)
+                }
             }
         }
-
-        // Fallback: use best board found (may not be fully solvable)
-        val fallback = bestBoard ?: generateRandomBoard()
-            ?: Board(level.boardWidth, level.boardHeight,
-                List(level.boardHeight) { List(level.boardWidth) { Tile(TileColor.RED) } },
-                level.voidCells)
-        return Pair(fallback, null)
     }
 
-    private suspend fun initLevel() {
+    private fun initLevel() {
         val hasTutorial = level.tutorialSteps != null
-        val board: Board
-        val solution: List<Pair<CellPos, CellPos>>?
-
-        if (hasTutorial) {
-            board = Board(
+        val board = if (hasTutorial) {
+            Board(
                 width = level.boardWidth,
                 height = level.boardHeight,
                 tiles = level.initialTiles.mapIndexed { r, row ->
@@ -158,20 +161,10 @@ class GameViewModel(
                 },
                 voids = level.voidCells
             )
-            // Compute solution for tutorial boards too
-            solution = withContext(Dispatchers.Default) {
-                val steps = HintSolver.findSolution(board, level.goals, adjustedMaxMoves)
-                if (HintSolver.verifySolution(board, level.goals, steps)) steps else null
-            }
         } else {
-            val result = withContext(Dispatchers.Default) {
-                generateSolvableBoard()
-            }
-            board = result.first
-            solution = result.second
+            generateValidBoard()
         }
-
-        precomputedSolution = solution
+        // Show board immediately
         val adjustedLevel = level.copy(maxMoves = adjustedMaxMoves)
         _state.value = GameState(
             level = adjustedLevel,
@@ -179,9 +172,10 @@ class GameViewModel(
             movesRemaining = adjustedMaxMoves,
             difficulty = difficulty,
             initialBoard = board,
-            hasSolution = solution != null,
             phase = if (hasTutorial) GamePhase.TUTORIAL_PAUSE else GamePhase.PLAYING
         )
+        // Compute solution in background
+        computeSolutionAsync(board)
     }
 
     fun onDragSwap(from: CellPos, to: CellPos) {
@@ -394,56 +388,41 @@ class GameViewModel(
     fun resetLevel() {
         val current = _state.value
         val hasTutorial = level.tutorialSteps != null
-
-        viewModelScope.launch {
-            val board: Board
-            val solution: List<Pair<CellPos, CellPos>>?
-
-            if (hasTutorial) {
-                board = Board(
-                    width = level.boardWidth,
-                    height = level.boardHeight,
-                    tiles = level.initialTiles.mapIndexed { r, row ->
-                        row.mapIndexed { c, color ->
-                            val frozen = CellPos(r, c) in level.frozenCells
-                            Tile(color, frozen)
-                        }
-                    },
-                    voids = level.voidCells
-                )
-                solution = withContext(Dispatchers.Default) {
-                    val steps = HintSolver.findSolution(board, level.goals, adjustedMaxMoves)
-                    if (HintSolver.verifySolution(board, level.goals, steps)) steps else null
-                }
-            } else if (hasMovedSinceReset) {
-                val result = withContext(Dispatchers.Default) {
-                    generateSolvableBoard()
-                }
-                board = result.first
-                solution = result.second
-            } else {
-                board = current.board
-                solution = precomputedSolution
-            }
-
-            precomputedSolution = solution
-            val moves = when (difficulty) {
-                Difficulty.EASY -> adjustedMaxMoves
-                Difficulty.MEDIUM -> max(1, adjustedMaxMoves - 2)
-                Difficulty.HARD -> if (current.movesRemaining > 0) current.movesRemaining else adjustedMaxMoves
-            }
-            hasMovedSinceReset = false
-            val adjustedLevel = level.copy(maxMoves = adjustedMaxMoves)
-            _state.value = GameState(
-                level = adjustedLevel,
-                board = board,
-                movesRemaining = moves,
-                difficulty = difficulty,
-                initialBoard = board,
-                hasSolution = solution != null,
-                phase = if (hasTutorial) GamePhase.TUTORIAL_PAUSE else GamePhase.PLAYING
+        // Only randomize if the player has made at least one move since last reset
+        val board = if (hasTutorial) {
+            Board(
+                width = level.boardWidth,
+                height = level.boardHeight,
+                tiles = level.initialTiles.mapIndexed { r, row ->
+                    row.mapIndexed { c, color ->
+                        val frozen = CellPos(r, c) in level.frozenCells
+                        Tile(color, frozen)
+                    }
+                },
+                voids = level.voidCells
             )
+        } else if (hasMovedSinceReset) {
+            generateValidBoard()
+        } else {
+            current.board
         }
+        val moves = when (difficulty) {
+            Difficulty.EASY -> adjustedMaxMoves
+            Difficulty.MEDIUM -> max(1, adjustedMaxMoves - 2)
+            Difficulty.HARD -> if (current.movesRemaining > 0) current.movesRemaining else adjustedMaxMoves
+        }
+        hasMovedSinceReset = false
+        val adjustedLevel = level.copy(maxMoves = adjustedMaxMoves)
+        _state.value = GameState(
+            level = adjustedLevel,
+            board = board,
+            movesRemaining = moves,
+            difficulty = difficulty,
+            initialBoard = board,
+            phase = if (hasTutorial) GamePhase.TUTORIAL_PAUSE else GamePhase.PLAYING
+        )
+        // Compute solution in background for the new board
+        computeSolutionAsync(board)
     }
 
     override fun onCleared() {
