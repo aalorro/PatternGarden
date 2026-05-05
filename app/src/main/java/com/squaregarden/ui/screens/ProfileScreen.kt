@@ -85,8 +85,11 @@ fun ProfileScreen(navController: NavHostController, isFirstTime: Boolean = false
         Text("Username", style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.onBackground)
         OutlinedTextField(
             value = username,
-            onValueChange = { if (it.length <= 20) username = it },
-            placeholder = { Text("Enter your name") },
+            onValueChange = { newVal ->
+                val filtered = newVal.filter { it.isLetterOrDigit() }
+                if (filtered.length <= 15) username = filtered
+            },
+            placeholder = { Text("Letters and numbers only") },
             singleLine = true,
             shape = RoundedCornerShape(12.dp),
             keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),

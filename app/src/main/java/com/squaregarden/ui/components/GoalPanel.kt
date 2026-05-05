@@ -35,8 +35,11 @@ fun GoalPanel(
         tonalElevation = 2.dp
     ) {
         Column(
-            modifier = Modifier.padding(horizontal = 14.dp, vertical = 10.dp),
-            verticalArrangement = Arrangement.spacedBy(3.dp)
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 14.dp, vertical = 10.dp),
+            verticalArrangement = Arrangement.spacedBy(3.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Text(
                 text = "GOALS",
@@ -109,6 +112,11 @@ fun GoalPanel(
                     )
                     if (difficultyLabel.isNotEmpty()) {
                         Spacer(modifier = Modifier.weight(1f))
+                        Text(
+                            text = "Difficulty:",
+                            fontSize = 13.sp,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
                         Text(
                             text = difficultyLabel,
                             fontSize = 13.sp,

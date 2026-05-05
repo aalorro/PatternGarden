@@ -47,7 +47,8 @@ fun GameScreen(
         modifier = Modifier
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.background)
-            .systemBarsPadding()
+            .systemBarsPadding(),
+        horizontalAlignment = Alignment.CenterHorizontally
     ) {
         // Top bar
         Row(
@@ -64,8 +65,8 @@ fun GameScreen(
             ) {
                 Text(
                     text = "\u2190 Menu",
-                    fontSize = 42.sp,
-                    fontWeight = FontWeight.ExtraBold,
+                    fontSize = 24.sp,
+                    fontWeight = FontWeight.Bold,
                     color = if (canGoBack) MaterialTheme.colorScheme.onBackground
                     else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.3f)
                 )
@@ -91,7 +92,7 @@ fun GameScreen(
             difficultyLabel = state.difficulty.label.replaceFirstChar { it.uppercase() },
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(start = 16.dp, end = 70.dp, top = 6.dp, bottom = 6.dp)
+                .padding(horizontal = 16.dp, vertical = 6.dp)
         )
 
         // Game board
