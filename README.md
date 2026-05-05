@@ -63,7 +63,7 @@ Requires Android Studio with JBR (JetBrains Runtime) and Android SDK installed.
 ## Project Structure
 
 ```
-com.patterngarden/
+com.squaregarden/
   model/       - Tile, Board, Goal, Level, GameState, PlayerProgress
   logic/       - BoardEngine, PatternMatcher, HintSolver, LevelLoader
   viewmodel/   - GameViewModel

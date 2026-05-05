@@ -1,3 +1,3 @@
-# Pattern Garden ProGuard Rules
+# Square Garden ProGuard Rules
 -keepattributes SourceFile,LineNumberTable
 -renamesourcefileattribute SourceFile

@@ -13,5 +13,5 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "PatternGarden"
+rootProject.name = "SquareGarden"
 include(":app")

@@ -5,11 +5,11 @@ plugins {
 }
 
 android {
-    namespace = "com.patterngarden"
+    namespace = "com.squaregarden"
     compileSdk = 35
 
     defaultConfig {
-        applicationId = "com.patterngarden"
+        applicationId = "com.squaregarden"
         minSdk = 26
         targetSdk = 35
         versionCode = 1
