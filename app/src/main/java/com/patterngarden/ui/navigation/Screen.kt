@@ -13,4 +13,6 @@ sealed class Screen(val route: String) {
     data object Settings : Screen("settings")
     data object Profile : Screen("profile")
     data object ProfileSetup : Screen("profile_setup")
+    data object Instructions : Screen("instructions")
+    data object About : Screen("about")
 }

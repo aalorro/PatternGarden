@@ -23,6 +23,9 @@ import com.patterngarden.ui.theme.*
 fun GoalPanel(
     goals: List<Goal>,
     completedIds: Set<String>,
+    movesRemaining: Int = -1,
+    movesMax: Int = -1,
+    difficultyLabel: String = "",
     modifier: Modifier = Modifier
 ) {
     Surface(
@@ -33,11 +36,11 @@ fun GoalPanel(
     ) {
         Column(
             modifier = Modifier.padding(horizontal = 14.dp, vertical = 10.dp),
-            verticalArrangement = Arrangement.spacedBy(4.dp)
+            verticalArrangement = Arrangement.spacedBy(3.dp)
         ) {
             Text(
                 text = "GOALS",
-                fontSize = 20.sp,
+                fontSize = 16.sp,
                 fontWeight = FontWeight.Bold,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 letterSpacing = 0.8.sp
@@ -46,18 +49,18 @@ fun GoalPanel(
                 val completed = goal.id in completedIds
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    horizontalArrangement = Arrangement.spacedBy(6.dp)
                 ) {
                     // Color swatch
                     Box(
                         modifier = Modifier
-                            .size(35.dp)
-                            .clip(RoundedCornerShape(8.dp))
+                            .size(18.dp)
+                            .clip(RoundedCornerShape(5.dp))
                             .background(goal.color.toComposeColor())
                     )
                     Text(
                         text = goal.description,
-                        fontSize = 32.sp,
+                        fontSize = 15.sp,
                         fontWeight = FontWeight.SemiBold,
                         color = if (completed)
                             MaterialTheme.colorScheme.onSurfaceVariant
@@ -69,9 +72,48 @@ fun GoalPanel(
                     if (completed) {
                         Text(
                             text = "DONE",
-                            fontSize = 27.sp,
+                            fontSize = 13.sp,
                             fontWeight = FontWeight.ExtraBold,
                             color = Color(0xFF43A047)
+                        )
+                    }
+                }
+            }
+
+            // Moves + Difficulty row below goals
+            if (movesRemaining >= 0) {
+                Spacer(modifier = Modifier.height(4.dp))
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    val lowMoves = movesRemaining <= 3
+                    Text(
+                        text = "MOVES",
+                        fontSize = 13.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        letterSpacing = 0.6.sp
+                    )
+                    Text(
+                        text = "$movesRemaining",
+                        fontFamily = DisplayFontFamily,
+                        fontSize = 22.sp,
+                        fontWeight = FontWeight.ExtraBold,
+                        color = if (lowMoves) Color(0xFFC62828) else MaterialTheme.colorScheme.onBackground
+                    )
+                    Text(
+                        text = "/$movesMax",
+                        fontSize = 13.sp,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                    if (difficultyLabel.isNotEmpty()) {
+                        Spacer(modifier = Modifier.weight(1f))
+                        Text(
+                            text = difficultyLabel,
+                            fontSize = 13.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     }
                 }

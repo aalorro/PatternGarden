@@ -82,25 +82,17 @@ fun GameScreen(
             Spacer(modifier = Modifier.width(60.dp))
         }
 
-        // Goals + Moves row (side by side cards)
-        Row(
+        // Goals + Moves panel (combined, stacked vertically)
+        GoalPanel(
+            goals = state.level.goals,
+            completedIds = state.completedGoalIds,
+            movesRemaining = state.movesRemaining,
+            movesMax = state.level.maxMoves,
+            difficultyLabel = state.difficulty.label.replaceFirstChar { it.uppercase() },
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(start = 16.dp, end = 70.dp, top = 6.dp, bottom = 6.dp),
-            horizontalArrangement = Arrangement.spacedBy(10.dp)
-        ) {
-            GoalPanel(
-                goals = state.level.goals,
-                completedIds = state.completedGoalIds,
-                modifier = Modifier.weight(1f)
-            )
-            MoveCounter(
-                remaining = state.movesRemaining,
-                max = state.level.maxMoves,
-                difficultyLabel = state.difficulty.label.replaceFirstChar { it.uppercase() },
-                modifier = Modifier.widthIn(min = 88.dp)
-            )
-        }
+                .padding(start = 16.dp, end = 70.dp, top = 6.dp, bottom = 6.dp)
+        )
 
         // Game board
         GameBoardCanvas(
