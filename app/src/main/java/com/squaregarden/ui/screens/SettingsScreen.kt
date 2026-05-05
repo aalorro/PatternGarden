@@ -74,48 +74,52 @@ fun SettingsScreen(navController: NavHostController) {
 
         // Theme section
         SectionLabel("Theme")
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(10.dp)
-        ) {
-            allThemes.forEach { theme ->
-                val selected = theme.id == currentThemeId
-                Card(
-                    onClick = {
-                        currentThemeId = theme.id
-                        scope.launch {
-                            currentProfile = currentProfile.copy(themeId = theme.id)
-                            profileRepo.saveProfile(currentProfile)
-                        }
-                    },
-                    modifier = Modifier.weight(1f),
-                    shape = RoundedCornerShape(16.dp),
-                    border = if (selected)
-                        androidx.compose.foundation.BorderStroke(3.dp, MaterialTheme.colorScheme.primary)
-                    else null,
-                    colors = CardDefaults.cardColors(containerColor = theme.surface),
-                    elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
-                ) {
-                    Column(
-                        modifier = Modifier.padding(10.dp),
-                        horizontalAlignment = Alignment.CenterHorizontally
+        allThemes.chunked(3).forEach { rowThemes ->
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(10.dp)
+            ) {
+                rowThemes.forEach { theme ->
+                    val selected = theme.id == currentThemeId
+                    Card(
+                        onClick = {
+                            currentThemeId = theme.id
+                            scope.launch {
+                                currentProfile = currentProfile.copy(themeId = theme.id)
+                                profileRepo.saveProfile(currentProfile)
+                            }
+                        },
+                        modifier = Modifier.weight(1f),
+                        shape = RoundedCornerShape(16.dp),
+                        border = if (selected)
+                            androidx.compose.foundation.BorderStroke(3.dp, MaterialTheme.colorScheme.primary)
+                        else null,
+                        colors = CardDefaults.cardColors(containerColor = theme.surface),
+                        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
                     ) {
-                        Box(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .height(36.dp)
-                                .background(theme.primary, RoundedCornerShape(10.dp))
-                        )
-                        Spacer(modifier = Modifier.height(6.dp))
-                        Text(
-                            text = theme.label,
-                            fontSize = 13.sp,
-                            fontWeight = FontWeight.Bold,
-                            color = theme.onBackground
-                        )
+                        Column(
+                            modifier = Modifier.padding(10.dp),
+                            horizontalAlignment = Alignment.CenterHorizontally
+                        ) {
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .height(36.dp)
+                                    .background(theme.primary, RoundedCornerShape(10.dp))
+                            )
+                            Spacer(modifier = Modifier.height(6.dp))
+                            Text(
+                                text = theme.label,
+                                fontSize = 13.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = theme.onBackground,
+                                maxLines = 1
+                            )
+                        }
                     }
                 }
             }
+            Spacer(modifier = Modifier.height(10.dp))
         }
 
         Spacer(modifier = Modifier.height(24.dp))
