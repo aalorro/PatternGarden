@@ -114,17 +114,17 @@ fun LevelSelectScreen(worldId: Int, navController: NavHostController) {
                         color = Color.White.copy(alpha = 0.85f)
                     )
                 }
-                Column {
+                Column(modifier = Modifier.weight(1f)) {
                     Text(
                         text = "WORLD $worldId",
-                        fontSize = 22.sp,
+                        fontSize = 16.sp,
                         fontWeight = FontWeight.Bold,
                         color = Color.White.copy(alpha = 0.85f),
                         letterSpacing = 1.sp
                     )
                     Text(
                         text = worldNames[worldId] ?: "World $worldId",
-                        fontSize = 48.sp,
+                        fontSize = 32.sp,
                         fontWeight = FontWeight.ExtraBold,
                         color = Color.White
                     )

@@ -598,14 +598,14 @@ class GameViewModel(
     private fun detectNewWorldUnlock(oldStars: Int, newStars: Int): String? {
         val worldThresholds = listOf(
             9 to "Blooming Meadow",
-            22 to "Ancient Grove",
-            40 to "Crystal Cavern",
-            65 to "Shattered Isles",
-            95 to "Void Fortress",
-            130 to "Molten Core",
-            165 to "Starfall Summit",
-            200 to "Abyssal Depths",
-            240 to "Prism Citadel"
+            25 to "Ancient Grove",
+            50 to "Crystal Cavern",
+            85 to "Shattered Isles",
+            130 to "Void Fortress",
+            185 to "Molten Core",
+            250 to "Starfall Summit",
+            325 to "Abyssal Depths",
+            410 to "Prism Citadel"
         )
         for ((threshold, name) in worldThresholds) {
             if (oldStars < threshold && newStars >= threshold) return name
