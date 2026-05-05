@@ -179,15 +179,20 @@
         "type": "line",
         "color": "GREEN",
         "length": 4
+      },
+      {
+        "type": "line",
+        "color": "RED",
+        "length": 3
       }
     ],
     "stars": {
-      "twoStar": 3,
-      "threeStar": 5
+      "twoStar": 4,
+      "threeStar": 6
     },
     "tutorial": [
       {
-        "message": "Try a longer line!\nCreate 4 GREEN tiles in a row."
+        "message": "Now handle two goals at once!\nCreate 4 GREEN and 3 RED in a line."
       },
       {
         "message": "Tap the hint button if you get stuck!"
@@ -200,7 +205,7 @@
     "name": "Twin Vines",
     "width": 5,
     "height": 5,
-    "maxMoves": 12,
+    "maxMoves": 14,
     "tiles": [
       [
         "RED",
@@ -242,17 +247,17 @@
       {
         "type": "line",
         "color": "RED",
-        "length": 3
+        "length": 4
       },
       {
         "type": "line",
         "color": "BLUE",
-        "length": 3
+        "length": 4
       }
     ],
     "stars": {
-      "twoStar": 4,
-      "threeStar": 7
+      "twoStar": 5,
+      "threeStar": 8
     }
   },
   {
@@ -261,7 +266,7 @@
     "name": "Garden Row",
     "width": 5,
     "height": 5,
-    "maxMoves": 10,
+    "maxMoves": 12,
     "tiles": [
       [
         "YELLOW",
@@ -303,12 +308,12 @@
       {
         "type": "line",
         "color": "YELLOW",
-        "length": 4
+        "length": 5
       }
     ],
     "stars": {
-      "twoStar": 3,
-      "threeStar": 6
+      "twoStar": 4,
+      "threeStar": 7
     }
   },
   {
@@ -317,7 +322,7 @@
     "name": "Color Cross",
     "width": 5,
     "height": 5,
-    "maxMoves": 14,
+    "maxMoves": 16,
     "tiles": [
       [
         "BLUE",
@@ -359,17 +364,22 @@
       {
         "type": "line",
         "color": "RED",
-        "length": 3
+        "length": 4
       },
       {
         "type": "line",
         "color": "GREEN",
+        "length": 4
+      },
+      {
+        "type": "line",
+        "color": "BLUE",
         "length": 3
       }
     ],
     "stars": {
       "twoStar": 5,
-      "threeStar": 8
+      "threeStar": 9
     }
   },
   {
@@ -378,7 +388,7 @@
     "name": "Tall Stems",
     "width": 5,
     "height": 5,
-    "maxMoves": 12,
+    "maxMoves": 14,
     "tiles": [
       [
         "GREEN",
@@ -421,11 +431,16 @@
         "type": "line",
         "color": "GREEN",
         "length": 5
+      },
+      {
+        "type": "line",
+        "color": "BLUE",
+        "length": 4
       }
     ],
     "stars": {
-      "twoStar": 3,
-      "threeStar": 6
+      "twoStar": 4,
+      "threeStar": 7
     }
   },
   {
@@ -434,7 +449,7 @@
     "name": "Triple Bloom",
     "width": 5,
     "height": 5,
-    "maxMoves": 15,
+    "maxMoves": 18,
     "tiles": [
       [
         "RED",
@@ -476,29 +491,29 @@
       {
         "type": "line",
         "color": "RED",
-        "length": 3
+        "length": 4
       },
       {
         "type": "line",
         "color": "BLUE",
-        "length": 3
+        "length": 4
       },
       {
         "type": "line",
         "color": "YELLOW",
-        "length": 3
+        "length": 4
       }
     ],
     "stars": {
-      "twoStar": 4,
-      "threeStar": 8
+      "twoStar": 5,
+      "threeStar": 10
     }
   },
   {
     "name": "Garden Gate",
     "width": 5,
     "height": 5,
-    "maxMoves": 10,
+    "maxMoves": 16,
     "tiles": [
       [
         "GREEN",
@@ -540,12 +555,12 @@
       {
         "type": "line",
         "color": "RED",
-        "length": 3
+        "length": 5
       },
       {
         "type": "line",
         "color": "BLUE",
-        "length": 3
+        "length": 4
       },
       {
         "type": "square",
@@ -553,8 +568,8 @@
       }
     ],
     "stars": {
-      "twoStar": 4,
-      "threeStar": 8
+      "twoStar": 5,
+      "threeStar": 9
     },
     "id": 9,
     "world": 1
@@ -565,7 +580,7 @@
     "name": "Meadow Dawn",
     "width": 6,
     "height": 6,
-    "maxMoves": 14,
+    "maxMoves": 16,
     "tiles": [
       [
         "RED",
@@ -624,12 +639,12 @@
       {
         "type": "line",
         "color": "BLUE",
-        "length": 3
+        "length": 4
       }
     ],
     "stars": {
       "twoStar": 5,
-      "threeStar": 8
+      "threeStar": 9
     }
   },
   {
@@ -638,7 +653,7 @@
     "name": "Blue Pond",
     "width": 6,
     "height": 6,
-    "maxMoves": 14,
+    "maxMoves": 16,
     "tiles": [
       [
         "BLUE",
@@ -697,12 +712,17 @@
       {
         "type": "line",
         "color": "RED",
+        "length": 4
+      },
+      {
+        "type": "line",
+        "color": "GREEN",
         "length": 3
       }
     ],
     "stars": {
       "twoStar": 5,
-      "threeStar": 8
+      "threeStar": 9
     }
   },
   {
@@ -766,7 +786,7 @@
       {
         "type": "line",
         "color": "RED",
-        "length": 4
+        "length": 5
       },
       {
         "type": "square",
@@ -775,12 +795,12 @@
       {
         "type": "line",
         "color": "BLUE",
-        "length": 3
+        "length": 4
       }
     ],
     "stars": {
-      "twoStar": 4,
-      "threeStar": 8
+      "twoStar": 5,
+      "threeStar": 9
     }
   },
   {
@@ -852,7 +872,7 @@
       {
         "type": "line",
         "color": "YELLOW",
-        "length": 4
+        "length": 5
       }
     ],
     "stars": {
@@ -866,7 +886,7 @@
     "name": "Sunlit Row",
     "width": 6,
     "height": 6,
-    "maxMoves": 13,
+    "maxMoves": 16,
     "tiles": [
       [
         "YELLOW",
@@ -926,11 +946,16 @@
       {
         "type": "square",
         "color": "RED"
+      },
+      {
+        "type": "line",
+        "color": "GREEN",
+        "length": 4
       }
     ],
     "stars": {
-      "twoStar": 4,
-      "threeStar": 7
+      "twoStar": 5,
+      "threeStar": 8
     }
   },
   {
@@ -939,7 +964,7 @@
     "name": "Dual Garden",
     "width": 6,
     "height": 6,
-    "maxMoves": 16,
+    "maxMoves": 18,
     "tiles": [
       [
         "RED",
@@ -999,7 +1024,11 @@
       {
         "type": "line",
         "color": "GREEN",
-        "length": 4
+        "length": 5
+      },
+      {
+        "type": "square",
+        "color": "BLUE"
       }
     ],
     "stars": {
@@ -1013,7 +1042,7 @@
     "name": "Four Corners",
     "width": 6,
     "height": 6,
-    "maxMoves": 16,
+    "maxMoves": 18,
     "tiles": [
       [
         "GREEN",
@@ -1077,6 +1106,11 @@
       {
         "type": "line",
         "color": "RED",
+        "length": 4
+      },
+      {
+        "type": "line",
+        "color": "YELLOW",
         "length": 3
       }
     ],
@@ -1091,7 +1125,7 @@
     "name": "Evening Bloom",
     "width": 6,
     "height": 6,
-    "maxMoves": 18,
+    "maxMoves": 20,
     "tiles": [
       [
         "BLUE",
@@ -1156,10 +1190,15 @@
       {
         "type": "square",
         "color": "YELLOW"
+      },
+      {
+        "type": "line",
+        "color": "GREEN",
+        "length": 4
       }
     ],
     "stars": {
-      "twoStar": 5,
+      "twoStar": 6,
       "threeStar": 10
     }
   },
@@ -1169,7 +1208,7 @@
     "name": "Meadow's End",
     "width": 6,
     "height": 6,
-    "maxMoves": 14,
+    "maxMoves": 18,
     "tiles": [
       [
         "RED",
@@ -1238,7 +1277,7 @@
       {
         "type": "line",
         "color": "YELLOW",
-        "length": 3
+        "length": 4
       }
     ],
     "stars": {
@@ -2148,7 +2187,7 @@
         "RED",
         "BLUE",
         "GREEN",
-        "YELLOW",
+        "ORANGE",
         "RED",
         "BLUE",
         "GREEN"
@@ -2156,7 +2195,7 @@
       [
         "BLUE",
         "RED",
-        "YELLOW",
+        "ORANGE",
         "GREEN",
         "BLUE",
         "GREEN",
@@ -2164,19 +2203,19 @@
       ],
       [
         "GREEN",
-        "YELLOW",
+        "ORANGE",
         "RED",
         "BLUE",
         "GREEN",
         "RED",
-        "YELLOW"
+        "ORANGE"
       ],
       [
-        "YELLOW",
+        "ORANGE",
         "GREEN",
         "BLUE",
         "RED",
-        "YELLOW",
+        "ORANGE",
         "BLUE",
         "GREEN"
       ],
@@ -2184,7 +2223,7 @@
         "RED",
         "BLUE",
         "GREEN",
-        "YELLOW",
+        "ORANGE",
         "RED",
         "GREEN",
         "BLUE"
@@ -2192,19 +2231,19 @@
       [
         "BLUE",
         "RED",
-        "YELLOW",
+        "ORANGE",
         "GREEN",
         "BLUE",
         "RED",
-        "YELLOW"
+        "ORANGE"
       ],
       [
         "GREEN",
-        "YELLOW",
+        "ORANGE",
         "RED",
         "BLUE",
         "GREEN",
-        "YELLOW",
+        "ORANGE",
         "RED"
       ]
     ],
@@ -2231,7 +2270,7 @@
     "goals": [
       {
         "type": "line",
-        "color": "RED",
+        "color": "ORANGE",
         "length": 4
       },
       {
@@ -2261,7 +2300,7 @@
         "BLUE",
         "GREEN",
         "RED",
-        "YELLOW",
+        "ORANGE",
         "BLUE",
         "RED",
         "GREEN"
@@ -2272,24 +2311,24 @@
         "GREEN",
         "BLUE",
         "RED",
-        "GREEN",
-        "YELLOW"
+        "ORANGE",
+        "ORANGE"
       ],
       [
         "GREEN",
         "RED",
-        "YELLOW",
+        "ORANGE",
         "RED",
         "GREEN",
         "YELLOW",
         "BLUE"
       ],
       [
-        "YELLOW",
+        "ORANGE",
         "GREEN",
         "BLUE",
         "GREEN",
-        "YELLOW",
+        "ORANGE",
         "BLUE",
         "RED"
       ],
@@ -2297,24 +2336,24 @@
         "BLUE",
         "RED",
         "GREEN",
-        "YELLOW",
+        "ORANGE",
         "BLUE",
         "RED",
         "GREEN"
       ],
       [
         "RED",
-        "YELLOW",
+        "ORANGE",
         "BLUE",
         "RED",
         "GREEN",
-        "YELLOW",
+        "ORANGE",
         "BLUE"
       ],
       [
         "GREEN",
         "BLUE",
-        "YELLOW",
+        "ORANGE",
         "GREEN",
         "RED",
         "BLUE",
@@ -2353,7 +2392,7 @@
       },
       {
         "type": "line",
-        "color": "YELLOW",
+        "color": "ORANGE",
         "length": 4
       },
       {
@@ -2379,7 +2418,7 @@
         "GREEN",
         "RED",
         "BLUE",
-        "YELLOW",
+        "ORANGE",
         "GREEN",
         "RED",
         "BLUE"
@@ -2387,7 +2426,7 @@
       [
         "RED",
         "GREEN",
-        "YELLOW",
+        "ORANGE",
         "GREEN",
         "RED",
         "BLUE",
@@ -2395,7 +2434,7 @@
       ],
       [
         "BLUE",
-        "YELLOW",
+        "ORANGE",
         "GREEN",
         "RED",
         "BLUE",
@@ -2403,21 +2442,21 @@
         "RED"
       ],
       [
-        "YELLOW",
+        "ORANGE",
         "GREEN",
         "RED",
         "BLUE",
-        "YELLOW",
+        "ORANGE",
         "RED",
-        "YELLOW"
+        "ORANGE"
       ],
       [
         "GREEN",
         "RED",
         "BLUE",
-        "YELLOW",
+        "ORANGE",
         "GREEN",
-        "YELLOW",
+        "ORANGE",
         "BLUE"
       ],
       [
@@ -2432,7 +2471,7 @@
       [
         "BLUE",
         "GREEN",
-        "YELLOW",
+        "ORANGE",
         "GREEN",
         "RED",
         "BLUE",
@@ -2480,7 +2519,7 @@
       },
       {
         "type": "line",
-        "color": "YELLOW",
+        "color": "ORANGE",
         "length": 3
       }
     ],
@@ -2501,7 +2540,7 @@
         "RED",
         "BLUE",
         "GREEN",
-        "YELLOW",
+        "ORANGE",
         "RED",
         "BLUE",
         "GREEN"
@@ -2509,7 +2548,7 @@
       [
         "BLUE",
         "RED",
-        "YELLOW",
+        "ORANGE",
         "GREEN",
         "BLUE",
         "GREEN",
@@ -2517,19 +2556,19 @@
       ],
       [
         "GREEN",
-        "YELLOW",
+        "ORANGE",
         "RED",
         "BLUE",
         "GREEN",
         "RED",
-        "YELLOW"
+        "ORANGE"
       ],
       [
-        "YELLOW",
+        "ORANGE",
         "GREEN",
         "BLUE",
         "RED",
-        "YELLOW",
+        "ORANGE",
         "BLUE",
         "GREEN"
       ],
@@ -2537,7 +2576,7 @@
         "RED",
         "BLUE",
         "GREEN",
-        "YELLOW",
+        "ORANGE",
         "RED",
         "GREEN",
         "BLUE"
@@ -2545,19 +2584,19 @@
       [
         "BLUE",
         "RED",
-        "YELLOW",
+        "ORANGE",
         "GREEN",
         "BLUE",
         "RED",
-        "YELLOW"
+        "ORANGE"
       ],
       [
         "GREEN",
-        "YELLOW",
+        "ORANGE",
         "RED",
         "BLUE",
         "GREEN",
-        "YELLOW",
+        "ORANGE",
         "RED"
       ]
     ],
@@ -2610,7 +2649,7 @@
       },
       {
         "type": "shape",
-        "color": "YELLOW",
+        "color": "ORANGE",
         "shape": "T_SHAPE"
       }
     ],
@@ -2628,67 +2667,67 @@
     "maxMoves": 22,
     "tiles": [
       [
-        "YELLOW",
+        "ORANGE",
         "RED",
         "BLUE",
         "GREEN",
-        "YELLOW",
+        "ORANGE",
         "RED",
         "BLUE"
       ],
       [
         "RED",
-        "YELLOW",
+        "ORANGE",
         "GREEN",
         "BLUE",
         "RED",
-        "YELLOW",
+        "ORANGE",
         "GREEN"
       ],
       [
         "BLUE",
         "GREEN",
-        "YELLOW",
+        "ORANGE",
         "RED",
         "GREEN",
         "BLUE",
-        "YELLOW"
+        "ORANGE"
       ],
       [
         "GREEN",
         "BLUE",
         "RED",
-        "YELLOW",
+        "ORANGE",
         "BLUE",
         "GREEN",
         "RED"
       ],
       [
-        "YELLOW",
+        "ORANGE",
         "RED",
         "GREEN",
         "BLUE",
-        "YELLOW",
+        "ORANGE",
         "RED",
         "BLUE"
       ],
       [
         "RED",
-        "YELLOW",
+        "ORANGE",
         "BLUE",
         "GREEN",
         "RED",
-        "YELLOW",
+        "ORANGE",
         "GREEN"
       ],
       [
         "BLUE",
         "GREEN",
-        "YELLOW",
+        "ORANGE",
         "RED",
         "BLUE",
         "GREEN",
-        "YELLOW"
+        "ORANGE"
       ]
     ],
     "frozen": [
@@ -2735,7 +2774,7 @@
       },
       {
         "type": "square",
-        "color": "YELLOW"
+        "color": "ORANGE"
       },
       {
         "type": "line",
@@ -2765,7 +2804,7 @@
         "RED",
         "BLUE",
         "GREEN",
-        "YELLOW",
+        "ORANGE",
         "RED",
         "BLUE",
         "GREEN"
@@ -2773,7 +2812,7 @@
       [
         "BLUE",
         "RED",
-        "YELLOW",
+        "ORANGE",
         "GREEN",
         "BLUE",
         "GREEN",
@@ -2781,19 +2820,19 @@
       ],
       [
         "GREEN",
-        "YELLOW",
+        "ORANGE",
         "RED",
         "BLUE",
         "GREEN",
         "RED",
-        "YELLOW"
+        "ORANGE"
       ],
       [
-        "YELLOW",
+        "ORANGE",
         "GREEN",
         "BLUE",
         "RED",
-        "YELLOW",
+        "ORANGE",
         "BLUE",
         "GREEN"
       ],
@@ -2801,7 +2840,7 @@
         "RED",
         "BLUE",
         "GREEN",
-        "YELLOW",
+        "ORANGE",
         "RED",
         "GREEN",
         "BLUE"
@@ -2809,19 +2848,19 @@
       [
         "BLUE",
         "RED",
-        "YELLOW",
+        "ORANGE",
         "GREEN",
         "BLUE",
         "RED",
-        "YELLOW"
+        "ORANGE"
       ],
       [
         "GREEN",
-        "YELLOW",
+        "ORANGE",
         "RED",
         "BLUE",
         "GREEN",
-        "YELLOW",
+        "ORANGE",
         "RED"
       ]
     ],
@@ -2882,7 +2921,7 @@
       },
       {
         "type": "shape",
-        "color": "YELLOW",
+        "color": "ORANGE",
         "shape": "T_SHAPE"
       }
     ],
@@ -2903,7 +2942,7 @@
         "BLUE",
         "RED",
         "GREEN",
-        "YELLOW",
+        "ORANGE",
         "BLUE",
         "RED",
         "GREEN"
@@ -2911,7 +2950,7 @@
       [
         "RED",
         "BLUE",
-        "YELLOW",
+        "ORANGE",
         "BLUE",
         "RED",
         "GREEN",
@@ -2919,27 +2958,27 @@
       ],
       [
         "GREEN",
-        "YELLOW",
+        "ORANGE",
         "BLUE",
         "RED",
         "BLUE",
-        "YELLOW",
+        "ORANGE",
         "RED"
       ],
       [
-        "YELLOW",
+        "ORANGE",
         "BLUE",
         "RED",
         "BLUE",
         "GREEN",
         "BLUE",
-        "YELLOW"
+        "ORANGE"
       ],
       [
         "BLUE",
         "RED",
         "GREEN",
-        "YELLOW",
+        "ORANGE",
         "BLUE",
         "RED",
         "GREEN"
@@ -2949,14 +2988,14 @@
         "GREEN",
         "BLUE",
         "RED",
-        "YELLOW",
+        "ORANGE",
         "BLUE",
         "RED"
       ],
       [
         "GREEN",
         "BLUE",
-        "YELLOW",
+        "ORANGE",
         "BLUE",
         "RED",
         "GREEN",
@@ -3016,7 +3055,7 @@
       },
       {
         "type": "line",
-        "color": "YELLOW",
+        "color": "ORANGE",
         "length": 5
       },
       {
@@ -3041,7 +3080,7 @@
         "RED",
         "GREEN",
         "BLUE",
-        "YELLOW",
+        "ORANGE",
         "RED",
         "GREEN",
         "BLUE"
@@ -3049,7 +3088,7 @@
       [
         "GREEN",
         "RED",
-        "YELLOW",
+        "ORANGE",
         "RED",
         "GREEN",
         "BLUE",
@@ -3057,27 +3096,27 @@
       ],
       [
         "BLUE",
-        "YELLOW",
+        "ORANGE",
         "RED",
         "GREEN",
         "RED",
-        "YELLOW",
+        "ORANGE",
         "GREEN"
       ],
       [
-        "YELLOW",
+        "ORANGE",
         "RED",
         "GREEN",
         "RED",
         "BLUE",
         "RED",
-        "YELLOW"
+        "ORANGE"
       ],
       [
         "RED",
         "GREEN",
         "BLUE",
-        "YELLOW",
+        "ORANGE",
         "RED",
         "GREEN",
         "BLUE"
@@ -3087,17 +3126,17 @@
         "BLUE",
         "RED",
         "GREEN",
-        "YELLOW",
+        "ORANGE",
         "RED",
         "GREEN"
       ],
       [
         "BLUE",
         "RED",
-        "YELLOW",
+        "ORANGE",
         "BLUE",
         "GREEN",
-        "YELLOW",
+        "ORANGE",
         "RED"
       ]
     ],
@@ -3170,7 +3209,7 @@
       },
       {
         "type": "line",
-        "color": "YELLOW",
+        "color": "ORANGE",
         "length": 5
       }
     ],
@@ -3189,11 +3228,11 @@
         "BLUE",
         "RED",
         "GREEN",
-        "YELLOW",
+        "ORANGE",
         "BLUE",
         "RED",
         "GREEN",
-        "YELLOW"
+        "ORANGE"
       ],
       [
         "RED",
@@ -3202,21 +3241,21 @@
         "RED",
         "GREEN",
         "BLUE",
-        "YELLOW",
+        "ORANGE",
         "RED"
       ],
       [
         "GREEN",
         "BLUE",
-        "YELLOW",
+        "ORANGE",
         "GREEN",
         "RED",
-        "YELLOW",
+        "ORANGE",
         "BLUE",
         "GREEN"
       ],
       [
-        "YELLOW",
+        "ORANGE",
         "RED",
         "BLUE",
         "GREEN",
@@ -3229,38 +3268,38 @@
         "BLUE",
         "GREEN",
         "RED",
-        "YELLOW",
+        "ORANGE",
         "GREEN",
         "BLUE",
         "RED",
-        "YELLOW"
+        "ORANGE"
       ],
       [
         "RED",
-        "YELLOW",
+        "ORANGE",
         "GREEN",
         "BLUE",
         "RED",
         "GREEN",
-        "YELLOW",
+        "ORANGE",
         "BLUE"
       ],
       [
         "GREEN",
         "BLUE",
-        "YELLOW",
+        "ORANGE",
         "RED",
         "BLUE",
-        "YELLOW",
+        "ORANGE",
         "RED",
         "GREEN"
       ],
       [
-        "YELLOW",
+        "ORANGE",
         "RED",
         "BLUE",
         "GREEN",
-        "YELLOW",
+        "ORANGE",
         "RED",
         "GREEN",
         "BLUE"
@@ -3320,7 +3359,7 @@
       },
       {
         "type": "square",
-        "color": "YELLOW"
+        "color": "ORANGE"
       }
     ],
     "stars": {

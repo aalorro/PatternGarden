@@ -179,10 +179,12 @@ fun LevelSelectScreen(worldId: Int, navController: NavHostController) {
                             Text("\uD83D\uDD12", fontSize = 26.sp, color = theme.textColor.copy(alpha = 0.6f))
                             Spacer(modifier = Modifier.height(2.dp))
                             Text(
-                                text = "Level ${levels.indexOf(level) + 1}",
-                                fontSize = 11.sp,
+                                text = level.name,
+                                fontSize = 9.sp,
                                 fontWeight = FontWeight.Bold,
-                                color = theme.textColor.copy(alpha = 0.5f)
+                                color = theme.textColor.copy(alpha = 0.5f),
+                                textAlign = TextAlign.Center,
+                                maxLines = 1
                             )
                         } else {
                             Text(
@@ -205,10 +207,12 @@ fun LevelSelectScreen(worldId: Int, navController: NavHostController) {
                             }
                             Spacer(modifier = Modifier.height(2.dp))
                             Text(
-                                text = "Level ${levels.indexOf(level) + 1}",
-                                fontSize = 11.sp,
+                                text = level.name,
+                                fontSize = 9.sp,
                                 fontWeight = FontWeight.Bold,
-                                color = theme.textColor.copy(alpha = 0.7f)
+                                color = theme.textColor.copy(alpha = 0.7f),
+                                textAlign = TextAlign.Center,
+                                maxLines = 1
                             )
                         }
                     }
