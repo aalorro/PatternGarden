@@ -69,14 +69,13 @@ fun GoalPanel(
                             MaterialTheme.colorScheme.onSurfaceVariant
                         else
                             MaterialTheme.colorScheme.onBackground,
-                        textDecoration = if (completed) TextDecoration.LineThrough else TextDecoration.None,
-                        modifier = Modifier.weight(1f)
+                        textDecoration = if (completed) TextDecoration.LineThrough else TextDecoration.None
                     )
                     if (completed) {
                         Text(
-                            text = "DONE",
-                            fontSize = 13.sp,
-                            fontWeight = FontWeight.ExtraBold,
+                            text = "\u2714",
+                            fontSize = 15.sp,
+                            fontWeight = FontWeight.Bold,
                             color = Color(0xFF43A047)
                         )
                     }

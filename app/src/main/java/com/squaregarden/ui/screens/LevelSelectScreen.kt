@@ -177,6 +177,13 @@ fun LevelSelectScreen(worldId: Int, navController: NavHostController) {
                     ) {
                         if (!unlocked) {
                             Text("\uD83D\uDD12", fontSize = 26.sp, color = theme.textColor.copy(alpha = 0.6f))
+                            Spacer(modifier = Modifier.height(2.dp))
+                            Text(
+                                text = "Level ${levels.indexOf(level) + 1}",
+                                fontSize = 11.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = theme.textColor.copy(alpha = 0.5f)
+                            )
                         } else {
                             Text(
                                 text = "${level.id}",
@@ -184,12 +191,6 @@ fun LevelSelectScreen(worldId: Int, navController: NavHostController) {
                                 fontSize = 32.sp,
                                 fontWeight = FontWeight.ExtraBold,
                                 color = theme.textColor
-                            )
-                            Text(
-                                text = "Level ${levels.indexOf(level) + 1}",
-                                fontSize = 22.sp,
-                                fontWeight = FontWeight.Bold,
-                                color = theme.textColor.copy(alpha = 0.7f)
                             )
                             Spacer(modifier = Modifier.height(2.dp))
                             Row(horizontalArrangement = Arrangement.spacedBy(2.dp)) {
@@ -202,6 +203,13 @@ fun LevelSelectScreen(worldId: Int, navController: NavHostController) {
                                     )
                                 }
                             }
+                            Spacer(modifier = Modifier.height(2.dp))
+                            Text(
+                                text = "Level ${levels.indexOf(level) + 1}",
+                                fontSize = 11.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = theme.textColor.copy(alpha = 0.7f)
+                            )
                         }
                     }
                 }
