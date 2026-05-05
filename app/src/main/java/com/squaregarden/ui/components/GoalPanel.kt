@@ -39,7 +39,7 @@ fun GoalPanel(
                 .fillMaxWidth()
                 .padding(horizontal = 14.dp, vertical = 10.dp),
             verticalArrangement = Arrangement.spacedBy(3.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
+            horizontalAlignment = Alignment.Start
         ) {
             Text(
                 text = "GOALS",
