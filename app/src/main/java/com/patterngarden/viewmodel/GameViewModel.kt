@@ -556,6 +556,9 @@ class GameViewModel(
     }
 
     fun playStarCollect() { audioManager.playStarCollect() }
+    fun playSwapSound() { audioManager.playSwap() }
+    fun playMatchSound() { audioManager.playMatch() }
+    fun playWinSound(stars: Int = 1) { audioManager.playWin(stars) }
 
     fun advanceTutorial() {
         val current = _state.value

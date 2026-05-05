@@ -176,6 +176,16 @@ fun HomeScreen(navController: NavHostController) {
             ) {
                 Text("Settings", fontSize = 16.sp, fontWeight = FontWeight.Bold)
             }
+
+            OutlinedButton(
+                onClick = { navController.navigate(Screen.Instructions.route) },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(48.dp),
+                shape = RoundedCornerShape(50)
+            ) {
+                Text("How to Play", fontSize = 16.sp, fontWeight = FontWeight.Bold)
+            }
         }
 
         Spacer(modifier = Modifier.height(8.dp))

@@ -164,6 +164,28 @@ fun SettingsScreen(navController: NavHostController) {
 
         Spacer(modifier = Modifier.height(12.dp))
 
+        // How to Play
+        OutlinedButton(
+            onClick = { navController.navigate(Screen.Instructions.route) },
+            modifier = Modifier.fillMaxWidth().height(48.dp),
+            shape = RoundedCornerShape(50)
+        ) {
+            Text("How to Play", fontWeight = FontWeight.Bold)
+        }
+
+        Spacer(modifier = Modifier.height(12.dp))
+
+        // About
+        OutlinedButton(
+            onClick = { navController.navigate(Screen.About.route) },
+            modifier = Modifier.fillMaxWidth().height(48.dp),
+            shape = RoundedCornerShape(50)
+        ) {
+            Text("About", fontWeight = FontWeight.Bold)
+        }
+
+        Spacer(modifier = Modifier.height(12.dp))
+
         // Reset progress
         OutlinedButton(
             onClick = { showResetDialog = true },
@@ -178,7 +200,7 @@ fun SettingsScreen(navController: NavHostController) {
 
         // Footer
         Text(
-            text = "Square Garden v1.0 \u00B7 Made with \uD83C\uDF31",
+            text = "Square Garden v1.0.1 \u00B7 Made with \uD83C\uDF31",
             fontSize = 12.sp,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             modifier = Modifier.align(Alignment.CenterHorizontally)
