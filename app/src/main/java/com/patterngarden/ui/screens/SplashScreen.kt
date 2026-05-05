@@ -11,12 +11,15 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import com.patterngarden.data.ProfileRepository
+import com.patterngarden.ui.components.LogoMark
 import com.patterngarden.ui.navigation.Screen
+import com.patterngarden.ui.theme.DisplayFontFamily
 import kotlinx.coroutines.delay
 
 @Composable
@@ -24,14 +27,11 @@ fun SplashScreen(navController: NavHostController) {
     val context = LocalContext.current
     val profileRepo = remember { ProfileRepository(context) }
     val alpha = remember { Animatable(0f) }
-    val scale = remember { Animatable(0.8f) }
 
     LaunchedEffect(Unit) {
-        alpha.animateTo(1f, animationSpec = tween(800))
-        scale.animateTo(1f, animationSpec = tween(800, easing = FastOutSlowInEasing))
-        delay(700)
+        alpha.animateTo(1f, animationSpec = tween(600))
+        delay(1200)
 
-        // Check if profile is set up
         val profile = profileRepo.loadProfile()
         val destination = if (profile.isSetUp) Screen.Home.route else Screen.ProfileSetup.route
 
@@ -48,27 +48,36 @@ fun SplashScreen(navController: NavHostController) {
     ) {
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
-            modifier = Modifier
-                .alpha(alpha.value)
-                .scale(scale.value)
+            modifier = Modifier.alpha(alpha.value)
         ) {
+            LogoMark(size = 120.dp)
+
+            Spacer(modifier = Modifier.height(24.dp))
+
             Text(
                 text = "Square",
-                fontSize = 42.sp,
-                fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.primary
+                fontFamily = DisplayFontFamily,
+                fontSize = 56.sp,
+                fontWeight = FontWeight.ExtraBold,
+                color = MaterialTheme.colorScheme.primary,
+                letterSpacing = (-0.03).sp
             )
             Text(
                 text = "Garden",
-                fontSize = 42.sp,
+                fontFamily = DisplayFontFamily,
+                fontSize = 56.sp,
                 fontWeight = FontWeight.Light,
-                color = MaterialTheme.colorScheme.secondary
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                letterSpacing = (-0.03).sp
             )
-            Spacer(modifier = Modifier.height(16.dp))
+
+            Spacer(modifier = Modifier.height(22.dp))
+
             Text(
                 text = "A calm puzzle game",
-                style = MaterialTheme.typography.bodyLarge,
-                color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.6f)
+                fontSize = 16.sp,
+                fontStyle = FontStyle.Italic,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
             )
         }
     }

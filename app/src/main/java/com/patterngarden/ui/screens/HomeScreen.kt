@@ -2,11 +2,13 @@ package com.patterngarden.ui.screens
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -15,8 +17,10 @@ import androidx.navigation.NavHostController
 import com.patterngarden.data.ProfileRepository
 import com.patterngarden.data.ProgressRepository
 import com.patterngarden.model.UserProfile
+import com.patterngarden.ui.components.getAvatar
+import com.patterngarden.ui.components.LogoMark
 import com.patterngarden.ui.navigation.Screen
-import com.patterngarden.ui.theme.TileYellow
+import com.patterngarden.ui.theme.DisplayFontFamily
 
 @Composable
 fun HomeScreen(navController: NavHostController) {
@@ -30,76 +34,150 @@ fun HomeScreen(navController: NavHostController) {
         profile = profileRepo.loadProfile()
     }
 
-    Box(
+    Column(
         modifier = Modifier
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.background)
-            .systemBarsPadding(),
-        contentAlignment = Alignment.Center
+            .systemBarsPadding()
+            .padding(horizontal = 20.dp, vertical = 24.dp)
     ) {
-        // Welcome greeting at top-left
-        Text(
-            text = "Welcome, ${profile.username.ifBlank { "Player" }}!",
-            fontSize = 40.sp,
-            fontWeight = FontWeight.SemiBold,
-            color = MaterialTheme.colorScheme.onBackground,
-            modifier = Modifier
-                .align(Alignment.TopStart)
-                .padding(start = 20.dp, top = 16.dp)
-        )
-
-        Column(
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(24.dp)
+        // Top greeting bar
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween
         ) {
+            Column {
+                Text(
+                    text = "Welcome back,",
+                    fontSize = 13.sp,
+                    fontWeight = FontWeight.SemiBold,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+                Text(
+                    text = "${profile.username.ifBlank { "Gardener" }}!",
+                    fontFamily = DisplayFontFamily,
+                    fontSize = 26.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.onBackground
+                )
+            }
+
+            // Avatar button
+            Button(
+                onClick = { navController.navigate(Screen.Profile.route) },
+                modifier = Modifier.size(52.dp),
+                shape = CircleShape,
+                contentPadding = PaddingValues(0.dp),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = MaterialTheme.colorScheme.primary
+                ),
+                elevation = ButtonDefaults.buttonElevation(defaultElevation = 4.dp)
+            ) {
+                Text(
+                    text = getAvatar(profile.avatarId).emoji,
+                    fontSize = 28.sp
+                )
+            }
+        }
+
+        // Star count chip
+        if (totalStars > 0) {
+            Spacer(modifier = Modifier.height(16.dp))
+            Surface(
+                shape = RoundedCornerShape(50),
+                color = MaterialTheme.colorScheme.surface,
+                tonalElevation = 1.dp
+            ) {
+                Row(
+                    modifier = Modifier.padding(horizontal = 14.dp, vertical = 6.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    Text(text = "\u2605", fontSize = 14.sp, color = MaterialTheme.colorScheme.primary)
+                    Text(
+                        text = "$totalStars stars",
+                        fontSize = 14.sp,
+                        fontWeight = FontWeight.ExtraBold,
+                        color = MaterialTheme.colorScheme.onBackground
+                    )
+                }
+            }
+        }
+
+        // Center content: logo + title
+        Column(
+            modifier = Modifier
+                .weight(1f)
+                .fillMaxWidth(),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
+        ) {
+            LogoMark(size = 110.dp)
+
+            Spacer(modifier = Modifier.height(16.dp))
+
             Text(
                 text = "Square",
-                fontSize = 38.sp,
-                fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.primary
+                fontFamily = DisplayFontFamily,
+                fontSize = 52.sp,
+                fontWeight = FontWeight.ExtraBold,
+                color = MaterialTheme.colorScheme.primary,
+                letterSpacing = (-0.03).sp
             )
             Text(
                 text = "Garden",
-                fontSize = 38.sp,
+                fontFamily = DisplayFontFamily,
+                fontSize = 52.sp,
                 fontWeight = FontWeight.Light,
-                color = MaterialTheme.colorScheme.secondary,
-                modifier = Modifier.offset(y = (-12).dp)
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                letterSpacing = (-0.03).sp
             )
 
-            if (totalStars > 0) {
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(4.dp)
-                ) {
-                    Text(text = "$totalStars", fontSize = 20.sp, fontWeight = FontWeight.Bold, color = TileYellow)
-                    Text(text = " stars", fontSize = 16.sp, color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.6f))
-                }
-            }
+            Spacer(modifier = Modifier.height(8.dp))
 
-            Spacer(modifier = Modifier.height(32.dp))
+            Text(
+                text = "A calm puzzle game",
+                fontSize = 14.sp,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                fontWeight = FontWeight.Normal
+            )
+        }
 
+        // Bottom CTAs
+        Column(
+            modifier = Modifier.fillMaxWidth(),
+            verticalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
             Button(
                 onClick = { navController.navigate(Screen.WorldSelect.route) },
                 modifier = Modifier
-                    .width(220.dp)
+                    .fillMaxWidth()
                     .height(56.dp),
-                shape = RoundedCornerShape(28.dp),
+                shape = RoundedCornerShape(50),
                 colors = ButtonDefaults.buttonColors(
                     containerColor = MaterialTheme.colorScheme.primary
-                )
+                ),
+                elevation = ButtonDefaults.buttonElevation(defaultElevation = 4.dp)
             ) {
-                Text("Play", fontSize = 20.sp, fontWeight = FontWeight.SemiBold)
+                Text(
+                    text = "\u25B6  Play",
+                    fontSize = 18.sp,
+                    fontWeight = FontWeight.Bold
+                )
             }
 
             OutlinedButton(
                 onClick = { navController.navigate(Screen.Settings.route) },
                 modifier = Modifier
-                    .width(220.dp)
+                    .fillMaxWidth()
                     .height(48.dp),
-                shape = RoundedCornerShape(24.dp)
+                shape = RoundedCornerShape(50)
             ) {
-                Text("Settings", fontSize = 16.sp)
+                Text("Settings", fontSize = 16.sp, fontWeight = FontWeight.Bold)
             }
         }
+
+        Spacer(modifier = Modifier.height(8.dp))
     }
 }

@@ -1,14 +1,17 @@
 package com.patterngarden.ui.screens
 
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
@@ -16,6 +19,7 @@ import com.patterngarden.data.ProfileRepository
 import com.patterngarden.data.ProgressRepository
 import com.patterngarden.data.SettingsRepository
 import com.patterngarden.ui.navigation.Screen
+import com.patterngarden.ui.theme.*
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 
@@ -29,11 +33,15 @@ fun SettingsScreen(navController: NavHostController) {
 
     var soundEnabled by remember { mutableStateOf(true) }
     var musicEnabled by remember { mutableStateOf(true) }
+    var currentThemeId by remember { mutableStateOf("light") }
+    var currentProfile by remember { mutableStateOf(com.patterngarden.model.UserProfile()) }
     var showResetDialog by remember { mutableStateOf(false) }
 
     LaunchedEffect(Unit) {
         soundEnabled = settingsRepo.soundEnabled.first()
         musicEnabled = settingsRepo.musicEnabled.first()
+        currentProfile = profileRepo.loadProfile()
+        currentThemeId = currentProfile.themeId
     }
 
     Column(
@@ -41,106 +49,140 @@ fun SettingsScreen(navController: NavHostController) {
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.background)
             .systemBarsPadding()
-            .padding(24.dp)
+            .verticalScroll(rememberScrollState())
+            .padding(20.dp)
     ) {
-        Text(
-            text = "Settings",
-            style = MaterialTheme.typography.headlineMedium,
-            color = MaterialTheme.colorScheme.onBackground
-        )
-
-        Spacer(modifier = Modifier.height(80.dp))
-
+        // Header
         Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(12.dp)
         ) {
+            TextButton(onClick = { navController.popBackStack() }) {
+                Text("\u2190", fontSize = 16.sp, fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.onBackground)
+            }
             Text(
-                text = "Sound Effects",
-                style = MaterialTheme.typography.bodyLarge,
+                text = "Settings",
+                fontFamily = DisplayFontFamily,
+                fontSize = 26.sp,
+                fontWeight = FontWeight.Bold,
                 color = MaterialTheme.colorScheme.onBackground
             )
-            Switch(
-                checked = soundEnabled,
-                onCheckedChange = { enabled ->
-                    soundEnabled = enabled
-                    scope.launch { settingsRepo.setSoundEnabled(enabled) }
-                }
-            )
         }
 
-        Spacer(modifier = Modifier.height(16.dp))
+        Spacer(modifier = Modifier.height(24.dp))
 
+        // Theme section
+        SectionLabel("Theme")
         Row(
             modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
+            horizontalArrangement = Arrangement.spacedBy(10.dp)
         ) {
-            Text(
-                text = "Music",
-                style = MaterialTheme.typography.bodyLarge,
-                color = MaterialTheme.colorScheme.onBackground
-            )
-            Switch(
-                checked = musicEnabled,
-                onCheckedChange = { enabled ->
-                    musicEnabled = enabled
-                    scope.launch { settingsRepo.setMusicEnabled(enabled) }
+            allThemes.forEach { theme ->
+                val selected = theme.id == currentThemeId
+                Card(
+                    onClick = {
+                        currentThemeId = theme.id
+                        scope.launch {
+                            currentProfile = currentProfile.copy(themeId = theme.id)
+                            profileRepo.saveProfile(currentProfile)
+                        }
+                    },
+                    modifier = Modifier.weight(1f),
+                    shape = RoundedCornerShape(16.dp),
+                    border = if (selected)
+                        androidx.compose.foundation.BorderStroke(3.dp, MaterialTheme.colorScheme.primary)
+                    else null,
+                    colors = CardDefaults.cardColors(containerColor = theme.surface),
+                    elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+                ) {
+                    Column(
+                        modifier = Modifier.padding(10.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(36.dp)
+                                .background(theme.primary, RoundedCornerShape(10.dp))
+                        )
+                        Spacer(modifier = Modifier.height(6.dp))
+                        Text(
+                            text = theme.label,
+                            fontSize = 13.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = theme.onBackground
+                        )
+                    }
                 }
-            )
+            }
         }
 
-        Spacer(modifier = Modifier.height(32.dp))
+        Spacer(modifier = Modifier.height(24.dp))
 
-        HorizontalDivider(color = MaterialTheme.colorScheme.surfaceVariant)
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-        Button(
-            onClick = { navController.navigate(Screen.Profile.route) },
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(48.dp),
-            shape = RoundedCornerShape(24.dp),
-            colors = ButtonDefaults.buttonColors(
-                containerColor = MaterialTheme.colorScheme.primaryContainer
-            )
+        // Sound section
+        SectionLabel("Sound & Haptics")
+        Surface(
+            shape = RoundedCornerShape(16.dp),
+            color = MaterialTheme.colorScheme.surface,
+            tonalElevation = 1.dp
         ) {
-            Text(
-                "Edit Profile",
-                color = MaterialTheme.colorScheme.onPrimaryContainer
-            )
+            Column {
+                ToggleRow(
+                    label = "Sound effects",
+                    checked = soundEnabled,
+                    onCheckedChange = { enabled ->
+                        soundEnabled = enabled
+                        scope.launch { settingsRepo.setSoundEnabled(enabled) }
+                    }
+                )
+                HorizontalDivider(
+                    color = MaterialTheme.colorScheme.background,
+                    thickness = 1.dp
+                )
+                ToggleRow(
+                    label = "Background music",
+                    checked = musicEnabled,
+                    onCheckedChange = { enabled ->
+                        musicEnabled = enabled
+                        scope.launch { settingsRepo.setMusicEnabled(enabled) }
+                    }
+                )
+            }
         }
 
-        Spacer(modifier = Modifier.height(16.dp))
+        Spacer(modifier = Modifier.height(24.dp))
 
-        Button(
-            onClick = { showResetDialog = true },
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(48.dp),
-            shape = RoundedCornerShape(24.dp),
-            colors = ButtonDefaults.buttonColors(
-                containerColor = MaterialTheme.colorScheme.error
-            )
-        ) {
-            Text(
-                "Reset Progress",
-                color = MaterialTheme.colorScheme.onError
-            )
-        }
-
-        Spacer(modifier = Modifier.weight(1f))
-
+        // Profile button
         OutlinedButton(
-            onClick = { navController.popBackStack() },
-            modifier = Modifier.align(Alignment.CenterHorizontally),
-            shape = RoundedCornerShape(50),
-            border = BorderStroke(1.5.dp, MaterialTheme.colorScheme.primary)
+            onClick = { navController.navigate(Screen.Profile.route) },
+            modifier = Modifier.fillMaxWidth().height(48.dp),
+            shape = RoundedCornerShape(50)
         ) {
-            Text("Back", fontSize = 28.sp)
+            Text("Edit Profile", fontWeight = FontWeight.Bold)
         }
+
+        Spacer(modifier = Modifier.height(12.dp))
+
+        // Reset progress
+        OutlinedButton(
+            onClick = { showResetDialog = true },
+            modifier = Modifier.fillMaxWidth().height(48.dp),
+            shape = RoundedCornerShape(50),
+            border = androidx.compose.foundation.BorderStroke(2.dp, Color(0xFFC62828))
+        ) {
+            Text("Reset progress", color = Color(0xFFC62828), fontWeight = FontWeight.Bold)
+        }
+
+        Spacer(modifier = Modifier.height(24.dp))
+
+        // Footer
+        Text(
+            text = "Square Garden v1.0 \u00B7 Made with \uD83C\uDF31",
+            fontSize = 12.sp,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            modifier = Modifier.align(Alignment.CenterHorizontally)
+        )
     }
 
     if (showResetDialog) {
@@ -151,8 +193,7 @@ fun SettingsScreen(navController: NavHostController) {
                 Text(
                     "This will reset all your stars, level progress, and player level " +
                     "back to zero. Your profile (name, avatar, theme, difficulty) " +
-                    "will be kept.\n\n" +
-                    "This action cannot be undone."
+                    "will be kept.\n\nThis action cannot be undone."
                 )
             },
             confirmButton = {
@@ -167,9 +208,7 @@ fun SettingsScreen(navController: NavHostController) {
                             }
                         }
                     },
-                    colors = ButtonDefaults.textButtonColors(
-                        contentColor = MaterialTheme.colorScheme.error
-                    )
+                    colors = ButtonDefaults.textButtonColors(contentColor = Color(0xFFC62828))
                 ) {
                     Text("Reset Everything")
                 }
@@ -179,6 +218,43 @@ fun SettingsScreen(navController: NavHostController) {
                     Text("Cancel")
                 }
             }
+        )
+    }
+}
+
+@Composable
+private fun SectionLabel(text: String) {
+    Text(
+        text = text.uppercase(),
+        fontSize = 13.sp,
+        fontWeight = FontWeight.Bold,
+        color = MaterialTheme.colorScheme.onSurfaceVariant,
+        letterSpacing = 0.5.sp,
+        modifier = Modifier.padding(bottom = 8.dp)
+    )
+}
+
+@Composable
+private fun ToggleRow(label: String, checked: Boolean, onCheckedChange: (Boolean) -> Unit) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp, vertical = 14.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.SpaceBetween
+    ) {
+        Text(
+            text = label,
+            fontSize = 15.sp,
+            fontWeight = FontWeight.SemiBold,
+            color = MaterialTheme.colorScheme.onBackground
+        )
+        Switch(
+            checked = checked,
+            onCheckedChange = onCheckedChange,
+            colors = SwitchDefaults.colors(
+                checkedTrackColor = MaterialTheme.colorScheme.primary
+            )
         )
     }
 }

@@ -4,6 +4,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -24,39 +25,55 @@ fun GoalPanel(
     completedIds: Set<String>,
     modifier: Modifier = Modifier
 ) {
-    Column(
-        modifier = modifier
-            .fillMaxWidth()
-            .padding(horizontal = 16.dp, vertical = 8.dp),
-        verticalArrangement = Arrangement.spacedBy(4.dp)
+    Surface(
+        modifier = modifier,
+        shape = RoundedCornerShape(16.dp),
+        color = MaterialTheme.colorScheme.surface,
+        tonalElevation = 2.dp
     ) {
-        Text(
-            text = "Goals",
-            style = MaterialTheme.typography.labelLarge,
-            color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.6f)
-        )
-        goals.forEach { goal ->
-            val completed = goal.id in completedIds
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                // Color dot
-                Box(
-                    modifier = Modifier
-                        .size(12.dp)
-                        .clip(RoundedCornerShape(6.dp))
-                        .background(goal.color.toComposeColor())
-                )
-                Text(
-                    text = goal.description,
-                    fontSize = 14.sp,
-                    color = if (completed) Color(0xFF4CAF50) else MaterialTheme.colorScheme.onBackground,
-                    fontWeight = if (completed) FontWeight.Bold else FontWeight.Normal,
-                    textDecoration = if (completed) TextDecoration.LineThrough else TextDecoration.None
-                )
-                if (completed) {
-                    Text(text = "Done", fontSize = 12.sp, color = Color(0xFF4CAF50), fontWeight = FontWeight.Bold)
+        Column(
+            modifier = Modifier.padding(horizontal = 14.dp, vertical = 10.dp),
+            verticalArrangement = Arrangement.spacedBy(4.dp)
+        ) {
+            Text(
+                text = "GOALS",
+                fontSize = 10.sp,
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                letterSpacing = 0.8.sp
+            )
+            goals.forEach { goal ->
+                val completed = goal.id in completedIds
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    // Color swatch
+                    Box(
+                        modifier = Modifier
+                            .size(14.dp)
+                            .clip(RoundedCornerShape(4.dp))
+                            .background(goal.color.toComposeColor())
+                    )
+                    Text(
+                        text = goal.description,
+                        fontSize = 13.sp,
+                        fontWeight = FontWeight.SemiBold,
+                        color = if (completed)
+                            MaterialTheme.colorScheme.onSurfaceVariant
+                        else
+                            MaterialTheme.colorScheme.onBackground,
+                        textDecoration = if (completed) TextDecoration.LineThrough else TextDecoration.None,
+                        modifier = Modifier.weight(1f)
+                    )
+                    if (completed) {
+                        Text(
+                            text = "DONE",
+                            fontSize = 11.sp,
+                            fontWeight = FontWeight.ExtraBold,
+                            color = Color(0xFF43A047)
+                        )
+                    }
                 }
             }
         }

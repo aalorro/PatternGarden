@@ -1,7 +1,6 @@
 package com.patterngarden.ui.screens
 
 import androidx.compose.animation.core.*
-import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -54,48 +53,56 @@ fun GameScreen(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 16.dp, vertical = 12.dp),
+                .padding(horizontal = 16.dp, vertical = 14.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
             val hasNotMoved = state.movesRemaining == state.level.maxMoves
             val canGoBack = hasNotMoved || state.phase == GamePhase.WON || state.phase == GamePhase.LOST
-            OutlinedButton(
+            TextButton(
                 onClick = { navController.popBackStack() },
-                enabled = canGoBack,
-                shape = RoundedCornerShape(50),
-                border = BorderStroke(
-                    1.5.dp,
-                    if (canGoBack) MaterialTheme.colorScheme.primary
-                    else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.2f)
-                )
+                enabled = canGoBack
             ) {
-                Text("Back", fontSize = 28.sp)
+                Text(
+                    text = "\u2190 Menu",
+                    fontSize = 14.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = if (canGoBack) MaterialTheme.colorScheme.onBackground
+                    else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.3f)
+                )
             }
             Spacer(modifier = Modifier.weight(1f))
             Text(
                 text = state.level.name,
-                style = MaterialTheme.typography.titleMedium,
+                fontFamily = com.patterngarden.ui.theme.DisplayFontFamily,
+                fontSize = 20.sp,
+                fontWeight = FontWeight.Bold,
                 color = MaterialTheme.colorScheme.onBackground
             )
             Spacer(modifier = Modifier.weight(1f))
-            // Placeholder for symmetry
             Spacer(modifier = Modifier.width(60.dp))
         }
 
-        // Goal panel
-        GoalPanel(
-            goals = state.level.goals,
-            completedIds = state.completedGoalIds
-        )
+        // Goals + Moves row (side by side cards)
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp, vertical = 6.dp),
+            horizontalArrangement = Arrangement.spacedBy(10.dp)
+        ) {
+            GoalPanel(
+                goals = state.level.goals,
+                completedIds = state.completedGoalIds,
+                modifier = Modifier.weight(1f)
+            )
+            MoveCounter(
+                remaining = state.movesRemaining,
+                max = state.level.maxMoves,
+                difficultyLabel = state.difficulty.label.replaceFirstChar { it.uppercase() },
+                modifier = Modifier.widthIn(min = 88.dp)
+            )
+        }
 
-        // Move counter + difficulty
-        MoveCounter(
-            remaining = state.movesRemaining,
-            max = state.level.maxMoves,
-            difficultyLabel = "Difficulty: ${state.difficulty.label}"
-        )
-
-        // Game board — drag to swap in one seamless action
+        // Game board
         GameBoardCanvas(
             board = state.board,
             selectedCell = state.selectedCell,
@@ -105,36 +112,33 @@ fun GameScreen(
             onDragSwap = { from, to -> viewModel.onDragSwap(from, to) },
             modifier = Modifier
                 .weight(1f)
-                .padding(16.dp)
+                .padding(horizontal = 12.dp, vertical = 8.dp)
         )
 
-        // Bottom bar with hint
+        // Bottom bar
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 16.dp, vertical = 12.dp),
-            horizontalArrangement = Arrangement.Center
+                .padding(horizontal = 16.dp, vertical = 10.dp),
+            horizontalArrangement = Arrangement.spacedBy(10.dp)
         ) {
             Button(
                 onClick = { viewModel.requestHint() },
-                shape = RoundedCornerShape(20.dp),
+                modifier = Modifier.weight(1f).height(48.dp),
+                shape = RoundedCornerShape(50),
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = MaterialTheme.colorScheme.primaryContainer
+                    containerColor = MaterialTheme.colorScheme.primary
                 )
             ) {
-                Text(
-                    text = "Hint",
-                    color = MaterialTheme.colorScheme.onPrimaryContainer
-                )
+                Text("\uD83D\uDCA1 Hint", fontWeight = FontWeight.Bold)
             }
-
-            Spacer(modifier = Modifier.width(16.dp))
 
             OutlinedButton(
                 onClick = { viewModel.resetLevel() },
-                shape = RoundedCornerShape(20.dp)
+                modifier = Modifier.weight(1f).height(48.dp),
+                shape = RoundedCornerShape(50)
             ) {
-                Text("Restart")
+                Text("\u21BB Restart", fontWeight = FontWeight.Bold)
             }
         }
     }

@@ -1,14 +1,18 @@
 package com.patterngarden.ui.components
 
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.patterngarden.ui.theme.DisplayFontFamily
 import com.patterngarden.ui.theme.TileRed
 
 @Composable
@@ -18,36 +22,51 @@ fun MoveCounter(
     difficultyLabel: String = "",
     modifier: Modifier = Modifier
 ) {
-    Column(
-        modifier = modifier
-            .fillMaxWidth()
-            .padding(horizontal = 16.dp, vertical = 4.dp)
+    val lowMoves = remaining <= 3
+
+    Surface(
+        modifier = modifier,
+        shape = RoundedCornerShape(16.dp),
+        color = MaterialTheme.colorScheme.surface,
+        tonalElevation = 2.dp
     ) {
-        Row(verticalAlignment = Alignment.CenterVertically) {
+        Column(
+            modifier = Modifier.padding(horizontal = 16.dp, vertical = 10.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
+        ) {
             Text(
-                text = "Moves: ",
-                fontSize = 16.sp,
-                color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.6f)
-            )
-            Text(
-                text = "$remaining",
-                fontSize = 22.sp,
+                text = "MOVES",
+                fontSize = 10.sp,
                 fontWeight = FontWeight.Bold,
-                color = if (remaining <= 3) TileRed else MaterialTheme.colorScheme.onBackground
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                letterSpacing = 0.8.sp
             )
-            Text(
-                text = " / $max",
-                fontSize = 14.sp,
-                color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.4f)
-            )
-        }
-        if (difficultyLabel.isNotEmpty()) {
-            Text(
-                text = difficultyLabel,
-                fontSize = 13.sp,
-                fontWeight = FontWeight.SemiBold,
-                color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.5f)
-            )
+            Row(
+                verticalAlignment = Alignment.Bottom
+            ) {
+                Text(
+                    text = "$remaining",
+                    fontFamily = DisplayFontFamily,
+                    fontSize = 26.sp,
+                    fontWeight = FontWeight.ExtraBold,
+                    color = if (lowMoves) Color(0xFFC62828) else MaterialTheme.colorScheme.onBackground
+                )
+                Text(
+                    text = "/$max",
+                    fontSize = 14.sp,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.padding(bottom = 2.dp)
+                )
+            }
+            if (difficultyLabel.isNotEmpty()) {
+                Text(
+                    text = difficultyLabel,
+                    fontSize = 10.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
         }
     }
 }

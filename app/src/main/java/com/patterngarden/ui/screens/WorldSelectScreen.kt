@@ -75,25 +75,47 @@ fun WorldSelectScreen(navController: NavHostController) {
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.background)
             .systemBarsPadding()
-            .padding(horizontal = 20.dp, vertical = 16.dp),
-        verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
-        Text(
-            text = "Worlds",
-            style = MaterialTheme.typography.headlineMedium,
-            color = MaterialTheme.colorScheme.onBackground
-        )
-
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            Text(
-                text = "$totalStars stars",
-                style = MaterialTheme.typography.bodyLarge,
-                color = TileYellow,
-                fontWeight = FontWeight.Bold
-            )
+        // Header
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 20.dp, vertical = 16.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                TextButton(onClick = { navController.popBackStack() }) {
+                    Text("\u2190", fontSize = 16.sp, fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.onBackground)
+                }
+                Text(
+                    text = "Worlds",
+                    fontFamily = DisplayFontFamily,
+                    fontSize = 26.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.onBackground
+                )
+            }
+            Surface(
+                shape = RoundedCornerShape(50),
+                color = MaterialTheme.colorScheme.surface,
+                tonalElevation = 1.dp
+            ) {
+                Row(
+                    modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(6.dp)
+                ) {
+                    Text("\u2605", fontSize = 14.sp, color = Color(0xFFFFB800))
+                    Text("$totalStars", fontSize = 14.sp, fontWeight = FontWeight.ExtraBold,
+                        color = MaterialTheme.colorScheme.onBackground)
+                }
+            }
         }
-
-        Spacer(modifier = Modifier.height(4.dp))
 
         val scrollState = rememberScrollState()
         Column(
@@ -115,18 +137,18 @@ fun WorldSelectScreen(navController: NavHostController) {
                     },
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(120.dp)
-                        .alpha(if (accessible) 1f else 0.5f),
-                    shape = RoundedCornerShape(18.dp),
+                        .height(124.dp)
+                        .alpha(if (accessible) 1f else 0.65f),
+                    shape = RoundedCornerShape(22.dp),
                     colors = CardDefaults.cardColors(containerColor = Color.Transparent),
-                    elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+                    elevation = CardDefaults.cardElevation(defaultElevation = 6.dp)
                 ) {
                     Box(modifier = Modifier.fillMaxSize()) {
                         // Banner background illustration
                         Canvas(
                             modifier = Modifier
                                 .fillMaxSize()
-                                .clip(RoundedCornerShape(18.dp))
+                                .clip(RoundedCornerShape(22.dp))
                         ) {
                             when (world.id) {
                                 1 -> drawSeedlingGarden(size)
@@ -142,25 +164,48 @@ fun WorldSelectScreen(navController: NavHostController) {
                             }
                         }
 
+                        // Dark scrim overlay (left-to-right gradient)
+                        Box(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .background(
+                                    Brush.horizontalGradient(
+                                        colors = listOf(
+                                            Color.Black.copy(alpha = 0.55f),
+                                            Color.Black.copy(alpha = 0.25f),
+                                            Color.Transparent
+                                        )
+                                    )
+                                )
+                        )
+
                         // Text overlay
                         Row(
                             modifier = Modifier
                                 .fillMaxSize()
-                                .padding(horizontal = 20.dp, vertical = 16.dp),
+                                .padding(horizontal = 18.dp, vertical = 14.dp),
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             Column(modifier = Modifier.weight(1f)) {
                                 Text(
-                                    text = world.name,
-                                    fontSize = 20.sp,
+                                    text = "WORLD ${world.id}",
+                                    fontSize = 11.sp,
                                     fontWeight = FontWeight.Bold,
+                                    color = Color.White.copy(alpha = 0.85f),
+                                    letterSpacing = 1.sp
+                                )
+                                Text(
+                                    text = world.name,
+                                    fontFamily = DisplayFontFamily,
+                                    fontSize = 24.sp,
+                                    fontWeight = FontWeight.ExtraBold,
                                     color = Color.White
                                 )
-                                Spacer(modifier = Modifier.height(2.dp))
+                                Spacer(modifier = Modifier.height(4.dp))
                                 Text(
                                     text = world.subtitle,
-                                    fontSize = 14.sp,
-                                    fontWeight = FontWeight.Medium,
+                                    fontSize = 12.sp,
+                                    fontWeight = FontWeight.SemiBold,
                                     color = Color.White.copy(alpha = 0.85f)
                                 )
                             }
@@ -172,14 +217,21 @@ fun WorldSelectScreen(navController: NavHostController) {
                                     color = Color(0xFFFFCDD2)
                                 )
                             } else if (!unlocked) {
-                                Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                                    Text("locked", fontSize = 12.sp, color = Color.White.copy(0.7f))
-                                    Text(
-                                        text = "${world.starsToUnlock} stars",
-                                        fontSize = 16.sp,
-                                        fontWeight = FontWeight.Bold,
-                                        color = Color(0xFFFFE082)
-                                    )
+                                Column(horizontalAlignment = Alignment.End) {
+                                    Text("\uD83D\uDD12", fontSize = 24.sp)
+                                    Spacer(modifier = Modifier.height(4.dp))
+                                    Surface(
+                                        shape = RoundedCornerShape(50),
+                                        color = Color.Black.copy(alpha = 0.4f)
+                                    ) {
+                                        Text(
+                                            text = "\u2605 ${world.starsToUnlock} needed",
+                                            fontSize = 11.sp,
+                                            fontWeight = FontWeight.Bold,
+                                            color = Color(0xFFFFE082),
+                                            modifier = Modifier.padding(horizontal = 8.dp, vertical = 3.dp)
+                                        )
+                                    }
                                 }
                             }
                         }
@@ -190,14 +242,6 @@ fun WorldSelectScreen(navController: NavHostController) {
             Spacer(modifier = Modifier.height(8.dp))
         }
 
-        OutlinedButton(
-            onClick = { navController.popBackStack() },
-            modifier = Modifier.align(Alignment.CenterHorizontally),
-            shape = RoundedCornerShape(50),
-            border = BorderStroke(1.5.dp, MaterialTheme.colorScheme.primary)
-        ) {
-            Text("Back", fontSize = 28.sp)
-        }
     }
 }
 
