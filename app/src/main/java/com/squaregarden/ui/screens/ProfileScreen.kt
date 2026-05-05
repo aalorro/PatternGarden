@@ -302,7 +302,8 @@ fun ProfileScreen(navController: NavHostController, isFirstTime: Boolean = false
                             text = theme.label,
                             fontSize = 12.sp,
                             fontWeight = if (selected) FontWeight.Bold else FontWeight.Normal,
-                            color = theme.onBackground
+                            color = theme.onBackground,
+                            maxLines = 1
                         )
                     }
                 }
