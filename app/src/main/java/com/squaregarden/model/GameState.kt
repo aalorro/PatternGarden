@@ -19,7 +19,9 @@ data class GameState(
     val initialBoard: Board? = null,
     val solutionSteps: List<Pair<CellPos, CellPos>>? = null,
     val hasSolution: Boolean = false,
-    val unlockedWorldName: String? = null
+    val unlockedWorldName: String? = null,
+    val shuffleTokens: Int = 0,
+    val shuffleTokenAwarded: Boolean = false
 )
 
 enum class GameDifficulty(val label: String, val starMultiplier: Float) {

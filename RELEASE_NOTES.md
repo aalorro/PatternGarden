@@ -20,7 +20,7 @@ Swipe to swap tiles with their neighbors. Arrange same-colored tiles into patter
 - Molten Core, Starfall Summit, Abyssal Depths, Prism Citadel — Even tougher puzzles await
 
 5 TILE COLORS
-Red, Blue, Yellow, Green — and Orange debuts in World 4 to keep things fresh.
+Red, Blue, Yellow, Green — and Orange debuts in World 5 to keep things fresh.
 
 PLAY YOUR WAY
 Choose your skill level:

@@ -139,6 +139,15 @@ object SoundGenerator {
         )
     }
 
+    /** Quick rising scramble whoosh for board shuffle */
+    fun generateShuffle(): ShortArray = generatePcm(300) { i, total ->
+        val env = envelope(i, total, 10, 100)
+        val progress = i.toFloat() / total
+        val freq = 200f + 800f * progress
+        val noise = (Math.random().toFloat() - 0.5f) * 0.2f * (1f - progress)
+        env * 0.5f * (sine(freq, i) * 0.4f + sine(freq * 1.5f, i) * 0.3f + noise)
+    }
+
     /** Sad descending tone for losing */
     fun generateLose(): ShortArray = generatePcm(700) { i, total ->
         val env = envelope(i, total, 20, 300)

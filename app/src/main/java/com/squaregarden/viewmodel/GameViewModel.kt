@@ -36,6 +36,7 @@ class GameViewModel(
     private var pendingWinLevelId: Int = 0
     private var pendingWinStars: Int = 0
     private var precomputedSolution: List<Pair<CellPos, CellPos>>? = null
+    private var shuffleTokens: Int = 0
     private val progressRepo = ProgressRepository(context)
     private val profileRepo = ProfileRepository(context)
     private val audioManager = AudioManager(context)
@@ -54,6 +55,8 @@ class GameViewModel(
         viewModelScope.launch {
             val profile = profileRepo.loadProfile()
             difficulty = Difficulty.fromId(profile.difficulty)
+
+            shuffleTokens = progressRepo.shuffleTokensFlow.first()
 
             val levels = LevelLoader.loadAllLevels(context)
             level = levels.first { it.id == levelId }
@@ -366,6 +369,7 @@ class GameViewModel(
                 movesRemaining = adjustedMaxMoves, difficulty = difficulty,
                 gameDifficulty = computeGameDifficulty(board),
                 initialBoard = board,
+                shuffleTokens = shuffleTokens,
                 phase = GamePhase.TUTORIAL_PAUSE
             )
             computeSolutionAsync(board)
@@ -378,6 +382,7 @@ class GameViewModel(
                 movesRemaining = adjustedMaxMoves, difficulty = difficulty,
                 gameDifficulty = computeGameDifficulty(board),
                 initialBoard = board, hasSolution = solution != null,
+                shuffleTokens = shuffleTokens,
                 phase = GamePhase.PLAYING
             )
             // If reverse-construction failed, try solver in background
@@ -430,6 +435,7 @@ class GameViewModel(
             movesRemaining = moves, difficulty = difficulty,
             gameDifficulty = computeGameDifficulty(board),
             initialBoard = board, hasSolution = solution != null,
+            shuffleTokens = shuffleTokens,
             phase = if (hasTutorial) GamePhase.TUTORIAL_PAUSE else GamePhase.PLAYING
         )
         if (solution == null) computeSolutionAsync(board)
@@ -498,7 +504,7 @@ class GameViewModel(
             var baseGoalIds = current.completedGoalIds
             var baseGoalCells = current.completedGoalCells
             var invalidatedGoals = emptySet<String>()
-            if (crossesBorder && difficulty == Difficulty.MEDIUM) {
+            if (crossesBorder && (difficulty == Difficulty.EASY || difficulty == Difficulty.MEDIUM)) {
                 invalidatedGoals = current.completedGoalCells.filter { (_, cells) ->
                     from in cells || to in cells
                 }.keys
@@ -582,6 +588,27 @@ class GameViewModel(
         }
     }
 
+    fun shuffleBoard() {
+        val current = _state.value
+        if (current.phase != GamePhase.PLAYING || current.shuffleTokens <= 0) return
+        viewModelScope.launch {
+            val success = progressRepo.useShuffleToken()
+            if (!success) return@launch
+            shuffleTokens--
+            val numSwaps = current.board.width * current.board.height
+            val (shuffled, _) = scrambleBoard(current.board, numSwaps)
+            audioManager.playShuffle()
+            _state.value = current.copy(
+                board = shuffled,
+                shuffleTokens = shuffleTokens,
+                gameDifficulty = computeGameDifficulty(shuffled),
+                hintCells = emptySet(),
+                selectedCell = null
+            )
+            computeSolutionAsync(shuffled)
+        }
+    }
+
     fun playStarCollect() { audioManager.playStarCollect() }
     fun playSwapSound() { audioManager.playSwap() }
     fun playMatchSound() { audioManager.playMatch() }
@@ -615,6 +642,11 @@ class GameViewModel(
             progressRepo.saveLevelResult(pendingWinLevelId, pendingWinStars)
             val result = progressRepo.recordWin(difficulty.ordinal, pendingWinLevelId)
             profileRepo.incrementPlayerLevel()
+            if (_state.value.unlockedWorldName != null) {
+                progressRepo.addShuffleToken()
+                shuffleTokens++
+                _state.value = _state.value.copy(shuffleTokenAwarded = true)
+            }
             if (result == -1) {
                 audioManager.playLifeRestored()
                 _state.value = _state.value.copy(lifeRestored = true)

@@ -124,6 +124,15 @@ fun GameScreen(
             }
 
             OutlinedButton(
+                onClick = { viewModel.shuffleBoard() },
+                enabled = state.shuffleTokens > 0 && state.phase == GamePhase.PLAYING,
+                modifier = Modifier.weight(1f).height(48.dp),
+                shape = RoundedCornerShape(50)
+            ) {
+                Text("\uD83D\uDD00 \u00D7${state.shuffleTokens}", fontWeight = FontWeight.Bold)
+            }
+
+            OutlinedButton(
                 onClick = { viewModel.resetLevel() },
                 modifier = Modifier.weight(1f).height(48.dp),
                 shape = RoundedCornerShape(50)
@@ -145,6 +154,7 @@ fun GameScreen(
             stars = stars,
             levelName = state.level.name,
             unlockedWorldName = state.unlockedWorldName,
+            shuffleTokenAwarded = state.shuffleTokenAwarded,
             onStarLanded = { viewModel.playStarCollect() },
             onAllStarsLanded = { viewModel.commitWinResult() },
             onNext = if (state.level.id < 90) {
@@ -270,7 +280,7 @@ fun GameScreen(
 }
 
 @Composable
-private fun WinOverlay(stars: Int, levelName: String, unlockedWorldName: String? = null, onStarLanded: () -> Unit = {}, onAllStarsLanded: () -> Unit = {}, onNext: (() -> Unit)?, onMenu: () -> Unit) {
+private fun WinOverlay(stars: Int, levelName: String, unlockedWorldName: String? = null, shuffleTokenAwarded: Boolean = false, onStarLanded: () -> Unit = {}, onAllStarsLanded: () -> Unit = {}, onNext: (() -> Unit)?, onMenu: () -> Unit) {
     // Pulsing scale animation for the star display
     val infiniteTransition = rememberInfiniteTransition(label = "starPulse")
     val starScale by infiniteTransition.animateFloat(
@@ -405,6 +415,44 @@ private fun WinOverlay(stars: Int, levelName: String, unlockedWorldName: String?
                             Text(
                                 text = unlockedWorldName,
                                 fontSize = 22.sp,
+                                fontWeight = FontWeight.ExtraBold,
+                                color = DarkSage
+                            )
+                        }
+                    }
+                }
+
+                // Shuffle token reward
+                if (shuffleTokenAwarded) {
+                    val tokenScale = remember { Animatable(0f) }
+                    LaunchedEffect(Unit) {
+                        delay(800) // wait for world unlock card to appear
+                        tokenScale.animateTo(
+                            1f,
+                            animationSpec = spring(dampingRatio = 0.5f, stiffness = 300f)
+                        )
+                    }
+                    Spacer(modifier = Modifier.height(4.dp))
+                    Card(
+                        shape = RoundedCornerShape(16.dp),
+                        colors = CardDefaults.cardColors(
+                            containerColor = TileYellow.copy(alpha = 0.15f)
+                        ),
+                        modifier = Modifier.scale(tokenScale.value)
+                    ) {
+                        Column(
+                            modifier = Modifier.padding(horizontal = 20.dp, vertical = 10.dp),
+                            horizontalAlignment = Alignment.CenterHorizontally
+                        ) {
+                            Text(
+                                text = "Shuffle Token Earned!",
+                                fontSize = 16.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = WarmBrown
+                            )
+                            Text(
+                                text = "+1 \uD83D\uDD00",
+                                fontSize = 24.sp,
                                 fontWeight = FontWeight.ExtraBold,
                                 color = DarkSage
                             )

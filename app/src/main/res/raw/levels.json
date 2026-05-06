@@ -126,7 +126,7 @@
         "message": "Each swap uses one move.\nWatch your move counter!"
       },
       {
-        "message": "Now try a longer line — 4 BLUE tiles!\nUse fewer moves to earn more stars."
+        "message": "Now try a longer line \u00e2\u20ac\u201d 4 BLUE tiles!\nUse fewer moves to earn more stars."
       }
     ]
   },
@@ -2270,7 +2270,7 @@
     "goals": [
       {
         "type": "line",
-        "color": "ORANGE",
+        "color": "RED",
         "length": 4
       },
       {
@@ -2392,7 +2392,7 @@
       },
       {
         "type": "line",
-        "color": "ORANGE",
+        "color": "BLUE",
         "length": 4
       },
       {
@@ -2519,7 +2519,7 @@
       },
       {
         "type": "line",
-        "color": "ORANGE",
+        "color": "YELLOW",
         "length": 3
       }
     ],
@@ -2649,7 +2649,7 @@
       },
       {
         "type": "shape",
-        "color": "ORANGE",
+        "color": "YELLOW",
         "shape": "T_SHAPE"
       }
     ],
@@ -2774,7 +2774,7 @@
       },
       {
         "type": "square",
-        "color": "ORANGE"
+        "color": "YELLOW"
       },
       {
         "type": "line",
@@ -2921,7 +2921,7 @@
       },
       {
         "type": "shape",
-        "color": "ORANGE",
+        "color": "YELLOW",
         "shape": "T_SHAPE"
       }
     ],
@@ -3055,7 +3055,7 @@
       },
       {
         "type": "line",
-        "color": "ORANGE",
+        "color": "YELLOW",
         "length": 5
       },
       {
@@ -3209,7 +3209,7 @@
       },
       {
         "type": "line",
-        "color": "ORANGE",
+        "color": "YELLOW",
         "length": 5
       }
     ],
@@ -3359,7 +3359,7 @@
       },
       {
         "type": "square",
-        "color": "ORANGE"
+        "color": "YELLOW"
       }
     ],
     "stars": {
@@ -3486,7 +3486,7 @@
       },
       {
         "type": "line",
-        "color": "YELLOW",
+        "color": "ORANGE",
         "length": 4
       }
     ],
@@ -3746,7 +3746,7 @@
       },
       {
         "type": "shape",
-        "color": "YELLOW",
+        "color": "ORANGE",
         "shape": "T_SHAPE"
       }
     ],
@@ -4014,7 +4014,7 @@
       },
       {
         "type": "shape",
-        "color": "YELLOW",
+        "color": "ORANGE",
         "shape": "L_SHAPE"
       }
     ],
@@ -4306,7 +4306,7 @@
       },
       {
         "type": "shape",
-        "color": "GREEN",
+        "color": "ORANGE",
         "shape": "L_SHAPE"
       }
     ],
@@ -4634,7 +4634,7 @@
       },
       {
         "type": "line",
-        "color": "YELLOW",
+        "color": "ORANGE",
         "length": 4
       }
     ],

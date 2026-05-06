@@ -32,7 +32,7 @@ All notable changes to Square Garden are documented in this file.
 ### Improvements
 - Skill-based starting worlds — experienced players skip easy content
 - Progressive difficulty ramp in World 1 and World 2 levels
-- Orange color restricted to World 4+ (no longer appears in early worlds)
+- Orange color restricted to World 5+ (no longer appears in early worlds)
 - Goal completion shown as green checkmark next to struck-through text
 - GoalPanel left-justified for natural reading
 - Theme picker uses 3x2 grid layout for mobile readability
@@ -46,7 +46,7 @@ All notable changes to Square Garden are documented in this file.
 
 ### Features
 - 90 handcrafted levels across 10 beautifully themed worlds
-- 5 tile colors: Red, Blue, Yellow, Green, and Orange (introduced in World 4)
+- 5 tile colors: Red, Blue, Yellow, Green, and Orange (introduced in World 5)
 - 3 goal types: Line, Square, Shape (L/T/Cross)
 - 3 skill levels: Casual (more moves, start World 1), Standard (balanced, start World 2), Pro (fewer moves, start World 3)
 - Skill-based starting worlds — experienced players skip easy content
@@ -68,7 +68,8 @@ All notable changes to Square Garden are documented in this file.
 - World 1: Progressive difficulty — levels ramp from single goals to multi-goal challenges with increasing line lengths
 - World 2: Larger 6x6 boards with shapes, squares, and 3-4 goals per level
 - World 3: Complex 7x7 boards with 3-4 goals including crosses
-- World 4: Orange color debut, frozen tiles, voids, L/T/Cross shapes
+- World 4: Frozen tiles, voids, L/T/Cross shapes
+- World 5: Orange color debut, void cells create irregular boards
 - Worlds 5-10: Increasing complexity with combined mechanics
 
 ### UI/UX

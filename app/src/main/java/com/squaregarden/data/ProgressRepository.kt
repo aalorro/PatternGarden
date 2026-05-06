@@ -24,6 +24,7 @@ class ProgressRepository(private val context: Context) {
         private val LIFE_LOST_DIFFICULTY_KEY = intPreferencesKey("life_lost_difficulty")
         private val LAST_WON_LEVEL_KEY = intPreferencesKey("last_won_level")
         private val STARS_MIGRATED_KEY = booleanPreferencesKey("stars_migrated")
+        private val SHUFFLE_TOKENS_KEY = intPreferencesKey("shuffle_tokens")
     }
 
     /** One-time migration: seed TOTAL_STARS_KEY from sum of per-level bests. */
@@ -148,6 +149,28 @@ class ProgressRepository(private val context: Context) {
             }
         }
         return result
+    }
+
+    val shuffleTokensFlow: Flow<Int> = context.dataStore.data.map { prefs ->
+        prefs[SHUFFLE_TOKENS_KEY] ?: 0
+    }
+
+    suspend fun addShuffleToken() {
+        context.dataStore.edit { prefs ->
+            prefs[SHUFFLE_TOKENS_KEY] = (prefs[SHUFFLE_TOKENS_KEY] ?: 0) + 1
+        }
+    }
+
+    suspend fun useShuffleToken(): Boolean {
+        var success = false
+        context.dataStore.edit { prefs ->
+            val current = prefs[SHUFFLE_TOKENS_KEY] ?: 0
+            if (current > 0) {
+                prefs[SHUFFLE_TOKENS_KEY] = current - 1
+                success = true
+            }
+        }
+        return success
     }
 
     suspend fun checkAndRestoreLives() {
