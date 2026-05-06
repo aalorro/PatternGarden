@@ -334,15 +334,12 @@ class GameViewModel(
 
     // ── Level lifecycle ──
 
-    private fun computeGameDifficulty(solutionMoves: Int): GameDifficulty {
+    private fun computeGameDifficulty(): GameDifficulty {
         return GameDifficulty.calculate(
-            solutionMoves = solutionMoves,
             maxMoves = adjustedMaxMoves,
             goals = level.goals,
             frozenCount = level.frozenCells.size,
-            voidCount = level.voidCells.size,
-            boardArea = level.boardWidth * level.boardHeight,
-            colorCount = levelColors().size
+            voidCount = level.voidCells.size
         )
     }
 
@@ -365,7 +362,7 @@ class GameViewModel(
             _state.value = GameState(
                 level = adjustedLevel, board = board,
                 movesRemaining = adjustedMaxMoves, difficulty = difficulty,
-                gameDifficulty = computeGameDifficulty(adjustedMaxMoves),
+                gameDifficulty = computeGameDifficulty(),
                 initialBoard = board,
                 phase = GamePhase.TUTORIAL_PAUSE
             )
@@ -373,12 +370,11 @@ class GameViewModel(
         } else {
             val (board, solution) = generateBoardWithSolution(adjustedMaxMoves)
             precomputedSolution = solution
-            val solutionMoves = solution?.size ?: adjustedMaxMoves
             val adjustedLevel = level.copy(maxMoves = adjustedMaxMoves)
             _state.value = GameState(
                 level = adjustedLevel, board = board,
                 movesRemaining = adjustedMaxMoves, difficulty = difficulty,
-                gameDifficulty = computeGameDifficulty(solutionMoves),
+                gameDifficulty = computeGameDifficulty(),
                 initialBoard = board, hasSolution = solution != null,
                 phase = GamePhase.PLAYING
             )
@@ -420,7 +416,6 @@ class GameViewModel(
         }
 
         precomputedSolution = solution
-        val solutionMoves = solution?.size ?: adjustedMaxMoves
         val moves = when (difficulty) {
             Difficulty.EASY -> adjustedMaxMoves
             Difficulty.MEDIUM -> max(1, adjustedMaxMoves - 2)
@@ -431,7 +426,7 @@ class GameViewModel(
         _state.value = GameState(
             level = adjustedLevel, board = board,
             movesRemaining = moves, difficulty = difficulty,
-            gameDifficulty = computeGameDifficulty(solutionMoves),
+            gameDifficulty = computeGameDifficulty(),
             initialBoard = board, hasSolution = solution != null,
             phase = if (hasTutorial) GamePhase.TUTORIAL_PAUSE else GamePhase.PLAYING
         )

@@ -31,47 +31,43 @@ enum class GameDifficulty(val label: String, val starMultiplier: Float) {
 
     companion object {
         fun calculate(
-            solutionMoves: Int,
             maxMoves: Int,
             goals: List<Goal>,
             frozenCount: Int,
-            voidCount: Int,
-            boardArea: Int,
-            colorCount: Int
+            voidCount: Int
         ): GameDifficulty {
-            val tightness = if (maxMoves > 0) solutionMoves.toFloat() / maxMoves else 0f
+            var points = 0f
 
-            val goalComplexity = goals.sumOf { goal: Goal ->
-                val w: Int = when (goal) {
-                    is Goal.Line -> 1
-                    is Goal.Square -> 2
+            // Move pressure: fewer moves per goal = harder
+            val movesPerGoal = if (goals.isNotEmpty()) maxMoves.toFloat() / goals.size else maxMoves.toFloat()
+            points += when {
+                movesPerGoal >= 5f -> 0f
+                movesPerGoal >= 4f -> 1f
+                movesPerGoal >= 3f -> 2f
+                movesPerGoal >= 2f -> 3f
+                else -> 4f
+            }
+
+            // Goal type complexity
+            for (goal in goals) {
+                points += when (goal) {
+                    is Goal.Line -> 0f
+                    is Goal.Square -> 0.5f
                     is Goal.Shape -> when (goal.shapeType) {
-                        ShapeType.L_SHAPE, ShapeType.T_SHAPE -> 3
-                        ShapeType.CROSS, ShapeType.Z_SHAPE, ShapeType.U_SHAPE -> 4
+                        ShapeType.L_SHAPE, ShapeType.T_SHAPE -> 1f
+                        ShapeType.CROSS, ShapeType.Z_SHAPE, ShapeType.U_SHAPE -> 1.5f
                     }
                 }
-                w
             }
-            val maxComplexity = goals.size * 4
-            val complexityRatio = if (maxComplexity > 0) goalComplexity.toFloat() / maxComplexity else 0f
 
-            val goalCountRatio = (goals.size.toFloat() / 4f).coerceAtMost(1f)
-
-            val constraintRatio = if (boardArea > 0) (frozenCount + voidCount).toFloat() / boardArea else 0f
-
-            val colorRatio = colorCount.toFloat() / 5f
-
-            val score = tightness * 0.4f +
-                    complexityRatio * 0.25f +
-                    goalCountRatio * 0.15f +
-                    constraintRatio * 0.1f +
-                    colorRatio * 0.1f
+            // Board constraints
+            points += frozenCount * 0.3f + voidCount * 0.2f
 
             return when {
-                score < 0.25f -> EASY
-                score < 0.40f -> MEDIUM
-                score < 0.55f -> HARD
-                score < 0.70f -> VERY_HARD
+                points < 2f -> EASY
+                points < 3.5f -> MEDIUM
+                points < 5.5f -> HARD
+                points < 10f -> VERY_HARD
                 else -> EXTREMELY_HARD
             }
         }
