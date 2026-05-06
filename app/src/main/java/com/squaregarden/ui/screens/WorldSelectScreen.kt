@@ -37,7 +37,7 @@ data class WorldInfo(
     val id: Int,
     val name: String,
     val subtitle: String,
-    val starsToUnlock: Int,
+    val baseStarsToUnlock: Int,
     val color: Color
 )
 
@@ -117,9 +117,11 @@ fun WorldSelectScreen(navController: NavHostController) {
             verticalArrangement = Arrangement.spacedBy(14.dp)
         ) {
             val startingWorld = difficulty?.startingWorld ?: 1
+            val skillMultiplier = difficulty?.starMultiplier ?: 1
             worlds.forEach { world ->
+                val starsToUnlock = world.baseStarsToUnlock * skillMultiplier
                 val belowSkill = world.id < startingWorld
-                val unlocked = !belowSkill && (totalStars >= world.starsToUnlock || world.id <= startingWorld)
+                val unlocked = !belowSkill && (totalStars >= starsToUnlock || world.id <= startingWorld)
                 val accessible = unlocked
 
                 Card(
@@ -218,7 +220,7 @@ fun WorldSelectScreen(navController: NavHostController) {
                                         color = Color.Black.copy(alpha = 0.4f)
                                     ) {
                                         Text(
-                                            text = "\u2605 ${world.starsToUnlock} needed",
+                                            text = "\u2605 $starsToUnlock needed",
                                             fontSize = 11.sp,
                                             fontWeight = FontWeight.Bold,
                                             color = Color(0xFFFFE082),
