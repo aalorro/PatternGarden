@@ -105,11 +105,11 @@ enum class GameDifficulty(val label: String, val starMultiplier: Float) {
 
             // Skill-relative thresholds: what's Easy for Pro is harder for Casual
             return when (skill) {
-                Difficulty.EASY -> when {   // Casual — generous thresholds
-                    points < 4f -> EASY
-                    points < 7f -> MEDIUM
-                    points < 10f -> HARD
-                    points < 15f -> VERY_HARD
+                Difficulty.EASY -> when {   // Casual — strict (less skilled, things feel harder)
+                    points < 2f -> EASY
+                    points < 4.5f -> MEDIUM
+                    points < 7f -> HARD
+                    points < 11f -> VERY_HARD
                     else -> EXTREMELY_HARD
                 }
                 Difficulty.MEDIUM -> when { // Standard — baseline
@@ -119,11 +119,11 @@ enum class GameDifficulty(val label: String, val starMultiplier: Float) {
                     points < 14f -> VERY_HARD
                     else -> EXTREMELY_HARD
                 }
-                Difficulty.HARD -> when {   // Pro — strict thresholds
-                    points < 2f -> EASY
-                    points < 4.5f -> MEDIUM
-                    points < 7f -> HARD
-                    points < 11f -> VERY_HARD
+                Difficulty.HARD -> when {   // Pro — generous (more skilled, things feel easier)
+                    points < 4f -> EASY
+                    points < 7f -> MEDIUM
+                    points < 10f -> HARD
+                    points < 15f -> VERY_HARD
                     else -> EXTREMELY_HARD
                 }
             }
