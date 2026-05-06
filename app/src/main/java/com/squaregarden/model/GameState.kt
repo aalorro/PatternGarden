@@ -42,10 +42,10 @@ enum class GameDifficulty(val label: String, val starMultiplier: Float) {
             val movesPerGoal = if (goals.isNotEmpty()) maxMoves.toFloat() / goals.size else maxMoves.toFloat()
             points += when {
                 movesPerGoal >= 5f -> 0f
-                movesPerGoal >= 4f -> 1f
-                movesPerGoal >= 3f -> 2f
-                movesPerGoal >= 2f -> 3f
-                else -> 4f
+                movesPerGoal >= 4f -> 1.5f
+                movesPerGoal >= 3f -> 3f
+                movesPerGoal >= 2f -> 5f
+                else -> 7f
             }
 
             // Goal type complexity
