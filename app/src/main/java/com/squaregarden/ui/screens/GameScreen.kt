@@ -307,8 +307,24 @@ private fun WinOverlay(stars: Int, levelName: String, unlockedWorldName: String?
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
+                val headline = remember {
+                    listOf(
+                        "Congratulations!",
+                        "You did it!",
+                        "Brilliant!",
+                        "Amazing!",
+                        "Well played!",
+                        "Superb!",
+                        "Fantastic!",
+                        "Wonderful!",
+                        "Bravo!",
+                        "Nicely done!",
+                        "Spectacular!",
+                        "Outstanding!"
+                    ).random()
+                }
                 Text(
-                    text = "Congratulations!",
+                    text = headline,
                     fontSize = 26.sp,
                     fontWeight = FontWeight.Bold,
                     color = DarkSage
@@ -331,12 +347,36 @@ private fun WinOverlay(stars: Int, levelName: String, unlockedWorldName: String?
 
                 Spacer(modifier = Modifier.height(4.dp))
 
+                val subtitle = remember(stars) {
+                    when (stars) {
+                        3 -> listOf(
+                            "Perfect! Flawless victory!",
+                            "Three stars! You're a natural!",
+                            "Maximum stars! Incredible!",
+                            "Perfection! Not a move wasted!",
+                            "Masterful! A perfect score!",
+                            "Stunning! All three stars!"
+                        ).random()
+                        2 -> listOf(
+                            "Great job! Almost perfect!",
+                            "So close to perfection!",
+                            "Two stars! Impressive work!",
+                            "Nearly flawless! Great effort!",
+                            "Solid win! One more star awaits!",
+                            "Strong finish! Can you get three?"
+                        ).random()
+                        else -> listOf(
+                            "Well done! Try again for more stars!",
+                            "A win is a win! Keep going!",
+                            "Good start! Room to grow!",
+                            "You cleared it! Aim higher next time!",
+                            "Nice work! More stars await!",
+                            "Victory! Replay for a better score!"
+                        ).random()
+                    }
+                }
                 Text(
-                    text = when (stars) {
-                        3 -> "Perfect! Flawless victory!"
-                        2 -> "Great job! Almost perfect!"
-                        else -> "Well done! Try again for more stars!"
-                    },
+                    text = subtitle,
                     fontSize = 14.sp,
                     color = WarmBrown,
                     textAlign = TextAlign.Center
