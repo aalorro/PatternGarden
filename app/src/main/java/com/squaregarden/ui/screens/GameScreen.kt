@@ -105,11 +105,11 @@ fun GameScreen(
                 .padding(horizontal = 12.dp, vertical = 8.dp)
         )
 
-        // Bottom bar
+        // Bottom bar — row 1: Hint + Restart
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 16.dp, vertical = 10.dp),
+                .padding(horizontal = 16.dp, vertical = 4.dp),
             horizontalArrangement = Arrangement.spacedBy(10.dp)
         ) {
             Button(
@@ -124,20 +124,50 @@ fun GameScreen(
             }
 
             OutlinedButton(
-                onClick = { viewModel.shuffleBoard() },
-                enabled = state.shuffleTokens > 0 && state.phase == GamePhase.PLAYING,
-                modifier = Modifier.weight(1f).height(48.dp),
-                shape = RoundedCornerShape(50)
-            ) {
-                Text("\uD83D\uDD00 \u00D7${state.shuffleTokens}", fontWeight = FontWeight.Bold)
-            }
-
-            OutlinedButton(
                 onClick = { viewModel.resetLevel() },
                 modifier = Modifier.weight(1f).height(48.dp),
                 shape = RoundedCornerShape(50)
             ) {
                 Text("\u21BB Restart", fontWeight = FontWeight.Bold)
+            }
+        }
+
+        // Bottom bar — row 2: Shuffle + Passthrough
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp, vertical = 4.dp),
+            horizontalArrangement = Arrangement.spacedBy(10.dp)
+        ) {
+            OutlinedButton(
+                onClick = { viewModel.shuffleBoard() },
+                enabled = state.shuffleTokens > 0 && state.phase == GamePhase.PLAYING,
+                modifier = Modifier.weight(1f).height(42.dp),
+                shape = RoundedCornerShape(50)
+            ) {
+                Text("\uD83D\uDD00 \u00D7${state.shuffleTokens}", fontWeight = FontWeight.Bold, fontSize = 13.sp)
+            }
+
+            if (state.passthroughActive) {
+                Button(
+                    onClick = {},
+                    modifier = Modifier.weight(1f).height(42.dp),
+                    shape = RoundedCornerShape(50),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = Sage
+                    )
+                ) {
+                    Text("\uD83D\uDEE1\uFE0F Active", fontWeight = FontWeight.Bold, fontSize = 13.sp, color = SoftWhite)
+                }
+            } else {
+                OutlinedButton(
+                    onClick = { viewModel.activatePassthrough() },
+                    enabled = state.passthroughTokens > 0 && state.phase == GamePhase.PLAYING,
+                    modifier = Modifier.weight(1f).height(42.dp),
+                    shape = RoundedCornerShape(50)
+                ) {
+                    Text("\uD83D\uDEE1\uFE0F \u00D7${state.passthroughTokens}", fontWeight = FontWeight.Bold, fontSize = 13.sp)
+                }
             }
         }
     }
@@ -155,6 +185,7 @@ fun GameScreen(
             levelName = state.level.name,
             unlockedWorldName = state.unlockedWorldName,
             shuffleTokenAwarded = state.shuffleTokenAwarded,
+            passthroughTokenAwarded = state.passthroughTokenAwarded,
             onStarLanded = { viewModel.playStarCollect() },
             onAllStarsLanded = { viewModel.commitWinResult() },
             onNext = if (state.level.id < 90) {
@@ -280,7 +311,7 @@ fun GameScreen(
 }
 
 @Composable
-private fun WinOverlay(stars: Int, levelName: String, unlockedWorldName: String? = null, shuffleTokenAwarded: Boolean = false, onStarLanded: () -> Unit = {}, onAllStarsLanded: () -> Unit = {}, onNext: (() -> Unit)?, onMenu: () -> Unit) {
+private fun WinOverlay(stars: Int, levelName: String, unlockedWorldName: String? = null, shuffleTokenAwarded: Boolean = false, passthroughTokenAwarded: Boolean = false, onStarLanded: () -> Unit = {}, onAllStarsLanded: () -> Unit = {}, onNext: (() -> Unit)?, onMenu: () -> Unit) {
     // Pulsing scale animation for the star display
     val infiniteTransition = rememberInfiniteTransition(label = "starPulse")
     val starScale by infiniteTransition.animateFloat(
@@ -452,6 +483,44 @@ private fun WinOverlay(stars: Int, levelName: String, unlockedWorldName: String?
                             )
                             Text(
                                 text = "+1 \uD83D\uDD00",
+                                fontSize = 24.sp,
+                                fontWeight = FontWeight.ExtraBold,
+                                color = DarkSage
+                            )
+                        }
+                    }
+                }
+
+                // Passthrough token reward
+                if (passthroughTokenAwarded) {
+                    val ptScale = remember { Animatable(0f) }
+                    LaunchedEffect(Unit) {
+                        delay(if (shuffleTokenAwarded) 1600L else 800L)
+                        ptScale.animateTo(
+                            1f,
+                            animationSpec = spring(dampingRatio = 0.5f, stiffness = 300f)
+                        )
+                    }
+                    Spacer(modifier = Modifier.height(4.dp))
+                    Card(
+                        shape = RoundedCornerShape(16.dp),
+                        colors = CardDefaults.cardColors(
+                            containerColor = Sage.copy(alpha = 0.15f)
+                        ),
+                        modifier = Modifier.scale(ptScale.value)
+                    ) {
+                        Column(
+                            modifier = Modifier.padding(horizontal = 20.dp, vertical = 10.dp),
+                            horizontalAlignment = Alignment.CenterHorizontally
+                        ) {
+                            Text(
+                                text = "Passthrough Token Earned!",
+                                fontSize = 16.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = Sage
+                            )
+                            Text(
+                                text = "+1 \uD83D\uDEE1\uFE0F",
                                 fontSize = 24.sp,
                                 fontWeight = FontWeight.ExtraBold,
                                 color = DarkSage

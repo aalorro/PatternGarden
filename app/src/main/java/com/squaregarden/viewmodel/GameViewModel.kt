@@ -37,6 +37,7 @@ class GameViewModel(
     private var pendingWinStars: Int = 0
     private var precomputedSolution: List<Pair<CellPos, CellPos>>? = null
     private var shuffleTokens: Int = 0
+    private var passthroughTokens: Int = 0
     private val progressRepo = ProgressRepository(context)
     private val profileRepo = ProfileRepository(context)
     private val audioManager = AudioManager(context)
@@ -57,6 +58,7 @@ class GameViewModel(
             difficulty = Difficulty.fromId(profile.difficulty)
 
             shuffleTokens = progressRepo.shuffleTokensFlow.first()
+            passthroughTokens = progressRepo.passthroughTokensFlow.first()
 
             val levels = LevelLoader.loadAllLevels(context)
             level = levels.first { it.id == levelId }
@@ -369,7 +371,7 @@ class GameViewModel(
                 movesRemaining = adjustedMaxMoves, difficulty = difficulty,
                 gameDifficulty = computeGameDifficulty(board),
                 initialBoard = board,
-                shuffleTokens = shuffleTokens,
+                shuffleTokens = shuffleTokens, passthroughTokens = passthroughTokens,
                 phase = GamePhase.TUTORIAL_PAUSE
             )
             computeSolutionAsync(board)
@@ -382,7 +384,7 @@ class GameViewModel(
                 movesRemaining = adjustedMaxMoves, difficulty = difficulty,
                 gameDifficulty = computeGameDifficulty(board),
                 initialBoard = board, hasSolution = solution != null,
-                shuffleTokens = shuffleTokens,
+                shuffleTokens = shuffleTokens, passthroughTokens = passthroughTokens,
                 phase = GamePhase.PLAYING
             )
             // If reverse-construction failed, try solver in background
@@ -480,7 +482,9 @@ class GameViewModel(
         val borderedCells = allGoalCells()
         val crossesBorder = from in borderedCells || to in borderedCells
 
-        if (crossesBorder && difficulty == Difficulty.HARD) return
+        val usePassthrough = crossesBorder && current.passthroughActive
+
+        if (crossesBorder && difficulty == Difficulty.HARD && !usePassthrough) return
 
         hasMovedSinceReset = true
         _state.value = current.copy(
@@ -498,13 +502,18 @@ class GameViewModel(
                 delay(stepDelay)
             }
 
+            // Deactivate passthrough after use
+            if (usePassthrough) {
+                _state.value = _state.value.copy(passthroughActive = false)
+            }
+
             val newBoard = BoardEngine.executeSwap(current.board, from, to)
             val newMoves = current.movesRemaining - 1
 
             var baseGoalIds = current.completedGoalIds
             var baseGoalCells = current.completedGoalCells
             var invalidatedGoals = emptySet<String>()
-            if (crossesBorder && (difficulty == Difficulty.EASY || difficulty == Difficulty.MEDIUM)) {
+            if (crossesBorder && !usePassthrough && (difficulty == Difficulty.EASY || difficulty == Difficulty.MEDIUM)) {
                 invalidatedGoals = current.completedGoalCells.filter { (_, cells) ->
                     from in cells || to in cells
                 }.keys
@@ -600,12 +609,26 @@ class GameViewModel(
             audioManager.playShuffle()
             _state.value = current.copy(
                 board = shuffled,
-                shuffleTokens = shuffleTokens,
+                shuffleTokens = shuffleTokens, passthroughTokens = passthroughTokens,
                 gameDifficulty = computeGameDifficulty(shuffled),
                 hintCells = emptySet(),
                 selectedCell = null
             )
             computeSolutionAsync(shuffled)
+        }
+    }
+
+    fun activatePassthrough() {
+        val current = _state.value
+        if (current.phase != GamePhase.PLAYING || current.passthroughTokens <= 0 || current.passthroughActive) return
+        viewModelScope.launch {
+            val success = progressRepo.usePassthroughToken()
+            if (!success) return@launch
+            passthroughTokens--
+            _state.value = current.copy(
+                passthroughTokens = passthroughTokens,
+                passthroughActive = true
+            )
         }
     }
 
@@ -642,10 +665,16 @@ class GameViewModel(
             progressRepo.saveLevelResult(pendingWinLevelId, pendingWinStars)
             val result = progressRepo.recordWin(difficulty.ordinal, pendingWinLevelId)
             profileRepo.incrementPlayerLevel()
+            val playerLevel = profileRepo.loadProfile().playerLevel
             if (_state.value.unlockedWorldName != null) {
                 progressRepo.addShuffleToken()
                 shuffleTokens++
                 _state.value = _state.value.copy(shuffleTokenAwarded = true)
+            }
+            if (playerLevel > 0 && playerLevel % 15 == 0) {
+                progressRepo.addPassthroughToken()
+                passthroughTokens++
+                _state.value = _state.value.copy(passthroughTokenAwarded = true)
             }
             if (result == -1) {
                 audioManager.playLifeRestored()

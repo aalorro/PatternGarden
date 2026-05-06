@@ -21,7 +21,10 @@ data class GameState(
     val hasSolution: Boolean = false,
     val unlockedWorldName: String? = null,
     val shuffleTokens: Int = 0,
-    val shuffleTokenAwarded: Boolean = false
+    val shuffleTokenAwarded: Boolean = false,
+    val passthroughTokens: Int = 0,
+    val passthroughTokenAwarded: Boolean = false,
+    val passthroughActive: Boolean = false
 )
 
 enum class GameDifficulty(val label: String, val starMultiplier: Float) {

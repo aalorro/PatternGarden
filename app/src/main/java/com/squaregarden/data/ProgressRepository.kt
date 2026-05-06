@@ -25,6 +25,7 @@ class ProgressRepository(private val context: Context) {
         private val LAST_WON_LEVEL_KEY = intPreferencesKey("last_won_level")
         private val STARS_MIGRATED_KEY = booleanPreferencesKey("stars_migrated")
         private val SHUFFLE_TOKENS_KEY = intPreferencesKey("shuffle_tokens")
+        private val PASSTHROUGH_TOKENS_KEY = intPreferencesKey("passthrough_tokens")
     }
 
     /** One-time migration: seed TOTAL_STARS_KEY from sum of per-level bests. */
@@ -167,6 +168,28 @@ class ProgressRepository(private val context: Context) {
             val current = prefs[SHUFFLE_TOKENS_KEY] ?: 0
             if (current > 0) {
                 prefs[SHUFFLE_TOKENS_KEY] = current - 1
+                success = true
+            }
+        }
+        return success
+    }
+
+    val passthroughTokensFlow: Flow<Int> = context.dataStore.data.map { prefs ->
+        prefs[PASSTHROUGH_TOKENS_KEY] ?: 0
+    }
+
+    suspend fun addPassthroughToken() {
+        context.dataStore.edit { prefs ->
+            prefs[PASSTHROUGH_TOKENS_KEY] = (prefs[PASSTHROUGH_TOKENS_KEY] ?: 0) + 1
+        }
+    }
+
+    suspend fun usePassthroughToken(): Boolean {
+        var success = false
+        context.dataStore.edit { prefs ->
+            val current = prefs[PASSTHROUGH_TOKENS_KEY] ?: 0
+            if (current > 0) {
+                prefs[PASSTHROUGH_TOKENS_KEY] = current - 1
                 success = true
             }
         }
