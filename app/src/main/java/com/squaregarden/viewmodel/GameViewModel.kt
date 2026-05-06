@@ -610,18 +610,22 @@ class GameViewModel(
     }
 
     private fun detectNewWorldUnlock(oldStars: Int, newStars: Int): String? {
+        val startingWorld = difficulty.startingWorld
         val worldThresholds = listOf(
-            9 to "Blooming Meadow",
-            25 to "Ancient Grove",
-            50 to "Crystal Cavern",
-            85 to "Shattered Isles",
-            130 to "Void Fortress",
-            185 to "Molten Core",
-            250 to "Starfall Summit",
-            325 to "Abyssal Depths",
-            410 to "Prism Citadel"
+            2 to 9 to "Blooming Meadow",
+            3 to 25 to "Ancient Grove",
+            4 to 50 to "Crystal Cavern",
+            5 to 85 to "Shattered Isles",
+            6 to 130 to "Void Fortress",
+            7 to 185 to "Molten Core",
+            8 to 250 to "Starfall Summit",
+            9 to 325 to "Abyssal Depths",
+            10 to 410 to "Prism Citadel"
         )
-        for ((threshold, name) in worldThresholds) {
+        for ((worldAndThreshold, name) in worldThresholds) {
+            val (worldId, threshold) = worldAndThreshold
+            // Skip worlds already accessible via starting difficulty
+            if (worldId <= startingWorld) continue
             if (oldStars < threshold && newStars >= threshold) return name
         }
         return null

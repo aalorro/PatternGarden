@@ -381,8 +381,8 @@ fun ProfileScreen(navController: NavHostController, isFirstTime: Boolean = false
                         )
                     )
                     if (isFirstTime) {
-                        navController.navigate(Screen.Home.route) {
-                            popUpTo(Screen.Profile.route) { inclusive = true }
+                        navController.navigate(Screen.ShapesExplainer.route) {
+                            popUpTo(Screen.ProfileSetup.route) { inclusive = true }
                         }
                     } else {
                         navController.popBackStack()

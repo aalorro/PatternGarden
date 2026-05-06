@@ -17,15 +17,18 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import com.squaregarden.data.ProfileRepository
+import com.squaregarden.data.SettingsRepository
 import com.squaregarden.ui.components.LogoMark
 import com.squaregarden.ui.navigation.Screen
 import com.squaregarden.ui.theme.DisplayFontFamily
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.first
 
 @Composable
 fun SplashScreen(navController: NavHostController) {
     val context = LocalContext.current
     val profileRepo = remember { ProfileRepository(context) }
+    val settingsRepo = remember { SettingsRepository(context) }
     val alpha = remember { Animatable(0f) }
 
     LaunchedEffect(Unit) {
@@ -33,7 +36,11 @@ fun SplashScreen(navController: NavHostController) {
         delay(1200)
 
         val profile = profileRepo.loadProfile()
-        val destination = if (profile.isSetUp) Screen.Home.route else Screen.ProfileSetup.route
+        val destination = when {
+            !profile.isSetUp -> Screen.ProfileSetup.route
+            !settingsRepo.shapesExplainerDismissed.first() -> Screen.ShapesExplainer.route
+            else -> Screen.Home.route
+        }
 
         navController.navigate(destination) {
             popUpTo(Screen.Splash.route) { inclusive = true }

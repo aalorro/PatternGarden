@@ -56,5 +56,8 @@ fun SquareGardenNavGraph(navController: NavHostController) {
         composable(Screen.Privacy.route) {
             PrivacyScreen(navController = navController)
         }
+        composable(Screen.ShapesExplainer.route) {
+            ShapesExplainerScreen(navController = navController)
+        }
     }
 }
