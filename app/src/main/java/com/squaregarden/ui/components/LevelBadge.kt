@@ -34,12 +34,14 @@ fun PlayerBadge(
 ) {
     var showMenu by remember { mutableStateOf(false) }
 
-    // Animated star counter: counts up to actual totalStars at 100ms per increment
+    // Animated star counter: counts up over max 5 seconds then snaps to total
     var displayedStars by remember { mutableIntStateOf(totalStars) }
     LaunchedEffect(totalStars) {
         if (totalStars > displayedStars) {
+            val diff = totalStars - displayedStars
+            val stepDelay = (5000L / diff).coerceIn(50, 100)
             while (displayedStars < totalStars) {
-                delay(100)
+                delay(stepDelay)
                 displayedStars++
             }
         } else {
