@@ -2,6 +2,31 @@
 
 All notable changes to Square Garden are documented in this file.
 
+## [1.1.0] - 2026-05-06 (Build 3)
+
+### New Features
+- Real-time game difficulty rating (Easy / Medium / Hard / Very Hard / Extremely Hard) based on board randomization, move pressure, goal complexity, and board constraints
+- Star multiplier per game difficulty: Easy 0.75x, Medium 1x, Hard 1.25x, Very Hard 1.5x, Extremely Hard 2x
+- Shapes explainer animation screen after first profile creation — demos all 7 goal patterns with animated tile pop-in
+- Life restored celebration splash with confetti and fanfare music
+- "Don't show again" checkbox for shapes explainer
+
+### Gameplay Changes
+- Skill level (Casual / Standard / Pro) is now locked after profile creation — can only change by resetting progress
+- Worlds below starting skill level are inaccessible (Pro can't access Worlds 1-2, Standard can't access World 1)
+- World unlock thresholds scale by skill: Casual 1x, Standard 2x, Pro 3x
+- Life restoration requires 3 consecutive wins within 5 levels of highest completed level
+- Removed in-game "wins to restore life" notification bubble — rule explained in How to Play
+
+### UI/UX
+- Difficulty rating displayed with color coding in GoalPanel (green/blue/orange/red/purple)
+- Skill picker shows as read-only when editing profile, with note to reset in Settings
+- Reset progress now navigates to profile setup to re-choose skill level
+- Renamed "Difficulty" setting to "Skill" (Casual / Standard / Pro)
+- Star count-up animation capped at 5 seconds max
+- Removed "Menu" text from game page back arrow
+- Reduced level name font size for mobile screens
+
 ## [1.0.2] - 2026-05-05 (Build 2)
 
 ### Improvements

@@ -340,7 +340,8 @@ class GameViewModel(
             maxMoves = adjustedMaxMoves,
             goals = level.goals,
             frozenCount = level.frozenCells.size,
-            voidCount = level.voidCells.size
+            voidCount = level.voidCells.size,
+            skill = difficulty
         )
     }
 

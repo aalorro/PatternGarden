@@ -28,7 +28,7 @@ Choose your skill level:
 - Standard — Balanced challenge, start at World 2
 - Pro — Fewer moves, start at World 3, for puzzle veterans
 
-No grinding through easy content if you're experienced — jump right in at your level. Change skill anytime.
+No grinding through easy content if you're experienced — jump right in at your level.
 
 FEATURES
 - 90 handcrafted levels with progressive difficulty
@@ -42,18 +42,16 @@ FEATURES
 
 ---
 
-## Release Notes — Version 1.0.2 (What's New)
+## Release Notes — Version 1.1.0 (What's New)
 
-Welcome to Square Garden! 🌱
+What's new in 1.0.3:
 
-Slide tiles, match colors, and complete puzzles across 10 beautiful worlds.
-
-- 90 handcrafted levels with progressive difficulty
-- 5 tile colors and 3 goal types (lines, squares, shapes)
-- 3 skill levels — Casual, Standard, Pro — each with a different starting world
-- Frozen tiles and void cells add strategic depth
-- 6 color themes to personalize your experience
-- Hint system, star ratings, and celebratory animations
-- No ads. No in-app purchases.
+- Real-time difficulty rating — each game is rated Easy to Extremely Hard based on the randomized board
+- Earn more stars on harder games: up to 2x on Extremely Hard
+- Animated shapes explainer teaches all 7 goal patterns after signup
+- Life restored celebration with confetti and music
+- Skill level locked after creation for fairer progression
+- World unlock thresholds scale by skill level
+- UI polish and performance improvements
 
 Happy gardening!

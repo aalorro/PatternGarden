@@ -35,7 +35,8 @@ enum class GameDifficulty(val label: String, val starMultiplier: Float) {
             maxMoves: Int,
             goals: List<Goal>,
             frozenCount: Int,
-            voidCount: Int
+            voidCount: Int,
+            skill: Difficulty = Difficulty.MEDIUM
         ): GameDifficulty {
             var points = 0f
 
@@ -100,12 +101,29 @@ enum class GameDifficulty(val label: String, val starMultiplier: Float) {
             // ── Board constraints (variable) ──
             points += frozenCount * 0.3f + voidCount * 0.2f
 
-            return when {
-                points < 3f -> EASY
-                points < 6f -> MEDIUM
-                points < 9f -> HARD
-                points < 14f -> VERY_HARD
-                else -> EXTREMELY_HARD
+            // Skill-relative thresholds: what's Easy for Pro is harder for Casual
+            return when (skill) {
+                Difficulty.EASY -> when {   // Casual — generous thresholds
+                    points < 4f -> EASY
+                    points < 7f -> MEDIUM
+                    points < 10f -> HARD
+                    points < 15f -> VERY_HARD
+                    else -> EXTREMELY_HARD
+                }
+                Difficulty.MEDIUM -> when { // Standard — baseline
+                    points < 3f -> EASY
+                    points < 6f -> MEDIUM
+                    points < 9f -> HARD
+                    points < 14f -> VERY_HARD
+                    else -> EXTREMELY_HARD
+                }
+                Difficulty.HARD -> when {   // Pro — strict thresholds
+                    points < 2f -> EASY
+                    points < 4.5f -> MEDIUM
+                    points < 7f -> HARD
+                    points < 11f -> VERY_HARD
+                    else -> EXTREMELY_HARD
+                }
             }
         }
     }
