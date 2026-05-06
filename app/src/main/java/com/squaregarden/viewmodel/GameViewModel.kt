@@ -598,8 +598,14 @@ class GameViewModel(
         winResultCommitted = true
         viewModelScope.launch {
             progressRepo.saveLevelResult(pendingWinLevelId, pendingWinStars)
-            progressRepo.recordWin(difficulty.ordinal)
+            val result = progressRepo.recordWin(difficulty.ordinal)
             profileRepo.incrementPlayerLevel()
+            if (result == -1) {
+                audioManager.playLifeRestored()
+                _state.value = _state.value.copy(lifeRestored = true)
+            } else if (result > 0) {
+                _state.value = _state.value.copy(winsToRestoreLife = result)
+            }
         }
     }
 

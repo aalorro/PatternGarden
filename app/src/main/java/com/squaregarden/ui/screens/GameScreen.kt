@@ -64,23 +64,22 @@ fun GameScreen(
                 enabled = canGoBack
             ) {
                 Text(
-                    text = "\u2190 Menu",
+                    text = "\u2190",
                     fontSize = 24.sp,
                     fontWeight = FontWeight.Bold,
                     color = if (canGoBack) MaterialTheme.colorScheme.onBackground
                     else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.3f)
                 )
             }
-            Spacer(modifier = Modifier.weight(1f))
             Text(
                 text = state.level.name,
                 fontFamily = com.squaregarden.ui.theme.DisplayFontFamily,
-                fontSize = 20.sp,
+                fontSize = 16.sp,
                 fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.onBackground
+                color = MaterialTheme.colorScheme.onBackground,
+                maxLines = 1
             )
             Spacer(modifier = Modifier.weight(1f))
-            Spacer(modifier = Modifier.width(60.dp))
         }
 
         // Goals + Moves panel (combined, stacked vertically)
@@ -166,8 +165,78 @@ fun GameScreen(
         )
     }
 
-    // Life restore notification
-    if (state.phase == GamePhase.WON && state.winsToRestoreLife in 1..2) {
+    // Life restored celebration splash
+    if (state.phase == GamePhase.WON && state.lifeRestored) {
+        ConfettiOverlay(stars = 3)
+
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(MaterialTheme.colorScheme.scrim.copy(alpha = 0.4f)),
+            contentAlignment = Alignment.Center
+        ) {
+            Card(
+                shape = RoundedCornerShape(24.dp),
+                colors = CardDefaults.cardColors(
+                    containerColor = SoftWhite
+                )
+            ) {
+                Column(
+                    modifier = Modifier.padding(32.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    Text(
+                        text = "\u2764\uFE0F",
+                        fontSize = 48.sp
+                    )
+                    Text(
+                        text = "Life Restored!",
+                        fontSize = 24.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = DarkSage
+                    )
+                    Text(
+                        text = "Great streak! You earned a life back.",
+                        fontSize = 14.sp,
+                        color = WarmBrown,
+                        textAlign = TextAlign.Center
+                    )
+
+                    Spacer(modifier = Modifier.height(8.dp))
+
+                    Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                        OutlinedButton(
+                            onClick = {
+                                viewModel.commitWinResult()
+                                navController.popBackStack()
+                            },
+                            shape = RoundedCornerShape(20.dp)
+                        ) {
+                            Text("Menu", fontSize = 13.sp)
+                        }
+                        if (state.level.id < 90) {
+                            Button(
+                                onClick = {
+                                    viewModel.commitWinResult()
+                                    val nextId = state.level.id + 1
+                                    navController.navigate(Screen.Game.create(nextId)) {
+                                        popUpTo(Screen.Game.route) { inclusive = true }
+                                    }
+                                },
+                                shape = RoundedCornerShape(20.dp)
+                            ) {
+                                Text("Next Level", fontSize = 13.sp)
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    // Life restore progress notification
+    if (state.phase == GamePhase.WON && !state.lifeRestored && state.winsToRestoreLife in 1..2) {
         var showNotif by remember(state.winsToRestoreLife) { mutableStateOf(true) }
         if (showNotif) {
             LaunchedEffect(state.winsToRestoreLife) {
@@ -416,14 +485,14 @@ private fun LoseDialog(onRetry: () -> Unit, onMenu: () -> Unit, onShowSolution: 
                         shape = RoundedCornerShape(20.dp),
                         modifier = Modifier.weight(1f)
                     ) {
-                        Text("Menu", maxLines = 1)
+                        Text("Menu", maxLines = 1, fontSize = 13.sp)
                     }
                     Button(
                         onClick = onRetry,
                         shape = RoundedCornerShape(20.dp),
                         modifier = Modifier.weight(1f)
                     ) {
-                        Text("Try Again", maxLines = 1)
+                        Text("Try Again", maxLines = 1, fontSize = 13.sp)
                     }
                 }
             }

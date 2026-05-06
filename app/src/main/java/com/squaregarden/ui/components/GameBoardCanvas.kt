@@ -231,12 +231,20 @@ fun GameBoardCanvas(
                 // Hint highlight
                 if (pos in hintCells) {
                     val tileInset = cs * 0.08f
+                    // Filled yellow glow
                     drawRoundRect(
-                        color = Color(0xFFFFEB3B).copy(alpha = 0.6f),
+                        color = Color(0xFFFFEB3B).copy(alpha = 0.35f),
+                        topLeft = Offset(c * cs + tileInset, r * cs + tileInset),
+                        size = Size(cs - tileInset * 2, cs - tileInset * 2),
+                        cornerRadius = CornerRadius(cornerR * 0.9f)
+                    )
+                    // Bold yellow border
+                    drawRoundRect(
+                        color = Color(0xFFFFD600),
                         topLeft = Offset(c * cs + tileInset, r * cs + tileInset),
                         size = Size(cs - tileInset * 2, cs - tileInset * 2),
                         cornerRadius = CornerRadius(cornerR * 0.9f),
-                        style = Stroke(width = 4.dp.toPx())
+                        style = Stroke(width = 6.dp.toPx())
                     )
                 }
 

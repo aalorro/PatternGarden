@@ -119,7 +119,8 @@ class ProgressRepository(private val context: Context) {
 
     /**
      * @param difficultyOrdinal ordinal of the Difficulty enum (EASY=0, MEDIUM=1, HARD=2)
-     * @return wins still needed to restore a life, or 0 if lives are full / life was just restored
+     * @return wins still needed to restore a life: positive = needs more wins,
+     *         0 = lives already full, -1 = life was just restored
      */
     suspend fun recordWin(difficultyOrdinal: Int): Int {
         var winsNeeded = 0
@@ -134,9 +135,11 @@ class ProgressRepository(private val context: Context) {
             val streak = (prefs[WIN_STREAK_KEY] ?: 0) + 1
             prefs[WIN_STREAK_KEY] = streak
             if (streak >= 3) {
-                if (currentLives < 3) prefs[LIVES_KEY] = currentLives + 1
+                if (currentLives < 3) {
+                    prefs[LIVES_KEY] = currentLives + 1
+                    winsNeeded = -1 // life restored
+                }
                 prefs[WIN_STREAK_KEY] = 0
-                winsNeeded = 0
             } else if (currentLives < 3) {
                 winsNeeded = 3 - streak
             }

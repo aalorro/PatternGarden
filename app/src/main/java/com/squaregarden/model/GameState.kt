@@ -14,6 +14,7 @@ data class GameState(
     val starsAwarded: Int = 0,
     val difficulty: Difficulty = Difficulty.MEDIUM,
     val winsToRestoreLife: Int = 0,
+    val lifeRestored: Boolean = false,
     val initialBoard: Board? = null,
     val solutionSteps: List<Pair<CellPos, CellPos>>? = null,
     val hasSolution: Boolean = false,

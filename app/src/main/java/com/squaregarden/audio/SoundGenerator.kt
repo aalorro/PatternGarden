@@ -114,6 +114,31 @@ object SoundGenerator {
         env * 0.5f * (sine(freq, i) * 0.5f + sine(freq * 2f, i) * 0.3f + sine(freq * 3f, i) * 0.2f)
     }
 
+    /** Celebratory fanfare for life restored (~5 seconds) */
+    fun generateLifeRestored(): ShortArray = generatePcm(5000) { i, total ->
+        val env = envelope(i, total, 50, 1500)
+        val progress = i.toFloat() / total
+        // Ascending fanfare in 5 stages
+        val freq = when {
+            progress < 0.12f -> 440f   // A4
+            progress < 0.22f -> 554f   // C#5
+            progress < 0.32f -> 659f   // E5
+            progress < 0.45f -> 880f   // A5
+            progress < 0.60f -> 1108f  // C#6
+            else -> 880f               // settle on A5
+        }
+        val vibrato = 1f + 0.005f * sine(4f, i)
+        val shimmer = if (progress > 0.4f) 0.12f * sine(2640f, i) * (1f - progress) else 0f
+        val sparkle = if (progress > 0.6f) 0.08f * sine(3520f, i) * sin(progress * 12.0).toFloat() else 0f
+        env * 0.55f * (
+            sine(freq * vibrato, i) * 0.35f +
+            sine(freq * 2f, i) * 0.2f +
+            sine(freq * 3f, i) * 0.1f +
+            sine(freq * 0.5f, i) * 0.2f +
+            shimmer + sparkle
+        )
+    }
+
     /** Sad descending tone for losing */
     fun generateLose(): ShortArray = generatePcm(700) { i, total ->
         val env = envelope(i, total, 20, 300)

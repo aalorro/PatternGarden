@@ -20,6 +20,7 @@ class AudioManager(private val context: Context) {
     private val win3Pcm by lazy { SoundGenerator.generateWin3Star() }
     private val losePcm by lazy { SoundGenerator.generateLose() }
     private val starCollectPcm by lazy { SoundGenerator.generateStarCollect() }
+    private val lifeRestoredPcm by lazy { SoundGenerator.generateLifeRestored() }
 
     fun observeSettings(scope: CoroutineScope) {
         this.scope = scope
@@ -48,6 +49,7 @@ class AudioManager(private val context: Context) {
     }
     fun playLose() = play(losePcm, 0.8f)
     fun playStarCollect() = play(starCollectPcm, 0.6f)
+    fun playLifeRestored() = play(lifeRestoredPcm, 1f)
 
     fun release() {
         // No SoundPool to release anymore
