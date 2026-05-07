@@ -664,11 +664,15 @@ class GameViewModel(
             if (newlyCompleted.isNotEmpty()) audioManager.playMatch()
 
             var starsAwarded = 0; var winsNeeded = 0; var unlockedWorld: String? = null
+            var isPerfect = false
             val phase = when {
                 won -> {
                     val baseStars = BoardEngine.calculateStars(newMoves, current.level.starThresholds)
                     val gameDiff = _state.value.gameDifficulty
-                    starsAwarded = (baseStars * difficulty.starMultiplier * gameDiff.starMultiplier).roundToInt()
+                    val movesUsed = adjustedMaxMoves - newMoves
+                    isPerfect = movesUsed <= current.level.goals.size && level.world >= 5
+                    val perfectMultiplier = if (isPerfect) 2f else 1f
+                    starsAwarded = (baseStars * difficulty.starMultiplier * gameDiff.starMultiplier * perfectMultiplier).roundToInt()
                     audioManager.playWin(baseStars)
                     val oldTotal = progressRepo.totalStarsFlow.first()
                     unlockedWorld = detectNewWorldUnlock(oldTotal, oldTotal + starsAwarded)
@@ -691,7 +695,8 @@ class GameViewModel(
                 selectedCell = null, hintCells = emptySet(), swapAnim = null,
                 phase = phase, starsAwarded = starsAwarded, winsToRestoreLife = winsNeeded,
                 unlockedWorldName = unlockedWorld,
-                redoTokens = redoTokens, redoTokenAwarded = redoCaptured
+                redoTokens = redoTokens, redoTokenAwarded = redoCaptured,
+                perfectGame = isPerfect
             )
         }
     }
@@ -765,11 +770,15 @@ class GameViewModel(
             if (newlyCompletedPt.isNotEmpty()) audioManager.playMatch()
 
             var starsAwarded = 0; var winsNeeded = 0; var unlockedWorld: String? = null
+            var isPerfect = false
             val phase = when {
                 won -> {
                     val baseStars = BoardEngine.calculateStars(newMoves, current.level.starThresholds)
                     val gameDiff = _state.value.gameDifficulty
-                    starsAwarded = (baseStars * difficulty.starMultiplier * gameDiff.starMultiplier).roundToInt()
+                    val movesUsed = adjustedMaxMoves - newMoves
+                    isPerfect = movesUsed <= current.level.goals.size && level.world >= 5
+                    val perfectMultiplier = if (isPerfect) 2f else 1f
+                    starsAwarded = (baseStars * difficulty.starMultiplier * gameDiff.starMultiplier * perfectMultiplier).roundToInt()
                     audioManager.playWin(baseStars)
                     val oldTotal = progressRepo.totalStarsFlow.first()
                     unlockedWorld = detectNewWorldUnlock(oldTotal, oldTotal + starsAwarded)
@@ -793,7 +802,8 @@ class GameViewModel(
                 passthroughActive = false, passthroughTokens = passthroughTokens,
                 phase = phase, starsAwarded = starsAwarded, winsToRestoreLife = winsNeeded,
                 unlockedWorldName = unlockedWorld,
-                redoTokens = redoTokens, redoTokenAwarded = redoCaptured
+                redoTokens = redoTokens, redoTokenAwarded = redoCaptured,
+                perfectGame = isPerfect
             )
         }
     }
@@ -930,6 +940,19 @@ class GameViewModel(
             if (unfreezeAwarded) {
                 unfreezeTokens++
                 _state.value = _state.value.copy(unfreezeTokenAwarded = true)
+            }
+            // Perfect game: award +1 of every token
+            if (_state.value.perfectGame) {
+                progressRepo.addShuffleToken(); shuffleTokens++
+                progressRepo.addPassthroughToken(); passthroughTokens++
+                progressRepo.addUnfreezeToken(); unfreezeTokens++
+                progressRepo.addRedoToken(); redoTokens++
+                _state.value = _state.value.copy(
+                    shuffleTokenAwarded = true,
+                    passthroughTokenAwarded = true,
+                    unfreezeTokenAwarded = true,
+                    redoTokenAwarded = true
+                )
             }
             if (result == -1) {
                 audioManager.playLifeRestored()

@@ -239,6 +239,8 @@ fun GameScreen(
             shuffleTokenAwarded = state.shuffleTokenAwarded,
             passthroughTokenAwarded = state.passthroughTokenAwarded,
             unfreezeTokenAwarded = state.unfreezeTokenAwarded,
+            redoTokenAwarded = state.redoTokenAwarded,
+            perfectGame = state.perfectGame,
             onStarLanded = { viewModel.playStarCollect() },
             onAllStarsLanded = { viewModel.commitWinResult() },
             onNext = if (state.level.id < 90) {
@@ -364,7 +366,7 @@ fun GameScreen(
 }
 
 @Composable
-private fun WinOverlay(stars: Int, levelName: String, unlockedWorldName: String? = null, shuffleTokenAwarded: Boolean = false, passthroughTokenAwarded: Boolean = false, unfreezeTokenAwarded: Boolean = false, onStarLanded: () -> Unit = {}, onAllStarsLanded: () -> Unit = {}, onNext: (() -> Unit)?, onMenu: () -> Unit) {
+private fun WinOverlay(stars: Int, levelName: String, unlockedWorldName: String? = null, shuffleTokenAwarded: Boolean = false, passthroughTokenAwarded: Boolean = false, unfreezeTokenAwarded: Boolean = false, redoTokenAwarded: Boolean = false, perfectGame: Boolean = false, onStarLanded: () -> Unit = {}, onAllStarsLanded: () -> Unit = {}, onNext: (() -> Unit)?, onMenu: () -> Unit) {
     // Pulsing scale animation for the star display
     val infiniteTransition = rememberInfiniteTransition(label = "starPulse")
     val starScale by infiniteTransition.animateFloat(
@@ -620,6 +622,55 @@ private fun WinOverlay(stars: Int, levelName: String, unlockedWorldName: String?
                                 fontWeight = FontWeight.ExtraBold,
                                 color = DarkSage
                             )
+                        }
+                    }
+                }
+
+                // Redo token reward (from mid-game capture or perfect game)
+                if (redoTokenAwarded) {
+                    val rdScale = remember { Animatable(0f) }
+                    LaunchedEffect(Unit) {
+                        val prior = listOf(shuffleTokenAwarded, passthroughTokenAwarded, unfreezeTokenAwarded).count { it }
+                        delay(800L + prior * 800L)
+                        rdScale.animateTo(1f, animationSpec = spring(dampingRatio = 0.5f, stiffness = 300f))
+                    }
+                    Spacer(modifier = Modifier.height(4.dp))
+                    Card(
+                        shape = RoundedCornerShape(16.dp),
+                        colors = CardDefaults.cardColors(containerColor = TileGreen.copy(alpha = 0.15f)),
+                        modifier = Modifier.scale(rdScale.value)
+                    ) {
+                        Column(
+                            modifier = Modifier.padding(horizontal = 20.dp, vertical = 10.dp),
+                            horizontalAlignment = Alignment.CenterHorizontally
+                        ) {
+                            Text("Redo Token Earned!", fontSize = 16.sp, fontWeight = FontWeight.Bold, color = TileGreen)
+                            Text("+1 \u21BB", fontSize = 24.sp, fontWeight = FontWeight.ExtraBold, color = DarkSage)
+                        }
+                    }
+                }
+
+                // Perfect game celebration
+                if (perfectGame) {
+                    val pgScale = remember { Animatable(0f) }
+                    LaunchedEffect(Unit) {
+                        val prior = listOf(shuffleTokenAwarded, passthroughTokenAwarded, unfreezeTokenAwarded, redoTokenAwarded).count { it }
+                        delay(800L + prior * 800L)
+                        pgScale.animateTo(1f, animationSpec = spring(dampingRatio = 0.4f, stiffness = 250f))
+                    }
+                    Spacer(modifier = Modifier.height(6.dp))
+                    Card(
+                        shape = RoundedCornerShape(16.dp),
+                        colors = CardDefaults.cardColors(containerColor = TileYellow.copy(alpha = 0.25f)),
+                        border = BorderStroke(2.dp, TileYellow),
+                        modifier = Modifier.scale(pgScale.value)
+                    ) {
+                        Column(
+                            modifier = Modifier.padding(horizontal = 24.dp, vertical = 12.dp),
+                            horizontalAlignment = Alignment.CenterHorizontally
+                        ) {
+                            Text("\u2B50 PERFECT GAME \u2B50", fontSize = 20.sp, fontWeight = FontWeight.ExtraBold, color = DarkSage)
+                            Text("2\u00D7 Stars + All Tokens!", fontSize = 14.sp, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurface)
                         }
                     }
                 }

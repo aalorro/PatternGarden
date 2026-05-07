@@ -271,6 +271,12 @@ class ProgressRepository(private val context: Context) {
         return success
     }
 
+    suspend fun addUnfreezeToken() {
+        context.dataStore.edit { prefs ->
+            prefs[UNFREEZE_TOKENS_KEY] = (prefs[UNFREEZE_TOKENS_KEY] ?: 0) + 1
+        }
+    }
+
     suspend fun useUnfreezeToken(): Boolean {
         var success = false
         context.dataStore.edit { prefs ->
