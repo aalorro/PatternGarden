@@ -91,7 +91,10 @@ fun GameScreen(
             gameDifficulty = state.gameDifficulty,
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 16.dp, vertical = 6.dp)
+                .padding(
+                    horizontal = if (isCompact) 10.dp else 16.dp,
+                    vertical = if (isCompact) 3.dp else 6.dp
+                )
         )
 
         // Game board — full width on phones & 7" tablets, padded on 10"+

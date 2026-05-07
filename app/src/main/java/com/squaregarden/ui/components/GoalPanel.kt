@@ -11,6 +11,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
@@ -29,22 +30,27 @@ fun GoalPanel(
     gameDifficulty: GameDifficulty? = null,
     modifier: Modifier = Modifier
 ) {
+    val isSmallScreen = LocalConfiguration.current.screenWidthDp < 800
+
     Surface(
         modifier = modifier,
-        shape = RoundedCornerShape(16.dp),
+        shape = RoundedCornerShape(if (isSmallScreen) 12.dp else 16.dp),
         color = MaterialTheme.colorScheme.surface,
         tonalElevation = 2.dp
     ) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 14.dp, vertical = 10.dp),
-            verticalArrangement = Arrangement.spacedBy(3.dp),
+                .padding(
+                    horizontal = if (isSmallScreen) 10.dp else 14.dp,
+                    vertical = if (isSmallScreen) 6.dp else 10.dp
+                ),
+            verticalArrangement = Arrangement.spacedBy(if (isSmallScreen) 1.dp else 3.dp),
             horizontalAlignment = Alignment.Start
         ) {
             Text(
                 text = "GOALS",
-                fontSize = 16.sp,
+                fontSize = if (isSmallScreen) 12.sp else 16.sp,
                 fontWeight = FontWeight.Bold,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 letterSpacing = 0.8.sp
@@ -53,18 +59,18 @@ fun GoalPanel(
                 val completed = goal.id in completedIds
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(6.dp)
+                    horizontalArrangement = Arrangement.spacedBy(if (isSmallScreen) 4.dp else 6.dp)
                 ) {
                     // Color swatch
                     Box(
                         modifier = Modifier
-                            .size(18.dp)
-                            .clip(RoundedCornerShape(5.dp))
+                            .size(if (isSmallScreen) 14.dp else 18.dp)
+                            .clip(RoundedCornerShape(if (isSmallScreen) 4.dp else 5.dp))
                             .background(goal.color.toComposeColor())
                     )
                     Text(
                         text = goal.description,
-                        fontSize = 15.sp,
+                        fontSize = if (isSmallScreen) 12.sp else 15.sp,
                         fontWeight = FontWeight.SemiBold,
                         color = if (completed)
                             MaterialTheme.colorScheme.onSurfaceVariant
@@ -75,7 +81,7 @@ fun GoalPanel(
                     if (completed) {
                         Text(
                             text = "\u2714",
-                            fontSize = 15.sp,
+                            fontSize = if (isSmallScreen) 12.sp else 15.sp,
                             fontWeight = FontWeight.Bold,
                             color = Color(0xFF43A047)
                         )
@@ -85,15 +91,15 @@ fun GoalPanel(
 
             // Moves + Difficulty row below goals
             if (movesRemaining >= 0) {
-                Spacer(modifier = Modifier.height(4.dp))
+                Spacer(modifier = Modifier.height(if (isSmallScreen) 2.dp else 4.dp))
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    horizontalArrangement = Arrangement.spacedBy(if (isSmallScreen) 6.dp else 8.dp)
                 ) {
                     val lowMoves = movesRemaining <= 3
                     Text(
                         text = "MOVES",
-                        fontSize = 13.sp,
+                        fontSize = if (isSmallScreen) 11.sp else 13.sp,
                         fontWeight = FontWeight.Bold,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         letterSpacing = 0.6.sp
@@ -101,13 +107,13 @@ fun GoalPanel(
                     Text(
                         text = "$movesRemaining",
                         fontFamily = DisplayFontFamily,
-                        fontSize = 22.sp,
+                        fontSize = if (isSmallScreen) 18.sp else 22.sp,
                         fontWeight = FontWeight.ExtraBold,
                         color = if (lowMoves) Color(0xFFC62828) else MaterialTheme.colorScheme.onBackground
                     )
                     Text(
                         text = "/$movesMax",
-                        fontSize = 13.sp,
+                        fontSize = if (isSmallScreen) 11.sp else 13.sp,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                     if (gameDifficulty != null) {
@@ -121,7 +127,7 @@ fun GoalPanel(
                         }
                         Text(
                             text = gameDifficulty.label,
-                            fontSize = 13.sp,
+                            fontSize = if (isSmallScreen) 11.sp else 13.sp,
                             fontWeight = FontWeight.Bold,
                             color = diffColor
                         )
