@@ -28,6 +28,7 @@ class ProgressRepository(private val context: Context) {
         private val PASSTHROUGH_TOKENS_KEY = intPreferencesKey("passthrough_tokens")
         private val UNFREEZE_TOKENS_KEY = intPreferencesKey("unfreeze_tokens")
         private val UNFREEZE_STREAK_KEY = intPreferencesKey("unfreeze_win_streak")
+        private val REDO_TOKENS_KEY = intPreferencesKey("redo_tokens")
         private const val LEVEL_FAVORITE_PREFIX = "level_favorite_"
     }
 
@@ -246,6 +247,28 @@ class ProgressRepository(private val context: Context) {
         context.dataStore.edit { prefs ->
             prefs[UNFREEZE_STREAK_KEY] = 0
         }
+    }
+
+    val redoTokensFlow: Flow<Int> = context.dataStore.data.map { prefs ->
+        prefs[REDO_TOKENS_KEY] ?: 0
+    }
+
+    suspend fun addRedoToken() {
+        context.dataStore.edit { prefs ->
+            prefs[REDO_TOKENS_KEY] = (prefs[REDO_TOKENS_KEY] ?: 0) + 1
+        }
+    }
+
+    suspend fun useRedoToken(): Boolean {
+        var success = false
+        context.dataStore.edit { prefs ->
+            val current = prefs[REDO_TOKENS_KEY] ?: 0
+            if (current > 0) {
+                prefs[REDO_TOKENS_KEY] = current - 1
+                success = true
+            }
+        }
+        return success
     }
 
     suspend fun useUnfreezeToken(): Boolean {

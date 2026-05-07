@@ -112,7 +112,10 @@ fun InstructionsScreen(navController: NavHostController) {
                 "\uD83D\uDEE1\uFE0F Passthrough — your tile jumps over completed goal tiles and lands on the other side, keeping the goal intact. " +
                 "Earn 1 token every 7 levels completed.\n\n" +
                 "\u2744\uFE0F Unfreeze — tap a frozen tile to unfreeze it. " +
-                "Earn 1 token for every 5 consecutive wins on World 3+."
+                "Earn 1 token for every 5 consecutive wins on World 3+.\n\n" +
+                "\u21BB Redo — restart the level with a fresh board and full moves, no life lost. " +
+                "Earn tokens by capturing redo tiles (marked with a \u21BB symbol) that appear on World 4+ boards. " +
+                "Complete a goal that includes a redo tile to collect the token."
         )
 
         InstructionSection(

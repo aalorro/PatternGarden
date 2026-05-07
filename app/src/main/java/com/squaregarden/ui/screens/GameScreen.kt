@@ -179,8 +179,9 @@ fun GameScreen(
             )
             ActionCircle(
                 icon = "\u21BB",
-                label = "Redo",
-                onClick = { viewModel.resetLevel() }
+                label = "\u00D7${state.redoTokens}",
+                onClick = { viewModel.executeRedo() },
+                enabled = state.redoTokens > 0 && state.phase == GamePhase.PLAYING
             )
         }
     }

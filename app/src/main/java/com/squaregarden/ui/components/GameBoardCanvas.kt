@@ -153,6 +153,35 @@ fun GameBoardCanvas(
                 drawEmbossedTile(tile.color, x, y, cs, cornerR)
                 drawTileMotif(tile.color, x, y, cs)
 
+                // Redo tile overlay: circular arrow indicator
+                if (tile.redo) {
+                    val cx = x + cs / 2f
+                    val cy = y + cs / 2f
+                    val radius = cs * 0.22f
+                    // Glow circle background
+                    drawCircle(
+                        color = Color.White.copy(alpha = 0.45f),
+                        radius = radius + cs * 0.06f,
+                        center = Offset(cx, cy)
+                    )
+                    // Arc (270 degrees of a circle)
+                    drawArc(
+                        color = Color.White,
+                        startAngle = -90f,
+                        sweepAngle = 270f,
+                        useCenter = false,
+                        topLeft = Offset(cx - radius, cy - radius),
+                        size = Size(radius * 2, radius * 2),
+                        style = Stroke(width = cs * 0.045f)
+                    )
+                    // Arrowhead at the end of the arc (pointing down-right at 180° position)
+                    val arrowSize = cs * 0.08f
+                    val ax = cx - radius
+                    val ay = cy
+                    drawLine(Color.White, Offset(ax, ay), Offset(ax + arrowSize, ay - arrowSize), strokeWidth = cs * 0.045f)
+                    drawLine(Color.White, Offset(ax, ay), Offset(ax + arrowSize, ay + arrowSize), strokeWidth = cs * 0.045f)
+                }
+
                 // Frozen overlay: light frost + diagonal lines + thick ice border
                 // Base tile color stays clearly visible
                 if (tile.frozen) {

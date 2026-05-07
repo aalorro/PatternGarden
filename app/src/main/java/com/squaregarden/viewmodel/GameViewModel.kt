@@ -41,6 +41,7 @@ class GameViewModel(
     private var shuffleTokens: Int = 0
     private var passthroughTokens: Int = 0
     private var unfreezeTokens: Int = 0
+    private var redoTokens: Int = 0
     private val progressRepo = ProgressRepository(context)
     private val profileRepo = ProfileRepository(context)
     private val audioManager = AudioManager(context)
@@ -64,6 +65,7 @@ class GameViewModel(
             shuffleTokens = progressRepo.shuffleTokensFlow.first()
             passthroughTokens = progressRepo.passthroughTokensFlow.first()
             unfreezeTokens = progressRepo.unfreezeTokensFlow.first()
+            redoTokens = progressRepo.redoTokensFlow.first()
 
             val levels = LevelLoader.loadAllLevels(context)
             level = levels.first { it.id == levelId }
@@ -237,10 +239,10 @@ class GameViewModel(
             if (BoardEngine.evaluateGoals(scrambled, level.goals).isNotEmpty()) return@repeat
 
             val solution = swaps.reversed()
-            return Pair(scrambled, solution)
+            return Pair(placeRedoTile(scrambled), solution)
         }
         // Fallback: random board, solver will try in background
-        return Pair(generateValidBoard(), null)
+        return Pair(placeRedoTile(generateValidBoard()), null)
     }
 
     // Shape rotation helpers (mirrors PatternMatcher logic)
@@ -326,6 +328,28 @@ class GameViewModel(
         return Board(level.boardWidth, level.boardHeight, tiles, voids)
     }
 
+    /** Place a single redo tile on a random non-frozen, non-void cell (World 4+ only). */
+    private fun placeRedoTile(board: Board): Board {
+        if (level.world < 4) return board
+        val candidates = mutableListOf<CellPos>()
+        for (r in 0 until board.height) {
+            for (c in 0 until board.width) {
+                if (board.isVoid(r, c)) continue
+                val tile = board.tileAt(r, c)
+                if (tile.frozen) continue
+                candidates.add(CellPos(r, c))
+            }
+        }
+        if (candidates.isEmpty()) return board
+        val pos = candidates.random()
+        val newTiles = board.tiles.mapIndexed { r, row ->
+            row.mapIndexed { c, tile ->
+                if (r == pos.row && c == pos.col) tile.copy(redo = true) else tile
+            }
+        }
+        return board.copy(tiles = newTiles)
+    }
+
     // ── Async fallback solver (for boards not built via reverse-construction) ──
 
     private fun computeSolutionAsync(board: Board) {
@@ -378,7 +402,7 @@ class GameViewModel(
                 movesRemaining = adjustedMaxMoves, difficulty = difficulty,
                 gameDifficulty = computeGameDifficulty(board),
                 initialBoard = board,
-                shuffleTokens = shuffleTokens, passthroughTokens = passthroughTokens, unfreezeTokens = unfreezeTokens,
+                shuffleTokens = shuffleTokens, passthroughTokens = passthroughTokens, unfreezeTokens = unfreezeTokens, redoTokens = redoTokens,
                 phase = GamePhase.TUTORIAL_PAUSE
             )
             computeSolutionAsync(board)
@@ -391,7 +415,7 @@ class GameViewModel(
                 movesRemaining = adjustedMaxMoves, difficulty = difficulty,
                 gameDifficulty = computeGameDifficulty(board),
                 initialBoard = board, hasSolution = solution != null,
-                shuffleTokens = shuffleTokens, passthroughTokens = passthroughTokens, unfreezeTokens = unfreezeTokens,
+                shuffleTokens = shuffleTokens, passthroughTokens = passthroughTokens, unfreezeTokens = unfreezeTokens, redoTokens = redoTokens,
                 phase = GamePhase.PLAYING
             )
             // If reverse-construction failed, try solver in background
@@ -612,10 +636,31 @@ class GameViewModel(
                 }
             }
 
+            // Check for redo tile capture in newly completed goals
+            var boardAfterRedo = newBoard
+            var redoCaptured = false
+            val newlyCompleted = newCompleted - current.completedGoalIds
+            if (newlyCompleted.isNotEmpty()) {
+                val newCells = newlyCompleted.flatMap { id -> newGoalCells[id] ?: emptySet() }
+                val hasRedo = newCells.any { boardAfterRedo.tileAt(it.row, it.col).redo }
+                if (hasRedo) {
+                    progressRepo.addRedoToken()
+                    redoTokens++
+                    redoCaptured = true
+                    // Clear redo flag from captured tiles
+                    val updatedTiles = boardAfterRedo.tiles.mapIndexed { r, row ->
+                        row.mapIndexed { c, tile ->
+                            if (tile.redo && CellPos(r, c) in newCells) tile.copy(redo = false) else tile
+                        }
+                    }
+                    boardAfterRedo = boardAfterRedo.copy(tiles = updatedTiles)
+                }
+            }
+
             val won = BoardEngine.checkWin(newCompleted, current.level.goals)
             val lost = BoardEngine.checkLose(newMoves, won)
 
-            if ((newCompleted - current.completedGoalIds).isNotEmpty()) audioManager.playMatch()
+            if (newlyCompleted.isNotEmpty()) audioManager.playMatch()
 
             var starsAwarded = 0; var winsNeeded = 0; var unlockedWorld: String? = null
             val phase = when {
@@ -626,7 +671,6 @@ class GameViewModel(
                     audioManager.playWin(baseStars)
                     val oldTotal = progressRepo.totalStarsFlow.first()
                     unlockedWorld = detectNewWorldUnlock(oldTotal, oldTotal + starsAwarded)
-                    // Defer saveLevelResult/recordWin/incrementPlayerLevel until star trail finishes
                     winResultCommitted = false
                     pendingWinLevelId = current.level.id
                     pendingWinStars = starsAwarded
@@ -641,11 +685,12 @@ class GameViewModel(
             }
 
             _state.value = _state.value.copy(
-                board = newBoard, movesRemaining = newMoves,
+                board = boardAfterRedo, movesRemaining = newMoves,
                 completedGoalIds = newCompleted, completedGoalCells = newGoalCells,
                 selectedCell = null, hintCells = emptySet(), swapAnim = null,
                 phase = phase, starsAwarded = starsAwarded, winsToRestoreLife = winsNeeded,
-                unlockedWorldName = unlockedWorld
+                unlockedWorldName = unlockedWorld,
+                redoTokens = redoTokens, redoTokenAwarded = redoCaptured
             )
         }
     }
@@ -693,10 +738,30 @@ class GameViewModel(
                 }
             }
 
+            // Check for redo tile capture in newly completed goals
+            var boardAfterRedo = newBoard
+            var redoCaptured = false
+            val newlyCompletedPt = newCompleted - current.completedGoalIds
+            if (newlyCompletedPt.isNotEmpty()) {
+                val newCells = newlyCompletedPt.flatMap { id -> newGoalCells[id] ?: emptySet() }
+                val hasRedo = newCells.any { boardAfterRedo.tileAt(it.row, it.col).redo }
+                if (hasRedo) {
+                    progressRepo.addRedoToken()
+                    redoTokens++
+                    redoCaptured = true
+                    val updatedTiles = boardAfterRedo.tiles.mapIndexed { r, row ->
+                        row.mapIndexed { c, tile ->
+                            if (tile.redo && CellPos(r, c) in newCells) tile.copy(redo = false) else tile
+                        }
+                    }
+                    boardAfterRedo = boardAfterRedo.copy(tiles = updatedTiles)
+                }
+            }
+
             val won = BoardEngine.checkWin(newCompleted, current.level.goals)
             val lost = BoardEngine.checkLose(newMoves, won)
 
-            if ((newCompleted - current.completedGoalIds).isNotEmpty()) audioManager.playMatch()
+            if (newlyCompletedPt.isNotEmpty()) audioManager.playMatch()
 
             var starsAwarded = 0; var winsNeeded = 0; var unlockedWorld: String? = null
             val phase = when {
@@ -721,12 +786,13 @@ class GameViewModel(
             }
 
             _state.value = _state.value.copy(
-                board = newBoard, movesRemaining = newMoves,
+                board = boardAfterRedo, movesRemaining = newMoves,
                 completedGoalIds = newCompleted, completedGoalCells = newGoalCells,
                 selectedCell = null, hintCells = emptySet(), swapAnim = null,
                 passthroughActive = false, passthroughTokens = passthroughTokens,
                 phase = phase, starsAwarded = starsAwarded, winsToRestoreLife = winsNeeded,
-                unlockedWorldName = unlockedWorld
+                unlockedWorldName = unlockedWorld,
+                redoTokens = redoTokens, redoTokenAwarded = redoCaptured
             )
         }
     }
@@ -781,12 +847,24 @@ class GameViewModel(
             audioManager.playShuffle()
             _state.value = current.copy(
                 board = shuffled, shuffleReady = false,
-                shuffleTokens = shuffleTokens, passthroughTokens = passthroughTokens, unfreezeTokens = unfreezeTokens,
+                shuffleTokens = shuffleTokens, passthroughTokens = passthroughTokens, unfreezeTokens = unfreezeTokens, redoTokens = redoTokens,
                 gameDifficulty = computeGameDifficulty(shuffled),
                 hintCells = emptySet(),
                 selectedCell = null
             )
             computeSolutionAsync(shuffled)
+        }
+    }
+
+    fun executeRedo() {
+        val current = _state.value
+        if (current.phase != GamePhase.PLAYING) return
+        if (redoTokens <= 0) return
+        viewModelScope.launch {
+            val success = progressRepo.useRedoToken()
+            if (!success) return@launch
+            redoTokens--
+            resetLevel()
         }
     }
 
