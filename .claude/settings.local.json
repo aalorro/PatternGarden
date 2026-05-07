@@ -13,7 +13,11 @@
       "Bash(find:*)",
       "Bash(sed:*)",
       "Bash(python:*)",
-      "Bash(pip install:*)"
+      "Bash(pip install:*)",
+      "Bash(\"/c/Users/arman/AppData/Local/Android/Sdk/platform-tools/adb.exe\" logcat:*)",
+      "Bash(\"/c/Users/arman/AppData/Local/Android/Sdk/platform-tools/adb.exe\" devices:*)",
+      "Bash(\"$ADB\":*)",
+      "Bash(/c/Users/arman/AppData/Local/Android/Sdk/platform-tools/adb.exe:*)"
     ]
   }
 }

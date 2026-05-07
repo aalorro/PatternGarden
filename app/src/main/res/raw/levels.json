@@ -6341,11 +6341,10 @@
         "color": "GREEN"
       }
     ],
-    "stars": [
-      8,
-      4,
-      1
-    ],
+    "stars": {
+      "twoStar": 4,
+      "threeStar": 8
+    },
     "frozen": [
       {
         "row": 2,
@@ -6478,11 +6477,10 @@
         "shape": "L_SHAPE"
       }
     ],
-    "stars": [
-      8,
-      4,
-      1
-    ],
+    "stars": {
+      "twoStar": 4,
+      "threeStar": 8
+    },
     "frozen": [
       {
         "row": 3,
@@ -6614,11 +6612,10 @@
         "color": "YELLOW"
       }
     ],
-    "stars": [
-      7,
-      4,
-      1
-    ],
+    "stars": {
+      "twoStar": 4,
+      "threeStar": 7
+    },
     "frozen": [
       {
         "row": 2,
@@ -6759,11 +6756,10 @@
         "color": "ORANGE"
       }
     ],
-    "stars": [
-      9,
-      5,
-      1
-    ],
+    "stars": {
+      "twoStar": 5,
+      "threeStar": 9
+    },
     "frozen": [
       {
         "row": 1,
@@ -6905,11 +6901,10 @@
         "length": 5
       }
     ],
-    "stars": [
-      9,
-      5,
-      1
-    ],
+    "stars": {
+      "twoStar": 5,
+      "threeStar": 9
+    },
     "frozen": [
       {
         "row": 2,
@@ -7054,11 +7049,10 @@
         "color": "YELLOW"
       }
     ],
-    "stars": [
-      8,
-      4,
-      1
-    ],
+    "stars": {
+      "twoStar": 4,
+      "threeStar": 8
+    },
     "frozen": [
       {
         "row": 2,
@@ -7204,11 +7198,10 @@
         "shape": "L_SHAPE"
       }
     ],
-    "stars": [
-      8,
-      4,
-      1
-    ],
+    "stars": {
+      "twoStar": 4,
+      "threeStar": 8
+    },
     "frozen": [
       {
         "row": 1,
@@ -7353,11 +7346,10 @@
         "color": "ORANGE"
       }
     ],
-    "stars": [
-      8,
-      4,
-      1
-    ],
+    "stars": {
+      "twoStar": 4,
+      "threeStar": 8
+    },
     "frozen": [
       {
         "row": 2,
@@ -7507,11 +7499,10 @@
         "shape": "T_SHAPE"
       }
     ],
-    "stars": [
-      8,
-      4,
-      1
-    ],
+    "stars": {
+      "twoStar": 4,
+      "threeStar": 8
+    },
     "frozen": [
       {
         "row": 1,
@@ -7661,11 +7652,10 @@
         "length": 5
       }
     ],
-    "stars": [
-      9,
-      5,
-      1
-    ],
+    "stars": {
+      "twoStar": 5,
+      "threeStar": 9
+    },
     "frozen": [
       {
         "row": 2,
@@ -7811,11 +7801,10 @@
         "shape": "L_SHAPE"
       }
     ],
-    "stars": [
-      8,
-      4,
-      1
-    ],
+    "stars": {
+      "twoStar": 4,
+      "threeStar": 8
+    },
     "frozen": [
       {
         "row": 1,
@@ -7960,11 +7949,10 @@
         "color": "GREEN"
       }
     ],
-    "stars": [
-      8,
-      4,
-      1
-    ],
+    "stars": {
+      "twoStar": 4,
+      "threeStar": 8
+    },
     "frozen": [
       {
         "row": 2,
@@ -8113,11 +8101,10 @@
         "color": "YELLOW"
       }
     ],
-    "stars": [
-      8,
-      4,
-      1
-    ],
+    "stars": {
+      "twoStar": 4,
+      "threeStar": 8
+    },
     "frozen": [
       {
         "row": 1,
@@ -8266,11 +8253,10 @@
         "color": "BLUE"
       }
     ],
-    "stars": [
-      9,
-      5,
-      1
-    ],
+    "stars": {
+      "twoStar": 5,
+      "threeStar": 9
+    },
     "frozen": [
       {
         "row": 2,
@@ -8424,11 +8410,10 @@
         "color": "RED"
       }
     ],
-    "stars": [
-      10,
-      6,
-      1
-    ],
+    "stars": {
+      "twoStar": 6,
+      "threeStar": 10
+    },
     "frozen": [
       {
         "row": 2,
@@ -8578,11 +8563,10 @@
         "color": "YELLOW"
       }
     ],
-    "stars": [
-      10,
-      6,
-      1
-    ],
+    "stars": {
+      "twoStar": 6,
+      "threeStar": 10
+    },
     "frozen": [
       {
         "row": 1,
@@ -8737,11 +8721,10 @@
         "shape": "Z_SHAPE"
       }
     ],
-    "stars": [
-      9,
-      5,
-      1
-    ],
+    "stars": {
+      "twoStar": 5,
+      "threeStar": 9
+    },
     "frozen": [
       {
         "row": 2,
@@ -8899,11 +8882,10 @@
         "color": "RED"
       }
     ],
-    "stars": [
-      9,
-      5,
-      1
-    ],
+    "stars": {
+      "twoStar": 5,
+      "threeStar": 9
+    },
     "frozen": [
       {
         "row": 1,
@@ -9075,11 +9057,10 @@
         "color": "RED"
       }
     ],
-    "stars": [
-      9,
-      5,
-      1
-    ],
+    "stars": {
+      "twoStar": 5,
+      "threeStar": 9
+    },
     "frozen": [
       {
         "row": 2,
@@ -9244,11 +9225,10 @@
         "shape": "T_SHAPE"
       }
     ],
-    "stars": [
-      9,
-      5,
-      1
-    ],
+    "stars": {
+      "twoStar": 5,
+      "threeStar": 9
+    },
     "frozen": [
       {
         "row": 1,
@@ -9421,11 +9401,10 @@
         "color": "ORANGE"
       }
     ],
-    "stars": [
-      11,
-      6,
-      1
-    ],
+    "stars": {
+      "twoStar": 6,
+      "threeStar": 11
+    },
     "frozen": [
       {
         "row": 2,
@@ -9598,11 +9577,10 @@
         "color": "RED"
       }
     ],
-    "stars": [
-      10,
-      6,
-      1
-    ],
+    "stars": {
+      "twoStar": 6,
+      "threeStar": 10
+    },
     "frozen": [
       {
         "row": 1,
@@ -9780,11 +9758,10 @@
         "shape": "Z_SHAPE"
       }
     ],
-    "stars": [
-      10,
-      6,
-      1
-    ],
+    "stars": {
+      "twoStar": 6,
+      "threeStar": 10
+    },
     "frozen": [
       {
         "row": 1,
@@ -9965,11 +9942,10 @@
         "color": "RED"
       }
     ],
-    "stars": [
-      10,
-      6,
-      1
-    ],
+    "stars": {
+      "twoStar": 6,
+      "threeStar": 10
+    },
     "frozen": [
       {
         "row": 1,
@@ -10151,11 +10127,10 @@
         "shape": "T_SHAPE"
       }
     ],
-    "stars": [
-      10,
-      6,
-      1
-    ],
+    "stars": {
+      "twoStar": 6,
+      "threeStar": 10
+    },
     "frozen": [
       {
         "row": 1,
@@ -10341,11 +10316,10 @@
         "shape": "T_SHAPE"
       }
     ],
-    "stars": [
-      9,
-      5,
-      1
-    ],
+    "stars": {
+      "twoStar": 5,
+      "threeStar": 9
+    },
     "frozen": [
       {
         "row": 1,
@@ -10531,11 +10505,10 @@
         "shape": "L_SHAPE"
       }
     ],
-    "stars": [
-      9,
-      5,
-      1
-    ],
+    "stars": {
+      "twoStar": 5,
+      "threeStar": 9
+    },
     "frozen": [
       {
         "row": 2,
@@ -10720,11 +10693,10 @@
         "color": "RED"
       }
     ],
-    "stars": [
-      10,
-      6,
-      1
-    ],
+    "stars": {
+      "twoStar": 6,
+      "threeStar": 10
+    },
     "frozen": [
       {
         "row": 1,
@@ -10910,11 +10882,10 @@
         "shape": "L_SHAPE"
       }
     ],
-    "stars": [
-      10,
-      6,
-      1
-    ],
+    "stars": {
+      "twoStar": 6,
+      "threeStar": 10
+    },
     "frozen": [
       {
         "row": 1,
@@ -11100,11 +11071,10 @@
         "shape": "T_SHAPE"
       }
     ],
-    "stars": [
-      10,
-      6,
-      1
-    ],
+    "stars": {
+      "twoStar": 6,
+      "threeStar": 10
+    },
     "frozen": [
       {
         "row": 1,
@@ -11294,11 +11264,10 @@
         "shape": "T_SHAPE"
       }
     ],
-    "stars": [
-      9,
-      5,
-      1
-    ],
+    "stars": {
+      "twoStar": 5,
+      "threeStar": 9
+    },
     "frozen": [
       {
         "row": 1,
@@ -11492,11 +11461,10 @@
         "color": "RED"
       }
     ],
-    "stars": [
-      13,
-      7,
-      1
-    ],
+    "stars": {
+      "twoStar": 7,
+      "threeStar": 13
+    },
     "frozen": [
       {
         "row": 1,
@@ -11687,11 +11655,10 @@
         "shape": "Z_SHAPE"
       }
     ],
-    "stars": [
-      12,
-      7,
-      1
-    ],
+    "stars": {
+      "twoStar": 7,
+      "threeStar": 12
+    },
     "frozen": [
       {
         "row": 1,
@@ -11885,11 +11852,10 @@
         "color": "YELLOW"
       }
     ],
-    "stars": [
-      12,
-      6,
-      1
-    ],
+    "stars": {
+      "twoStar": 6,
+      "threeStar": 12
+    },
     "frozen": [
       {
         "row": 1,
@@ -12084,11 +12050,10 @@
         "shape": "Z_SHAPE"
       }
     ],
-    "stars": [
-      12,
-      6,
-      1
-    ],
+    "stars": {
+      "twoStar": 6,
+      "threeStar": 12
+    },
     "frozen": [
       {
         "row": 1,
@@ -12287,11 +12252,10 @@
         "shape": "L_SHAPE"
       }
     ],
-    "stars": [
-      11,
-      6,
-      1
-    ],
+    "stars": {
+      "twoStar": 6,
+      "threeStar": 11
+    },
     "frozen": [
       {
         "row": 1,
