@@ -51,6 +51,7 @@ fun ProfileScreen(navController: NavHostController, isFirstTime: Boolean = false
     var gender by remember { mutableStateOf("prefer_not_to_say") }
     var themeId by remember { mutableStateOf("light") }
     var difficulty by remember { mutableStateOf("medium") }
+    var leaderboardOptIn by remember { mutableStateOf(false) }
     var loaded by remember { mutableStateOf(false) }
 
     LaunchedEffect(Unit) {
@@ -61,6 +62,7 @@ fun ProfileScreen(navController: NavHostController, isFirstTime: Boolean = false
         gender = profile.gender
         themeId = profile.themeId
         difficulty = profile.difficulty
+        leaderboardOptIn = profile.leaderboardOptIn
         loaded = true
     }
 
@@ -388,6 +390,26 @@ fun ProfileScreen(navController: NavHostController, isFirstTime: Boolean = false
             }
         }
 
+        // ── Leaderboard Opt-In ──
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            Column(modifier = Modifier.weight(1f)) {
+                Text("Leaderboards", style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.onBackground)
+                Text(
+                    "Submit scores to Google Play Games leaderboards",
+                    fontSize = 12.sp,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+            Switch(
+                checked = leaderboardOptIn,
+                onCheckedChange = { leaderboardOptIn = it }
+            )
+        }
+
         Spacer(modifier = Modifier.height(8.dp))
 
         // ── Save Button ──
@@ -401,7 +423,8 @@ fun ProfileScreen(navController: NavHostController, isFirstTime: Boolean = false
                             yearOfBirth = yearOfBirth,
                             gender = gender,
                             themeId = themeId,
-                            difficulty = difficulty
+                            difficulty = difficulty,
+                            leaderboardOptIn = leaderboardOptIn
                         )
                     )
                     if (isFirstTime) {

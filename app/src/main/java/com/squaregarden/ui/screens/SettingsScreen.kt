@@ -169,22 +169,24 @@ fun SettingsScreen(navController: NavHostController) {
 
         Spacer(modifier = Modifier.height(12.dp))
 
-        // Leaderboards button
-        OutlinedButton(
-            onClick = {
-                val activity = context as? android.app.Activity ?: return@OutlinedButton
-                PlayGamesManager.checkSignIn(activity) { signedIn ->
-                    if (signedIn) {
-                        PlayGamesManager.showAllLeaderboards(activity)
-                    } else {
-                        PlayGamesManager.signIn(activity)
+        // Leaderboards button (only if opted in)
+        if (currentProfile.leaderboardOptIn) {
+            OutlinedButton(
+                onClick = {
+                    val activity = context as? android.app.Activity ?: return@OutlinedButton
+                    PlayGamesManager.checkSignIn(activity) { signedIn ->
+                        if (signedIn) {
+                            PlayGamesManager.showAllLeaderboards(activity)
+                        } else {
+                            PlayGamesManager.signIn(activity)
+                        }
                     }
-                }
-            },
-            modifier = Modifier.fillMaxWidth().height(48.dp),
-            shape = RoundedCornerShape(50)
-        ) {
-            Text("\uD83C\uDFC6  Leaderboards", fontWeight = FontWeight.Bold)
+                },
+                modifier = Modifier.fillMaxWidth().height(48.dp),
+                shape = RoundedCornerShape(50)
+            ) {
+                Text("\uD83C\uDFC6  Leaderboards", fontWeight = FontWeight.Bold)
+            }
         }
 
         Spacer(modifier = Modifier.height(12.dp))

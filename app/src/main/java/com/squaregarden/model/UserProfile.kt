@@ -7,7 +7,8 @@ data class UserProfile(
     val gender: String = "prefer_not_to_say",
     val themeId: String = "light",
     val difficulty: String = "medium",
-    val playerLevel: Int = 0
+    val playerLevel: Int = 0,
+    val leaderboardOptIn: Boolean = false
 ) {
     val isSetUp: Boolean get() = username.isNotBlank()
 }

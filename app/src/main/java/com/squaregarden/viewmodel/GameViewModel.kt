@@ -962,13 +962,16 @@ class GameViewModel(
                 _state.value = _state.value.copy(lifeRestored = true)
             }
 
-            // Submit scores to Google Play Games leaderboards
-            activity?.let { act ->
-                val totalStars = progressRepo.totalStarsFlow.first()
-                val progress = progressRepo.loadProgress()
-                val highestLevel = progress.highestUnlockedLevel(difficulty.startingLevel)
-                PlayGamesManager.submitTotalStars(act, difficulty, totalStars)
-                PlayGamesManager.submitHighestLevel(act, difficulty, highestLevel)
+            // Submit scores to Google Play Games leaderboards (only if opted in)
+            val profile = profileRepo.loadProfile()
+            if (profile.leaderboardOptIn) {
+                activity?.let { act ->
+                    val totalStars = progressRepo.totalStarsFlow.first()
+                    val progress = progressRepo.loadProgress()
+                    val highestLevel = progress.highestUnlockedLevel(difficulty.startingLevel)
+                    PlayGamesManager.submitTotalStars(act, difficulty, totalStars)
+                    PlayGamesManager.submitHighestLevel(act, difficulty, highestLevel)
+                }
             }
         }
     }
