@@ -36,13 +36,6 @@ object PlayGamesManager {
         Log.d(TAG, "Submitted highestLevel=$level for ${difficulty.name}")
     }
 
-    fun submitWorldStars(activity: Activity, difficulty: Difficulty, worldId: Int, stars: Int) {
-        val id = worldStarsLeaderboardId(activity, difficulty, worldId) ?: return
-        PlayGames.getLeaderboardsClient(activity)
-            .submitScore(id, stars.toLong())
-        Log.d(TAG, "Submitted world${worldId}Stars=$stars for ${difficulty.name}")
-    }
-
     fun showAllLeaderboards(activity: Activity) {
         PlayGames.getLeaderboardsClient(activity)
             .allLeaderboardsIntent
@@ -79,7 +72,4 @@ object PlayGamesManager {
 
     private fun highestLevelLeaderboardId(context: Context, difficulty: Difficulty): String? =
         getStringRes(context, "leaderboard_highest_level_${skillSuffix(difficulty)}")
-
-    private fun worldStarsLeaderboardId(context: Context, difficulty: Difficulty, worldId: Int): String? =
-        getStringRes(context, "leaderboard_world_${worldId}_${skillSuffix(difficulty)}")
 }

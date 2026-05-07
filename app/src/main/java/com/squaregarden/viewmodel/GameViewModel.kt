@@ -864,18 +864,9 @@ class GameViewModel(
                 val highestLevel = progress.highestUnlockedLevel(difficulty.startingLevel)
                 PlayGamesManager.submitTotalStars(act, difficulty, totalStars)
                 PlayGamesManager.submitHighestLevel(act, difficulty, highestLevel)
-                // Submit world stars for the level's world
-                val worldId = level.world
-                val worldStars = progress.levelStars
-                    .filter { (id, _) -> levelWorldId(id) == worldId }
-                    .values.sum()
-                PlayGamesManager.submitWorldStars(act, difficulty, worldId, worldStars)
             }
         }
     }
-
-    /** Map level ID (1-90) to world ID (1-10). */
-    private fun levelWorldId(levelId: Int): Int = ((levelId - 1) / 9) + 1
 
     private fun detectNewWorldUnlock(oldStars: Int, newStars: Int): String? {
         val startingWorld = difficulty.startingWorld
