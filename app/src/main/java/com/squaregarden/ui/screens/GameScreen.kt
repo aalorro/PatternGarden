@@ -94,7 +94,8 @@ fun GameScreen(
                 .padding(horizontal = 16.dp, vertical = 6.dp)
         )
 
-        // Game board
+        // Game board — full width on phones & 7" tablets, padded on 10"+
+        val boardHPad = if (LocalConfiguration.current.screenWidthDp < 800) 0.dp else 12.dp
         GameBoardCanvas(
             board = state.board,
             selectedCell = state.selectedCell,
@@ -105,7 +106,7 @@ fun GameScreen(
             onCellTapped = { row, col -> viewModel.onCellTapped(row, col) },
             modifier = Modifier
                 .weight(1f)
-                .padding(horizontal = 12.dp, vertical = 8.dp)
+                .padding(horizontal = boardHPad, vertical = 4.dp)
         )
 
         // Bottom bar — circular action buttons
