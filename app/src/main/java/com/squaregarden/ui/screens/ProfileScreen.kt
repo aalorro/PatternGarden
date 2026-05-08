@@ -32,6 +32,7 @@ import com.squaregarden.data.ProfileRepository
 import com.squaregarden.model.Difficulty
 import com.squaregarden.model.Gender
 import com.squaregarden.model.UserProfile
+import com.squaregarden.ui.components.BasReliefAvatar
 import com.squaregarden.ui.components.avatarList
 import com.squaregarden.ui.navigation.Screen
 import com.squaregarden.ui.theme.*
@@ -102,23 +103,15 @@ fun ProfileScreen(navController: NavHostController, isFirstTime: Boolean = false
         // ── Avatar Picker ──
         Text("Choose Avatar", style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.onBackground)
 
-        // Show selected avatar large
+        // Show selected avatar large (bas-relief)
         Box(
             modifier = Modifier.fillMaxWidth(),
             contentAlignment = Alignment.Center
         ) {
-            Box(
-                modifier = Modifier
-                    .size(72.dp)
-                    .clip(CircleShape)
-                    .background(MaterialTheme.colorScheme.primaryContainer),
-                contentAlignment = Alignment.Center
-            ) {
-                Text(
-                    text = avatarList.getOrElse(avatarId) { avatarList[0] }.emoji,
-                    fontSize = 36.sp
-                )
-            }
+            BasReliefAvatar(
+                emoji = avatarList.getOrElse(avatarId) { avatarList[0] }.emoji,
+                size = 80.dp
+            )
         }
 
         // Avatar grid
@@ -150,7 +143,11 @@ fun ProfileScreen(navController: NavHostController, isFirstTime: Boolean = false
                         .clickable { avatarId = avatar.id },
                     contentAlignment = Alignment.Center
                 ) {
-                    Text(text = avatar.emoji, fontSize = 24.sp)
+                    BasReliefAvatar(
+                        emoji = avatar.emoji,
+                        size = 44.dp,
+                        animate = selected
+                    )
                 }
             }
         }

@@ -48,6 +48,16 @@ fun GameScreen(
     val progressRepo = remember { ProgressRepository(context) }
     val scope = rememberCoroutineScope()
     var isFavorite by remember { mutableStateOf(false) }
+    val lives by progressRepo.livesFlow.collectAsState(initial = 3)
+    val cooldownUntil by progressRepo.cooldownUntilFlow.collectAsState(initial = 0L)
+
+    // Safety net: if cooldown is active, pop back immediately
+    LaunchedEffect(lives, cooldownUntil) {
+        if (lives <= 0 && cooldownUntil > System.currentTimeMillis()) {
+            navController.popBackStack()
+        }
+    }
+
     LaunchedEffect(levelId) {
         val progress = progressRepo.loadProgress()
         isFavorite = levelId in progress.favoriteLevels

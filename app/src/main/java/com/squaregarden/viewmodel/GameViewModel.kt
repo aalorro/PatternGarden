@@ -482,15 +482,18 @@ class GameViewModel(
         val current = _state.value
         if (current.phase != GamePhase.PLAYING) return
 
-        // Passthrough skip: jump over completed goal cells and land on the other side
+        // Passthrough skip: jump over completed goal cells and frozen tiles
         val borderedCells = allGoalCells()
-        if (current.passthroughActive && to in borderedCells && from !in borderedCells) {
+        val toFrozen = current.board.tileAt(to.row, to.col).frozen
+        if (current.passthroughActive && (to in borderedCells || toFrozen) && from !in borderedCells) {
             val dr = to.row - from.row
             val dc = to.col - from.col
             var r = to.row; var c = to.col
-            while (CellPos(r, c) in borderedCells) { r += dr; c += dc }
+            while (current.board.isValidCell(r, c) &&
+                (CellPos(r, c) in borderedCells || current.board.tileAt(r, c).frozen)) {
+                r += dr; c += dc
+            }
             if (!current.board.isValidCell(r, c)) return
-            if (current.board.tileAt(r, c).frozen) return
             executePassthroughSwap(from, CellPos(r, c))
             return
         }
@@ -564,12 +567,16 @@ class GameViewModel(
                 // Passthrough skip for tap-swap
                 val borderedCells = allGoalCells()
                 val sel = current.selectedCell
-                if (current.passthroughActive && tapped in borderedCells && sel !in borderedCells) {
+                val tappedFrozen = current.board.tileAt(tapped.row, tapped.col).frozen
+                if (current.passthroughActive && (tapped in borderedCells || tappedFrozen) && sel !in borderedCells) {
                     val dr = tapped.row - sel.row
                     val dc = tapped.col - sel.col
                     var r = tapped.row; var c = tapped.col
-                    while (CellPos(r, c) in borderedCells) { r += dr; c += dc }
-                    if (current.board.isValidCell(r, c) && !current.board.tileAt(r, c).frozen) {
+                    while (current.board.isValidCell(r, c) &&
+                        (CellPos(r, c) in borderedCells || current.board.tileAt(r, c).frozen)) {
+                        r += dr; c += dc
+                    }
+                    if (current.board.isValidCell(r, c)) {
                         executePassthroughSwap(sel, CellPos(r, c))
                     }
                 } else {
@@ -887,7 +894,8 @@ class GameViewModel(
         if (current.phase != GamePhase.PLAYING) return
         if (current.passthroughActive) {
             _state.value = current.copy(passthroughActive = false)
-        } else if (current.passthroughTokens > 0 && current.completedGoalIds.isNotEmpty()) {
+        } else if (current.passthroughTokens > 0 &&
+            (current.completedGoalIds.isNotEmpty() || current.board.tiles.any { row -> row.any { it.frozen } })) {
             _state.value = current.copy(
                 passthroughActive = true, shuffleReady = false, unfreezeMode = false,
                 selectedCell = null, hintCells = emptySet()

@@ -71,6 +71,9 @@ fun LevelSelectScreen(worldId: Int, navController: NavHostController) {
     val lastWonLevel by progressRepo.lastWonLevelFlow.collectAsState(initial = -1)
     val profile by profileRepo.profileFlow.collectAsState(initial = null)
     val difficulty = profile?.let { Difficulty.fromId(it.difficulty) }
+    val lives by progressRepo.livesFlow.collectAsState(initial = 3)
+    val cooldownUntil by progressRepo.cooldownUntilFlow.collectAsState(initial = 0L)
+    val cooldownActive = lives <= 0 && cooldownUntil > System.currentTimeMillis()
 
     LaunchedEffect(Unit) {
         progress = progressRepo.loadProgress()
@@ -150,14 +153,14 @@ fun LevelSelectScreen(worldId: Int, navController: NavHostController) {
 
                 Card(
                     onClick = {
-                        if (unlocked) {
+                        if (unlocked && !cooldownActive) {
                             navController.navigate(Screen.Game.create(level.id))
                         }
                     },
                     modifier = Modifier
                         .fillMaxWidth()
                         .aspectRatio(1f)
-                        .alpha(if (unlocked) 1f else 0.4f),
+                        .alpha(if (unlocked && !cooldownActive) 1f else if (unlocked) 0.6f else 0.4f),
                     shape = RoundedCornerShape(18.dp),
                     colors = CardDefaults.cardColors(
                         containerColor = if (isLastWon)

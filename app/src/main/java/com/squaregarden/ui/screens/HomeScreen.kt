@@ -1,6 +1,7 @@
 package com.squaregarden.ui.screens
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -19,6 +20,7 @@ import com.squaregarden.data.ProgressRepository
 import com.squaregarden.model.Difficulty
 import com.squaregarden.model.PlayerProgress
 import com.squaregarden.model.UserProfile
+import com.squaregarden.ui.components.BasReliefAvatar
 import com.squaregarden.ui.components.getAvatar
 import com.squaregarden.ui.components.LogoMark
 import com.squaregarden.ui.navigation.Screen
@@ -31,6 +33,9 @@ fun HomeScreen(navController: NavHostController) {
     val profileRepo = remember { ProfileRepository(context) }
     val totalStars by progressRepo.totalStarsFlow.collectAsState(initial = 0)
     val perfectGames by progressRepo.perfectGamesFlow.collectAsState(initial = 0)
+    val lives by progressRepo.livesFlow.collectAsState(initial = 3)
+    val cooldownUntil by progressRepo.cooldownUntilFlow.collectAsState(initial = 0L)
+    val cooldownActive = lives <= 0 && cooldownUntil > System.currentTimeMillis()
     var profile by remember { mutableStateOf(UserProfile()) }
     var currentWorld by remember { mutableIntStateOf(1) }
 
@@ -73,19 +78,14 @@ fun HomeScreen(navController: NavHostController) {
             }
 
             // Avatar button
-            Button(
-                onClick = { navController.navigate(Screen.Profile.route) },
-                modifier = Modifier.size(52.dp),
-                shape = CircleShape,
-                contentPadding = PaddingValues(0.dp),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = MaterialTheme.colorScheme.primary
-                ),
-                elevation = ButtonDefaults.buttonElevation(defaultElevation = 4.dp)
+            Box(
+                modifier = Modifier
+                    .size(56.dp)
+                    .clickable { navController.navigate(Screen.Profile.route) }
             ) {
-                Text(
-                    text = getAvatar(profile.avatarId).emoji,
-                    fontSize = 28.sp
+                BasReliefAvatar(
+                    emoji = getAvatar(profile.avatarId).emoji,
+                    size = 56.dp
                 )
             }
         }
@@ -177,10 +177,11 @@ fun HomeScreen(navController: NavHostController) {
                 colors = ButtonDefaults.buttonColors(
                     containerColor = MaterialTheme.colorScheme.primary
                 ),
-                elevation = ButtonDefaults.buttonElevation(defaultElevation = 4.dp)
+                elevation = ButtonDefaults.buttonElevation(defaultElevation = 4.dp),
+                enabled = !cooldownActive
             ) {
                 Text(
-                    text = "\u25B6  Play",
+                    text = if (cooldownActive) "\u2764\uFE0F  Resting..." else "\u25B6  Play",
                     fontSize = 18.sp,
                     fontWeight = FontWeight.Bold
                 )
@@ -191,7 +192,8 @@ fun HomeScreen(navController: NavHostController) {
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(48.dp),
-                shape = RoundedCornerShape(50)
+                shape = RoundedCornerShape(50),
+                enabled = !cooldownActive
             ) {
                 Text("Worlds", fontSize = 16.sp, fontWeight = FontWeight.Bold)
             }

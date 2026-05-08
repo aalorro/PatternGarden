@@ -70,16 +70,12 @@ fun PlayerBadge(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(if (isCompact) 4.dp else 6.dp)
         ) {
-            // Avatar circle
-            Box(
-                modifier = Modifier
-                    .size(if (isCompact) 34.dp else 60.dp)
-                    .clip(CircleShape)
-                    .background(MaterialTheme.colorScheme.primaryContainer),
-                contentAlignment = Alignment.Center
-            ) {
-                Text(text = avatarEmoji, fontSize = if (isCompact) 18.sp else 32.sp)
-            }
+            // Avatar circle (bas-relief)
+            BasReliefAvatar(
+                emoji = avatarEmoji,
+                size = if (isCompact) 38.dp else 64.dp,
+                animate = false
+            )
 
             // Level + Games + Stars + Lives stacked
             Column {
