@@ -55,39 +55,21 @@ fun HomeScreen(navController: NavHostController) {
             .padding(horizontal = 20.dp, vertical = 24.dp)
     ) {
         // Top greeting bar
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceBetween
-        ) {
-            Column {
-                Text(
-                    text = "Welcome back,",
-                    fontSize = 20.sp,
-                    fontWeight = FontWeight.SemiBold,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-                Text(
-                    text = "${profile.username.ifBlank { "Gardener" }}!",
-                    fontFamily = DisplayFontFamily,
-                    fontSize = 36.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.onBackground,
-                    maxLines = 1
-                )
-            }
-
-            // Avatar button
-            Box(
-                modifier = Modifier
-                    .size(56.dp)
-                    .clickable { navController.navigate(Screen.Profile.route) }
-            ) {
-                BasReliefAvatar(
-                    emoji = getAvatar(profile.avatarId).emoji,
-                    size = 56.dp
-                )
-            }
+        Column {
+            Text(
+                text = "Welcome back,",
+                fontSize = 20.sp,
+                fontWeight = FontWeight.SemiBold,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+            Text(
+                text = "${profile.username.ifBlank { "Gardener" }}!",
+                fontFamily = DisplayFontFamily,
+                fontSize = 36.sp,
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.onBackground,
+                maxLines = 1
+            )
         }
 
         // Star count chip

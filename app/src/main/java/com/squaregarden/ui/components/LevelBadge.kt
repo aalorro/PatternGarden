@@ -68,10 +68,10 @@ fun PlayerBadge(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(if (isCompact) 4.dp else 6.dp)
         ) {
-            // Avatar (compact)
+            // Avatar
             BasReliefAvatar(
                 emoji = avatarEmoji,
-                size = if (isCompact) 32.dp else 48.dp,
+                size = if (isCompact) 38.dp else 58.dp,
                 animate = false
             )
 
