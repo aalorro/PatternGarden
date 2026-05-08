@@ -50,13 +50,16 @@ object PlayGamesManager {
         Log.d(TAG, "Submitted highestLevel=$level for ${difficulty.name}")
     }
 
+    private const val RC_LEADERBOARD_UI = 9004
+
     fun showAllLeaderboards(activity: Activity) {
         Log.d(TAG, "Requesting leaderboards intent...")
         PlayGames.getLeaderboardsClient(activity)
             .allLeaderboardsIntent
             .addOnSuccessListener { intent ->
-                Log.d(TAG, "Leaderboards intent received, launching...")
-                activity.startActivity(intent)
+                Log.d(TAG, "Leaderboards intent received: action=${intent.action}, component=${intent.component}, flags=${intent.flags}")
+                @Suppress("DEPRECATION")
+                activity.startActivityForResult(intent, RC_LEADERBOARD_UI)
             }
             .addOnFailureListener { e ->
                 Log.e(TAG, "Failed to open leaderboards: ${e.message}", e)
