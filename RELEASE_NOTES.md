@@ -43,7 +43,20 @@ FEATURES
 
 ---
 
-## Release Notes — Version 1.3.0 (What's New)
+## Release Notes — Version 1.3.1 (What's New)
+
+What's new in 1.3.1:
+
+- Token tiles for all power-ups — Shuffle, Passthrough, and Unfreeze tiles now appear on World 4+ boards. Capture them in completed goals to earn tokens!
+- White dotted borders on completed goals — easier to tell apart from frozen tiles
+- Leaderboard score sync — existing progress now shows up immediately on the leaderboard
+- Scrollable win screen — all rewards reachable on small phones
+- Fixed leaderboard not opening on some devices
+- Fixed PlayerBadge overlapping screen titles on mobile
+
+Happy gardening!
+
+## Release Notes — Version 1.3.0
 
 What's new in 1.3.0:
 
@@ -57,5 +70,3 @@ What's new in 1.3.0:
 - Leaderboard opt-in toggle in Profile
 - Dark theme improvements — all labels now readable
 - Bug fixes: cooldown bypass, redo move reset, duplicate avatar
-
-Happy gardening!

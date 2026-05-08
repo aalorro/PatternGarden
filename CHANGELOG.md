@@ -2,6 +2,21 @@
 
 All notable changes to Square Garden are documented in this file.
 
+## [1.3.1] - 2026-05-08 (Build 6)
+
+### New Features
+- **Token tiles for all power-ups** — Shuffle, Passthrough, and Unfreeze token tiles now appear randomly on World 4+ boards (~25% chance each, independently). Capture them by completing goals that contain them. A single tile can hold multiple token types.
+- **Leaderboard score sync** — Tapping the Leaderboards button now submits your current total stars and highest level, so existing progress appears on the board immediately.
+
+### UI/UX
+- **White dotted border on completed goals** — Completed goal cells now show a white dotted outline on top of the green/cyan border, making them clearly distinguishable from frozen tiles.
+- **Scrollable win overlay** — Win celebration screen with many token awards (e.g. perfect game) is now scrollable so buttons are always reachable on mobile phones.
+- **Header text no longer hidden by PlayerBadge** — Added padding on HomeScreen greeting and LevelSelectScreen world title to prevent overlap with the top-right PlayerBadge on mobile.
+
+### Bug Fixes
+- Fixed Google Play Games leaderboard not opening (switched to `startActivityForResult` for the leaderboard intent)
+- Fixed leaderboard sign-in requiring a second tap to open (now auto-opens after sign-in)
+
 ## [1.3.0] - 2026-05-08 (Build 5)
 
 ### New Features
