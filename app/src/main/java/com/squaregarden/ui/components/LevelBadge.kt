@@ -3,13 +3,11 @@ package com.squaregarden.ui.components
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
@@ -57,10 +55,10 @@ fun PlayerBadge(
     Box(modifier = modifier) {
         Row(
             modifier = Modifier
-                .shadow(4.dp, RoundedCornerShape(if (isCompact) 12.dp else 16.dp))
+                .shadow(4.dp, RoundedCornerShape(if (isCompact) 10.dp else 16.dp))
                 .background(
                     MaterialTheme.colorScheme.surface,
-                    RoundedCornerShape(if (isCompact) 12.dp else 16.dp)
+                    RoundedCornerShape(if (isCompact) 10.dp else 16.dp)
                 )
                 .clickable { showMenu = true }
                 .padding(
@@ -70,52 +68,51 @@ fun PlayerBadge(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(if (isCompact) 4.dp else 6.dp)
         ) {
-            // Avatar circle (bas-relief)
+            // Avatar (compact)
             BasReliefAvatar(
                 emoji = avatarEmoji,
-                size = if (isCompact) 38.dp else 64.dp,
+                size = if (isCompact) 32.dp else 48.dp,
                 animate = false
             )
 
-            // Level + Games + Stars + Lives stacked
-            Column {
-                Text(
-                    text = "Lv $playerLevel",
-                    fontSize = if (isCompact) 15.sp else 26.sp,
-                    fontWeight = FontWeight.ExtraBold,
-                    color = MaterialTheme.colorScheme.primary
-                )
-                Text(
-                    text = "$gamesPlayed played",
-                    fontSize = if (isCompact) 9.sp else 12.sp,
-                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
-                )
-                Text(
-                    text = "$displayedStars ★",
-                    fontSize = if (isCompact) 13.sp else 22.sp,
-                    fontWeight = FontWeight.ExtraBold,
-                    color = Color(0xFFD4A017),
-                    modifier = Modifier.onGloballyPositioned { coords ->
-                        val pos = coords.positionInWindow()
-                        val size = coords.size
-                        onStarPositioned?.invoke(
-                            Offset(pos.x + size.width / 2f, pos.y + size.height / 2f)
-                        )
-                    }
-                )
-                Text(
-                    text = "\u2764".repeat(lives),
-                    fontSize = if (isCompact) 11.sp else 16.sp,
-                    color = Color(0xFFE53935)
-                )
-                if (perfectGames > 0) {
-                    Text(
-                        text = "\uD83C\uDFC6 $perfectGames",
-                        fontSize = if (isCompact) 10.sp else 14.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = Color(0xFFD4A017)
+            // Level
+            Text(
+                text = "Lv$playerLevel",
+                fontSize = if (isCompact) 13.sp else 20.sp,
+                fontWeight = FontWeight.ExtraBold,
+                color = MaterialTheme.colorScheme.primary
+            )
+
+            // Stars (with position tracking)
+            Text(
+                text = "$displayedStars\u2605",
+                fontSize = if (isCompact) 12.sp else 18.sp,
+                fontWeight = FontWeight.ExtraBold,
+                color = Color(0xFFD4A017),
+                modifier = Modifier.onGloballyPositioned { coords ->
+                    val pos = coords.positionInWindow()
+                    val size = coords.size
+                    onStarPositioned?.invoke(
+                        Offset(pos.x + size.width / 2f, pos.y + size.height / 2f)
                     )
                 }
+            )
+
+            // Lives
+            Text(
+                text = "\u2764".repeat(lives),
+                fontSize = if (isCompact) 10.sp else 14.sp,
+                color = Color(0xFFE53935)
+            )
+
+            // Perfect games (only if > 0)
+            if (perfectGames > 0) {
+                Text(
+                    text = "\uD83C\uDFC6$perfectGames",
+                    fontSize = if (isCompact) 10.sp else 14.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = Color(0xFFD4A017)
+                )
             }
         }
 

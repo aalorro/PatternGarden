@@ -1,5 +1,6 @@
 package com.squaregarden.ui.components
 
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -13,13 +14,38 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextDecoration
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.squaregarden.model.CellPos
 import com.squaregarden.model.GameDifficulty
 import com.squaregarden.model.Goal
-import com.squaregarden.model.TileColor
 import com.squaregarden.ui.theme.*
+
+/** Extract the cell positions to draw for any goal type. */
+private fun Goal.cellPositions(): List<CellPos> = when (this) {
+    is Goal.Line -> (0 until length).map { CellPos(0, it) }
+    is Goal.Square -> listOf(CellPos(0, 0), CellPos(0, 1), CellPos(1, 0), CellPos(1, 1))
+    is Goal.Shape -> shapeType.offsets
+}
+
+/** Compute (rows, cols) needed to draw this goal's shape. */
+private fun Goal.gridBounds(): Pair<Int, Int> {
+    val cells = cellPositions()
+    return Pair(cells.maxOf { it.row } + 1, cells.maxOf { it.col } + 1)
+}
+
+/** Determine grid layout (layoutRows, layoutCols) based on goal count. */
+private fun gridLayout(count: Int): Pair<Int, Int> = when (count) {
+    1 -> 1 to 1
+    2 -> 1 to 2
+    3 -> 1 to 3
+    4 -> 2 to 2
+    5 -> 2 to 3
+    6 -> 2 to 3
+    7 -> 2 to 4
+    else -> 2 to 4
+}
 
 @Composable
 fun GoalPanel(
@@ -42,54 +68,47 @@ fun GoalPanel(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(
-                    horizontal = if (isSmallScreen) 10.dp else 14.dp,
+                    horizontal = if (isSmallScreen) 8.dp else 14.dp,
                     vertical = if (isSmallScreen) 6.dp else 10.dp
                 ),
-            verticalArrangement = Arrangement.spacedBy(if (isSmallScreen) 1.dp else 3.dp),
-            horizontalAlignment = Alignment.Start
+            verticalArrangement = Arrangement.spacedBy(if (isSmallScreen) 3.dp else 5.dp)
         ) {
-            Text(
-                text = "GOALS",
-                fontSize = if (isSmallScreen) 12.sp else 16.sp,
-                fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                letterSpacing = 0.8.sp
-            )
-            goals.forEach { goal ->
-                val completed = goal.id in completedIds
+            // Goal grid
+            val (layoutRows, layoutCols) = gridLayout(goals.size)
+            val rowHeight: Dp = if (layoutRows == 1) {
+                if (isSmallScreen) 48.dp else 64.dp
+            } else {
+                if (isSmallScreen) 36.dp else 48.dp
+            }
+
+            val rows = goals.chunked(layoutCols)
+            for (row in rows) {
                 Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(if (isSmallScreen) 4.dp else 6.dp)
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(rowHeight),
+                    horizontalArrangement = Arrangement.spacedBy(
+                        if (isSmallScreen) 4.dp else 6.dp
+                    )
                 ) {
-                    // Color swatch
-                    Box(
-                        modifier = Modifier
-                            .size(if (isSmallScreen) 14.dp else 18.dp)
-                            .clip(RoundedCornerShape(if (isSmallScreen) 4.dp else 5.dp))
-                            .background(goal.color.toComposeColor())
-                    )
-                    Text(
-                        text = goal.description,
-                        fontSize = if (isSmallScreen) 12.sp else 15.sp,
-                        fontWeight = FontWeight.SemiBold,
-                        color = if (completed)
-                            MaterialTheme.colorScheme.onSurfaceVariant
-                        else
-                            MaterialTheme.colorScheme.onBackground,
-                        textDecoration = if (completed) TextDecoration.LineThrough else TextDecoration.None
-                    )
-                    if (completed) {
-                        Text(
-                            text = "\u2714",
-                            fontSize = if (isSmallScreen) 12.sp else 15.sp,
-                            fontWeight = FontWeight.Bold,
-                            color = Color(0xFF43A047)
+                    for (goal in row) {
+                        GoalBox(
+                            goal = goal,
+                            completed = goal.id in completedIds,
+                            modifier = Modifier
+                                .weight(1f)
+                                .fillMaxHeight()
                         )
+                    }
+                    // Spacer fillers for uneven last rows
+                    val missing = layoutCols - row.size
+                    repeat(missing) {
+                        Spacer(modifier = Modifier.weight(1f))
                     }
                 }
             }
 
-            // Moves + Difficulty row below goals
+            // Moves + Difficulty row (unchanged)
             if (movesRemaining >= 0) {
                 Spacer(modifier = Modifier.height(if (isSmallScreen) 2.dp else 4.dp))
                 Row(
@@ -133,6 +152,63 @@ fun GoalPanel(
                         )
                     }
                 }
+            }
+        }
+    }
+}
+
+@Composable
+private fun GoalBox(
+    goal: Goal,
+    completed: Boolean,
+    modifier: Modifier = Modifier
+) {
+    val cells = goal.cellPositions()
+    val (shapeRows, shapeCols) = goal.gridBounds()
+    val tileColor = goal.color
+    val bgColor = MaterialTheme.colorScheme.surfaceVariant
+    val dimColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.55f)
+
+    Box(
+        modifier = modifier
+            .clip(RoundedCornerShape(8.dp))
+            .background(bgColor),
+        contentAlignment = Alignment.Center
+    ) {
+        Canvas(modifier = Modifier.fillMaxSize().padding(4.dp)) {
+            val availW = size.width
+            val availH = size.height
+            val cellSize = minOf(availW / shapeCols, availH / shapeRows)
+            val totalW = shapeCols * cellSize
+            val totalH = shapeRows * cellSize
+            val offsetX = (availW - totalW) / 2f
+            val offsetY = (availH - totalH) / 2f
+            val cornerR = cellSize * 0.18f
+
+            for (cell in cells) {
+                val x = offsetX + cell.col * cellSize
+                val y = offsetY + cell.row * cellSize
+                drawEmbossedTile(tileColor, x, y, cellSize, cornerR)
+                if (cellSize > 20f) {
+                    drawTileMotif(tileColor, x, y, cellSize)
+                }
+            }
+        }
+
+        // Completed overlay
+        if (completed) {
+            Box(
+                modifier = Modifier
+                    .matchParentSize()
+                    .background(dimColor, RoundedCornerShape(8.dp)),
+                contentAlignment = Alignment.Center
+            ) {
+                Text(
+                    text = "\u2714",
+                    fontSize = 20.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = Color(0xFF43A047)
+                )
             }
         }
     }
