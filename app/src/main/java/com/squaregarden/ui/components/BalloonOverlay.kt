@@ -34,15 +34,17 @@ private val balloonColors = listOf(
 )
 
 @Composable
-fun BalloonOverlay(stars: Int) {
-    val balloonCount = when (stars) {
-        3 -> 80
-        2 -> 50
+fun BalloonOverlay(stars: Int, perfectGame: Boolean = false) {
+    val balloonCount = when {
+        perfectGame -> 120
+        stars == 3 -> 80
+        stars == 2 -> 50
         else -> 30
     }
-    val durationMs = when (stars) {
-        3 -> 8000
-        2 -> 7000
+    val durationMs = when {
+        perfectGame -> 34000
+        stars == 3 -> 8000
+        stars == 2 -> 7000
         else -> 6000
     }
 

@@ -41,15 +41,17 @@ private val confettiColors = listOf(
 )
 
 @Composable
-fun ConfettiOverlay(stars: Int) {
-    val particleCount = when (stars) {
-        3 -> 300
-        2 -> 180
+fun ConfettiOverlay(stars: Int, perfectGame: Boolean = false) {
+    val particleCount = when {
+        perfectGame -> 400
+        stars == 3 -> 300
+        stars == 2 -> 180
         else -> 100
     }
-    val durationMs = when (stars) {
-        3 -> 8000
-        2 -> 6500
+    val durationMs = when {
+        perfectGame -> 34000
+        stars == 3 -> 8000
+        stars == 2 -> 6500
         else -> 5000
     }
 

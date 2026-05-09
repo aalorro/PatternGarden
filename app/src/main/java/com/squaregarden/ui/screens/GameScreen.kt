@@ -287,9 +287,9 @@ fun GameScreen(
         )
 
         // Celebration layers in the foreground, raining down over the card
-        ConfettiOverlay(stars = stars)
-        BalloonOverlay(stars = stars)
-        StarBurstOverlay(stars = stars)
+        ConfettiOverlay(stars = stars, perfectGame = state.perfectGame)
+        BalloonOverlay(stars = stars, perfectGame = state.perfectGame)
+        StarBurstOverlay(stars = stars, perfectGame = state.perfectGame)
     }
 
     // Life restored celebration splash

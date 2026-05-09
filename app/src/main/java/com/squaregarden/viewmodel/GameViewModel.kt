@@ -454,14 +454,59 @@ class GameViewModel(
             _state.value = _state.value.copy(board = displayBoard)
             delay(143)
         }
-        // Settle phase: ~2 swaps over 0.5s
-        repeat(2) {
-            displayBoard = randomSwap(displayBoard)
+        // Settle phase: progressively place tiles into their final positions
+        val misplaced = findMisplacedTiles(displayBoard, finalBoard).toMutableList()
+        misplaced.shuffle()
+        val settleCount = misplaced.size.coerceAtMost(8)
+        for (idx in 0 until settleCount) {
+            displayBoard = placeCorrectTile(displayBoard, finalBoard, misplaced[idx])
             _state.value = _state.value.copy(board = displayBoard)
-            delay(250)
+            delay(60L + idx * 20L)
         }
-        // Snap to final solvable board
+        // Final board — should be very close now, seamless transition
         _state.value = _state.value.copy(board = finalBoard, phase = GamePhase.PLAYING)
+    }
+
+    /** Find positions where displayBoard differs from finalBoard. */
+    private fun findMisplacedTiles(display: Board, target: Board): List<Pair<Int, Int>> {
+        val result = mutableListOf<Pair<Int, Int>>()
+        for (r in 0 until display.height) {
+            for (c in 0 until display.width) {
+                if (display.isVoid(r, c)) continue
+                if (display.tileAt(r, c).color != target.tileAt(r, c).color) {
+                    result.add(r to c)
+                }
+            }
+        }
+        return result
+    }
+
+    /** Swap the tile at pos with whatever tile currently holds the correct color for that pos. */
+    private fun placeCorrectTile(display: Board, target: Board, pos: Pair<Int, Int>): Board {
+        val (tr, tc) = pos
+        val targetColor = target.tileAt(tr, tc).color
+        if (display.tileAt(tr, tc).color == targetColor) return display
+        // Find a tile that has the target color but is in the wrong place
+        for (r in 0 until display.height) {
+            for (c in 0 until display.width) {
+                if (display.isVoid(r, c)) continue
+                if (r == tr && c == tc) continue
+                if (display.tileAt(r, c).color == targetColor && display.tileAt(r, c).color != target.tileAt(r, c).color) {
+                    return display.withSwap(tr, tc, r, c)
+                }
+            }
+        }
+        // Fallback: just swap with any tile that has the right color
+        for (r in 0 until display.height) {
+            for (c in 0 until display.width) {
+                if (display.isVoid(r, c)) continue
+                if (r == tr && c == tc) continue
+                if (display.tileAt(r, c).color == targetColor) {
+                    return display.withSwap(tr, tc, r, c)
+                }
+            }
+        }
+        return display
     }
 
     private fun randomizeBoard(board: Board): Board {
@@ -767,7 +812,7 @@ class GameViewModel(
                     isPerfect = movesUsed <= current.level.goals.size && level.world >= 5
                     val perfectMultiplier = if (isPerfect) 2f else 1f
                     starsAwarded = (baseStars * difficulty.starMultiplier * gameDiff.starMultiplier * perfectMultiplier).roundToInt()
-                    MusicManager.startWinMusic(context, loop = isPerfect)
+                    MusicManager.startWinMusic(context, perfectGame = isPerfect)
                     val oldTotal = progressRepo.totalStarsFlow.first()
                     unlockedWorld = detectNewWorldUnlock(oldTotal, oldTotal + starsAwarded)
                     winResultCommitted = false
@@ -885,7 +930,7 @@ class GameViewModel(
                     isPerfect = movesUsed <= current.level.goals.size && level.world >= 5
                     val perfectMultiplier = if (isPerfect) 2f else 1f
                     starsAwarded = (baseStars * difficulty.starMultiplier * gameDiff.starMultiplier * perfectMultiplier).roundToInt()
-                    MusicManager.startWinMusic(context, loop = isPerfect)
+                    MusicManager.startWinMusic(context, perfectGame = isPerfect)
                     val oldTotal = progressRepo.totalStarsFlow.first()
                     unlockedWorld = detectNewWorldUnlock(oldTotal, oldTotal + starsAwarded)
                     winResultCommitted = false

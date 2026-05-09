@@ -30,15 +30,17 @@ private val burstOrange = Color(0xFFFFAB00)
 private val burstWhite = Color(0xFFFFFFFF)
 
 @Composable
-fun StarBurstOverlay(stars: Int) {
-    val starCount = when (stars) {
-        3 -> 90
-        2 -> 60
+fun StarBurstOverlay(stars: Int, perfectGame: Boolean = false) {
+    val starCount = when {
+        perfectGame -> 120
+        stars == 3 -> 90
+        stars == 2 -> 60
         else -> 40
     }
-    val durationMs = when (stars) {
-        3 -> 8000
-        2 -> 6500
+    val durationMs = when {
+        perfectGame -> 34000
+        stars == 3 -> 8000
+        stars == 2 -> 6500
         else -> 5000
     }
 

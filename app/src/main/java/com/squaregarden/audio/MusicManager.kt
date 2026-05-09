@@ -66,24 +66,19 @@ object MusicManager {
 
     /**
      * Start win celebration music from the track.
-     * @param loop true for perfect-game (loops dedicated segment until stopped),
-     *             false for regular win (random segment, ~8 sec with 1-sec fade-out).
+     * @param perfectGame true for perfect-game (plays dedicated segment to end),
+     *                    false for regular win (random segment, ~8 sec with 1-sec fade-out).
      */
-    fun startWinMusic(context: Context, loop: Boolean) {
+    fun startWinMusic(context: Context, perfectGame: Boolean) {
         if (!musicEnabled) return
         stopWinMusic()
         try {
             winPlayer = MediaPlayer.create(context, R.raw.perfect_game_music)?.apply {
                 setVolume(0.7f, 0.7f)
-                if (loop) {
-                    // Perfect game: play from dedicated segment, loop back on end
+                if (perfectGame) {
+                    // Perfect game: play from dedicated segment to end of track
                     seekTo(PERFECT_SEGMENT_START)
-                    setOnCompletionListener { mp ->
-                        try {
-                            mp.seekTo(PERFECT_SEGMENT_START)
-                            mp.start()
-                        } catch (_: Exception) {}
-                    }
+                    setOnCompletionListener { stopWinMusic() }
                 } else {
                     // Regular win: pick a random segment
                     seekTo(winSegments.random())
@@ -91,7 +86,7 @@ object MusicManager {
                 start()
             }
         } catch (_: Exception) {}
-        if (!loop) {
+        if (!perfectGame) {
             handler.postDelayed({ fadeOutWinMusic() }, WIN_PLAY_MS - WIN_FADE_MS)
         }
     }
