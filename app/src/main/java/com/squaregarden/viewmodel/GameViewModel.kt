@@ -940,6 +940,8 @@ class GameViewModel(
     fun playSwapSound() { audioManager.playSwap() }
     fun playMatchSound() { audioManager.playMatch() }
     fun playWinSound(stars: Int = 1) { audioManager.playWin(stars) }
+    fun playPerfectGameSound() { audioManager.playPerfectGame() }
+    fun playWorldUnlockSound() { audioManager.playWorldUnlock() }
 
     fun advanceTutorial() {
         val current = _state.value

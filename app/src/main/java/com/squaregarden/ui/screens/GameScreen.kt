@@ -247,12 +247,14 @@ fun GameScreen(
         }
     }
 
-    // Win overlay with confetti + star trail + dialog (all in same window layer)
+    // Win overlay with confetti + balloons + star burst + star trail + dialog
     if (state.phase == GamePhase.WON) {
         val stars = state.starsAwarded
 
-        // Confetti behind everything
+        // Visual celebration layers behind the card
         ConfettiOverlay(stars = stars)
+        BalloonOverlay(stars = stars)
+        StarBurstOverlay(stars = stars)
 
         // Fullscreen overlay instead of Dialog so star trail renders on top
         WinOverlay(
@@ -266,6 +268,8 @@ fun GameScreen(
             perfectGame = state.perfectGame,
             onStarLanded = { viewModel.playStarCollect() },
             onAllStarsLanded = { viewModel.commitWinResult() },
+            onPerfectGameSound = { viewModel.playPerfectGameSound() },
+            onWorldUnlockSound = { viewModel.playWorldUnlockSound() },
             onNext = if (state.level.id < 90) {
                 {
                     viewModel.commitWinResult()
@@ -389,7 +393,7 @@ fun GameScreen(
 }
 
 @Composable
-private fun WinOverlay(stars: Int, levelName: String, unlockedWorldName: String? = null, shuffleTokenAwarded: Boolean = false, passthroughTokenAwarded: Boolean = false, unfreezeTokenAwarded: Boolean = false, redoTokenAwarded: Boolean = false, perfectGame: Boolean = false, onStarLanded: () -> Unit = {}, onAllStarsLanded: () -> Unit = {}, onNext: (() -> Unit)?, onMenu: () -> Unit) {
+private fun WinOverlay(stars: Int, levelName: String, unlockedWorldName: String? = null, shuffleTokenAwarded: Boolean = false, passthroughTokenAwarded: Boolean = false, unfreezeTokenAwarded: Boolean = false, redoTokenAwarded: Boolean = false, perfectGame: Boolean = false, onStarLanded: () -> Unit = {}, onAllStarsLanded: () -> Unit = {}, onPerfectGameSound: () -> Unit = {}, onWorldUnlockSound: () -> Unit = {}, onNext: (() -> Unit)?, onMenu: () -> Unit) {
     // Pulsing scale animation for the star display
     val infiniteTransition = rememberInfiniteTransition(label = "starPulse")
     val starScale by infiniteTransition.animateFloat(
@@ -408,6 +412,13 @@ private fun WinOverlay(stars: Int, levelName: String, unlockedWorldName: String?
         animationSpec = spring(dampingRatio = 0.5f, stiffness = 300f),
         label = "unlockScale"
     )
+    // Play world unlock sound when world unlocked
+    LaunchedEffect(unlockedWorldName) {
+        if (unlockedWorldName != null) {
+            delay(400)
+            onWorldUnlockSound()
+        }
+    }
 
     // Fullscreen overlay (same window layer — not a Dialog)
     Box(
@@ -688,6 +699,7 @@ private fun WinOverlay(stars: Int, levelName: String, unlockedWorldName: String?
                         val prior = listOf(shuffleTokenAwarded, passthroughTokenAwarded, unfreezeTokenAwarded, redoTokenAwarded).count { it }
                         delay(800L + prior * 800L)
                         pgScale.animateTo(1f, animationSpec = spring(dampingRatio = 0.4f, stiffness = 250f))
+                        onPerfectGameSound()
                     }
                     Spacer(modifier = Modifier.height(6.dp))
                     Card(

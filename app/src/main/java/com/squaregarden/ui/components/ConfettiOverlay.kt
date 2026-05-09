@@ -8,9 +8,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.drawscope.rotate
 import kotlin.math.*
 import kotlin.random.Random
+
+private enum class ConfettiShape { RECT, CIRCLE, TRIANGLE }
 
 private data class ConfettiParticle(
     val x: Float,         // 0..1 normalized start X
@@ -21,7 +24,9 @@ private data class ConfettiParticle(
     val rotSpeed: Float,   // rotation speed
     val width: Float,      // particle width dp
     val height: Float,     // particle height dp
-    val color: Color
+    val color: Color,
+    val shape: ConfettiShape,
+    val pulsePhase: Float  // phase offset for size pulsing
 )
 
 private val confettiColors = listOf(
@@ -38,17 +43,18 @@ private val confettiColors = listOf(
 @Composable
 fun ConfettiOverlay(stars: Int) {
     val particleCount = when (stars) {
-        3 -> 120
-        2 -> 70
-        else -> 35
+        3 -> 180
+        2 -> 100
+        else -> 50
     }
     val durationMs = when (stars) {
-        3 -> 4000
-        2 -> 3000
-        else -> 2000
+        3 -> 7000
+        2 -> 5500
+        else -> 4000
     }
 
     val particles = remember(stars) {
+        val shapes = ConfettiShape.entries
         List(particleCount) {
             ConfettiParticle(
                 x = Random.nextFloat(),
@@ -59,7 +65,9 @@ fun ConfettiOverlay(stars: Int) {
                 rotSpeed = 100f + Random.nextFloat() * 400f,
                 width = 4f + Random.nextFloat() * 6f,
                 height = 6f + Random.nextFloat() * 10f,
-                color = confettiColors[Random.nextInt(confettiColors.size)]
+                color = confettiColors[Random.nextInt(confettiColors.size)],
+                shape = shapes[Random.nextInt(shapes.size)],
+                pulsePhase = Random.nextFloat() * 2f * PI.toFloat()
             )
         }
     }
@@ -90,17 +98,45 @@ fun ConfettiOverlay(stars: Int) {
             val xSway = sin(staggeredT * 8f + p.phase) * p.amplitude * w
             val xPos = p.x * w + xSway
 
-            // Fade out in the last 20%
-            val alpha = if (t > 0.8f) (1f - t) / 0.2f else 1f
+            // Fade out in the last 15%
+            val alpha = if (t > 0.85f) (1f - t) / 0.15f else 1f
 
             val rot = p.rotation + p.rotSpeed * t
 
+            // Slight size pulsing
+            val pulse = 1f + 0.15f * sin(t * 12f + p.pulsePhase)
+            val pw = p.width * pulse
+            val ph = p.height * pulse
+
             rotate(degrees = rot, pivot = Offset(xPos, yPos)) {
-                drawRect(
-                    color = p.color.copy(alpha = alpha.coerceIn(0f, 1f)),
-                    topLeft = Offset(xPos - p.width / 2f, yPos - p.height / 2f),
-                    size = Size(p.width, p.height)
-                )
+                when (p.shape) {
+                    ConfettiShape.RECT -> {
+                        drawRect(
+                            color = p.color.copy(alpha = alpha.coerceIn(0f, 1f)),
+                            topLeft = Offset(xPos - pw / 2f, yPos - ph / 2f),
+                            size = Size(pw, ph)
+                        )
+                    }
+                    ConfettiShape.CIRCLE -> {
+                        drawCircle(
+                            color = p.color.copy(alpha = alpha.coerceIn(0f, 1f)),
+                            radius = (pw + ph) / 4f,
+                            center = Offset(xPos, yPos)
+                        )
+                    }
+                    ConfettiShape.TRIANGLE -> {
+                        val path = Path().apply {
+                            moveTo(xPos, yPos - ph / 2f)
+                            lineTo(xPos - pw / 2f, yPos + ph / 2f)
+                            lineTo(xPos + pw / 2f, yPos + ph / 2f)
+                            close()
+                        }
+                        drawPath(
+                            path = path,
+                            color = p.color.copy(alpha = alpha.coerceIn(0f, 1f))
+                        )
+                    }
+                }
             }
         }
     }

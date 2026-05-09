@@ -22,6 +22,8 @@ class AudioManager(private val context: Context) {
     private val starCollectPcm by lazy { SoundGenerator.generateStarCollect() }
     private val lifeRestoredPcm by lazy { SoundGenerator.generateLifeRestored() }
     private val shufflePcm by lazy { SoundGenerator.generateShuffle() }
+    private val perfectGamePcm by lazy { SoundGenerator.generatePerfectGame() }
+    private val worldUnlockPcm by lazy { SoundGenerator.generateWorldUnlock() }
 
     fun observeSettings(scope: CoroutineScope) {
         this.scope = scope
@@ -52,6 +54,8 @@ class AudioManager(private val context: Context) {
     fun playStarCollect() = play(starCollectPcm, 0.6f)
     fun playLifeRestored() = play(lifeRestoredPcm, 1f)
     fun playShuffle() = play(shufflePcm, 0.7f)
+    fun playPerfectGame() = play(perfectGamePcm, 1f)
+    fun playWorldUnlock() = play(worldUnlockPcm, 0.9f)
 
     fun release() {
         // No SoundPool to release anymore

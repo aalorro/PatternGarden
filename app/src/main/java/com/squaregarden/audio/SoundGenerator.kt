@@ -63,46 +63,128 @@ object SoundGenerator {
         env * 0.6f * (sine(660f, i) * 0.5f + sine(990f, i) * 0.3f + sine(1320f, i) * 0.2f)
     }
 
-    /** 1-star: modest ascending two-note chime */
-    fun generateWin1Star(): ShortArray = generatePcm(600) { i, total ->
-        val env = envelope(i, total, 20, 200)
-        val progress = i.toFloat() / total
-        val freq = if (progress < 0.5f) 440f else 554f // A4 → C#5
-        env * 0.5f * (sine(freq, i) * 0.7f + sine(freq * 2f, i) * 0.3f)
-    }
-
-    /** 2-star: three-note ascending arpeggio with shimmer */
-    fun generateWin2Star(): ShortArray = generatePcm(900) { i, total ->
-        val env = envelope(i, total, 20, 300)
+    /** 1-star: gentle 5-note ascending melody (~5 seconds) */
+    fun generateWin1Star(): ShortArray = generatePcm(5000) { i, total ->
+        val env = envelope(i, total, 40, 1200)
         val progress = i.toFloat() / total
         val freq = when {
-            progress < 0.33f -> 440f   // A4
-            progress < 0.66f -> 554f   // C#5
+            progress < 0.18f -> 262f   // C4
+            progress < 0.34f -> 330f   // E4
+            progress < 0.50f -> 392f   // G4
+            progress < 0.70f -> 523f   // C5
             else -> 659f               // E5
         }
-        val shimmer = 1f + 0.003f * sine(6f, i)
-        env * 0.55f * (sine(freq * shimmer, i) * 0.5f + sine(freq * 2f, i) * 0.3f + sine(freq * 3f, i) * 0.2f)
+        val vibrato = 1f + 0.003f * sine(4.5f, i)
+        val shimmer = if (progress > 0.65f) 0.08f * sine(2640f, i) * (1f - progress) * 2f else 0f
+        env * 0.5f * (
+            sine(freq * vibrato, i) * 0.5f +
+            sine(freq * 2f, i) * 0.25f +
+            sine(freq * 3f, i) * 0.1f +
+            sine(freq * 0.5f, i) * 0.15f +
+            shimmer
+        )
     }
 
-    /** 3-star: grand fanfare with harmonics, sweep, and sparkle */
-    fun generateWin3Star(): ShortArray = generatePcm(1400) { i, total ->
-        val env = envelope(i, total, 30, 500)
+    /** 2-star: rich 6-note arpeggio with shimmer (~5.5 seconds) */
+    fun generateWin2Star(): ShortArray = generatePcm(5500) { i, total ->
+        val env = envelope(i, total, 40, 1500)
         val progress = i.toFloat() / total
         val freq = when {
-            progress < 0.2f -> 440f    // A4
-            progress < 0.35f -> 554f   // C#5
-            progress < 0.5f -> 659f    // E5
-            progress < 0.7f -> 880f    // A5
-            else -> 1108f              // C#6
+            progress < 0.14f -> 440f   // A4
+            progress < 0.28f -> 554f   // C#5
+            progress < 0.42f -> 659f   // E5
+            progress < 0.58f -> 880f   // A5
+            progress < 0.75f -> 659f   // E5 (descend)
+            else -> 880f               // A5 (resolve)
         }
         val vibrato = 1f + 0.004f * sine(5f, i)
-        val sparkle = if (progress > 0.5f) 0.15f * sine(3520f, i) * (1f - progress) else 0f
-        env * 0.6f * (
+        val shimmer = 0.06f * sine(2200f, i) * sin(progress * 10.0).toFloat().coerceIn(0f, 1f)
+        val sparkle = if (progress > 0.5f) 0.1f * sine(3520f, i) * (1f - progress) * 1.5f else 0f
+        env * 0.55f * (
             sine(freq * vibrato, i) * 0.4f +
-            sine(freq * 2f, i) * 0.25f +
-            sine(freq * 3f, i) * 0.15f +
+            sine(freq * 2f, i) * 0.2f +
+            sine(freq * 3f, i) * 0.1f +
+            sine(freq * 0.5f, i) * 0.15f +
+            shimmer + sparkle
+        )
+    }
+
+    /** 3-star: grand 7-note fanfare with full harmonics (~6 seconds) */
+    fun generateWin3Star(): ShortArray = generatePcm(6000) { i, total ->
+        val env = envelope(i, total, 50, 2000)
+        val progress = i.toFloat() / total
+        val freq = when {
+            progress < 0.10f -> 440f    // A4
+            progress < 0.20f -> 554f    // C#5
+            progress < 0.30f -> 659f    // E5
+            progress < 0.45f -> 880f    // A5
+            progress < 0.58f -> 1108f   // C#6
+            progress < 0.72f -> 1318f   // E6
+            else -> 880f                // settle A5
+        }
+        val vibrato = 1f + 0.005f * sine(5f, i)
+        val shimmer = 0.1f * sine(2640f, i) * sin(progress * 8.0).toFloat().coerceIn(0f, 1f)
+        val sparkle = if (progress > 0.4f) 0.12f * sine(3520f, i) * sin(progress * 14.0).toFloat().coerceIn(0f, 1f) else 0f
+        val chordSustain = if (progress > 0.72f) 0.08f * sine(554f, i) + 0.06f * sine(659f, i) else 0f
+        env * 0.6f * (
+            sine(freq * vibrato, i) * 0.3f +
+            sine(freq * 2f, i) * 0.15f +
+            sine(freq * 3f, i) * 0.1f +
+            sine(freq * 0.5f, i) * 0.15f +
+            shimmer + sparkle + chordSustain
+        )
+    }
+
+    /** Perfect game: epic ascending fanfare with chord layers (~7 seconds) */
+    fun generatePerfectGame(): ShortArray = generatePcm(7000) { i, total ->
+        val env = envelope(i, total, 60, 2500)
+        val progress = i.toFloat() / total
+        val freq = when {
+            progress < 0.08f -> 440f    // A4
+            progress < 0.16f -> 554f    // C#5
+            progress < 0.24f -> 659f    // E5
+            progress < 0.34f -> 880f    // A5
+            progress < 0.44f -> 1108f   // C#6
+            progress < 0.54f -> 1318f   // E6
+            progress < 0.65f -> 1760f   // A6
+            else -> 880f                // triumphant A5 sustain
+        }
+        val vibrato = 1f + 0.006f * sine(4.5f, i)
+        val shimmer = 0.12f * sine(2640f, i) * sin(progress * 6.0).toFloat().coerceIn(0f, 1f)
+        val sparkle = if (progress > 0.3f) 0.1f * sine(4186f, i) * sin(progress * 16.0).toFloat().coerceIn(0f, 1f) else 0f
+        val sparkle2 = if (progress > 0.5f) 0.06f * sine(5274f, i) * sin(progress * 20.0).toFloat().coerceIn(0f, 1f) else 0f
+        val chord = if (progress > 0.65f) {
+            0.1f * sine(554f, i) + 0.08f * sine(659f, i) + 0.06f * sine(440f, i)
+        } else 0f
+        env * 0.55f * (
+            sine(freq * vibrato, i) * 0.25f +
+            sine(freq * 2f, i) * 0.12f +
+            sine(freq * 3f, i) * 0.08f +
+            sine(freq * 0.5f, i) * 0.15f +
+            shimmer + sparkle + sparkle2 + chord
+        )
+    }
+
+    /** World unlock: mysterious sweep into triumphant chord (~4 seconds) */
+    fun generateWorldUnlock(): ShortArray = generatePcm(4000) { i, total ->
+        val env = envelope(i, total, 50, 1000)
+        val progress = i.toFloat() / total
+        val freq = when {
+            progress < 0.25f -> 220f + 220f * progress * 4f  // sweep 220→440
+            progress < 0.40f -> 440f     // A4
+            progress < 0.55f -> 554f     // C#5
+            progress < 0.70f -> 659f     // E5
+            else -> 880f                 // A5 resolve
+        }
+        val vibrato = 1f + 0.004f * sine(5f, i)
+        val shimmer = if (progress > 0.25f) 0.1f * sine(2200f, i) * (1f - progress) else 0f
+        val sparkle = if (progress > 0.55f) 0.12f * sine(3520f, i) * sin(progress * 12.0).toFloat().coerceIn(0f, 1f) else 0f
+        val chord = if (progress > 0.7f) 0.08f * sine(554f, i) + 0.06f * sine(659f, i) else 0f
+        env * 0.55f * (
+            sine(freq * vibrato, i) * 0.35f +
+            sine(freq * 2f, i) * 0.15f +
             sine(freq * 0.5f, i) * 0.2f +
-            sparkle
+            shimmer + sparkle + chord
         )
     }
 
