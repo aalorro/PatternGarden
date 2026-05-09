@@ -11,6 +11,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.positionInWindow
 import androidx.compose.ui.platform.LocalConfiguration
@@ -22,6 +23,7 @@ import kotlinx.coroutines.delay
 @Composable
 fun PlayerBadge(
     avatarEmoji: String,
+    avatarImageBitmap: ImageBitmap? = null,
     playerLevel: Int,
     totalStars: Int,
     gamesPlayed: Int,
@@ -72,7 +74,8 @@ fun PlayerBadge(
             BasReliefAvatar(
                 emoji = avatarEmoji,
                 size = if (isCompact) 38.dp else 58.dp,
-                animate = false
+                animate = false,
+                imageBitmap = avatarImageBitmap
             )
 
             // Level

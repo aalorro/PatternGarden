@@ -22,11 +22,16 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.compose.rememberNavController
+import com.squaregarden.data.AvatarStorage
 import com.squaregarden.data.ProfileRepository
 import com.squaregarden.data.ProgressRepository
 import com.squaregarden.model.UserProfile
 import com.squaregarden.ui.components.PlayerBadge
 import com.squaregarden.ui.components.getAvatar
+import androidx.compose.ui.graphics.ImageBitmap
+import androidx.compose.ui.graphics.asImageBitmap
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import com.squaregarden.ui.navigation.SquareGardenNavGraph
 import com.squaregarden.ui.navigation.Screen
 import com.squaregarden.ui.theme.SquareGardenTheme
@@ -73,11 +78,22 @@ class MainActivity : ComponentActivity() {
                         )
                     }
 
+                    // Load custom avatar bitmap
+                    var customAvatarBitmap by remember { mutableStateOf<ImageBitmap?>(null) }
+                    LaunchedEffect(profile.customAvatarPath, profile.avatarId) {
+                        customAvatarBitmap = if (profile.hasCustomAvatar) {
+                            withContext(Dispatchers.IO) {
+                                AvatarStorage.loadAvatar(profile.customAvatarPath)?.asImageBitmap()
+                            }
+                        } else null
+                    }
+
                     // Player badge in top-right corner
                     if (profile.isSetUp) {
                         val avatar = getAvatar(profile.avatarId)
                         PlayerBadge(
                             avatarEmoji = avatar.emoji,
+                            avatarImageBitmap = customAvatarBitmap,
                             playerLevel = profile.playerLevel,
                             totalStars = totalStars,
                             gamesPlayed = gamesPlayed,

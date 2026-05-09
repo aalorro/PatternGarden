@@ -72,6 +72,8 @@ val avatarList: List<AvatarOption> = listOf(
     AvatarOption(49, "\uD83C\uDF19", "Crescent Moon")
 )
 
+const val CUSTOM_AVATAR_ID = -1
+
 fun getAvatar(id: Int): AvatarOption {
     return avatarList.getOrElse(id) { avatarList[0] }
 }

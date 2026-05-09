@@ -2,20 +2,25 @@ package com.squaregarden.ui.components
 
 import androidx.compose.animation.core.*
 import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.Shadow
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -31,7 +36,8 @@ fun BasReliefAvatar(
     emoji: String,
     size: Dp,
     modifier: Modifier = Modifier,
-    animate: Boolean = true
+    animate: Boolean = true,
+    imageBitmap: ImageBitmap? = null
 ) {
     // Gentle breathing animation
     val infiniteTransition = rememberInfiniteTransition(label = "avatar_breathe")
@@ -133,19 +139,31 @@ fun BasReliefAvatar(
             )
         }
 
-        // Emoji with cartoon shadow for depth
-        val emojiSize = (size.value * 0.48f).sp
-        Text(
-            text = emoji,
-            style = TextStyle(
-                fontSize = emojiSize,
-                shadow = Shadow(
-                    color = Color.Black.copy(alpha = 0.3f),
-                    offset = Offset(1.5f, 2.5f),
-                    blurRadius = 3f
+        if (imageBitmap != null) {
+            // Custom avatar image clipped to circle inside medallion
+            Image(
+                bitmap = imageBitmap,
+                contentDescription = "Custom avatar",
+                modifier = Modifier
+                    .size(size * 0.76f)
+                    .clip(CircleShape),
+                contentScale = ContentScale.Crop
+            )
+        } else {
+            // Emoji with cartoon shadow for depth
+            val emojiSize = (size.value * 0.48f).sp
+            Text(
+                text = emoji,
+                style = TextStyle(
+                    fontSize = emojiSize,
+                    shadow = Shadow(
+                        color = Color.Black.copy(alpha = 0.3f),
+                        offset = Offset(1.5f, 2.5f),
+                        blurRadius = 3f
+                    )
                 )
             )
-        )
+        }
     }
 }
 

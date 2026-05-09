@@ -22,12 +22,14 @@ class ProfileRepository(private val context: Context) {
         private val DIFFICULTY = stringPreferencesKey("difficulty")
         private val PLAYER_LEVEL = intPreferencesKey("player_level")
         private val LEADERBOARD_OPT_IN = booleanPreferencesKey("leaderboard_opt_in")
+        private val CUSTOM_AVATAR_PATH = stringPreferencesKey("custom_avatar_path")
     }
 
     val profileFlow: Flow<UserProfile> = context.profileDataStore.data.map { prefs ->
         UserProfile(
             username = prefs[USERNAME] ?: "",
             avatarId = prefs[AVATAR_ID] ?: 0,
+            customAvatarPath = prefs[CUSTOM_AVATAR_PATH] ?: "",
             yearOfBirth = prefs[YEAR_OF_BIRTH] ?: 2000,
             gender = prefs[GENDER] ?: "prefer_not_to_say",
             themeId = prefs[THEME_ID] ?: "light",
@@ -50,6 +52,7 @@ class ProfileRepository(private val context: Context) {
             prefs[THEME_ID] = profile.themeId
             prefs[DIFFICULTY] = profile.difficulty
             prefs[LEADERBOARD_OPT_IN] = profile.leaderboardOptIn
+            prefs[CUSTOM_AVATAR_PATH] = profile.customAvatarPath
             // playerLevel is NOT overwritten here — it's incremented separately
         }
     }

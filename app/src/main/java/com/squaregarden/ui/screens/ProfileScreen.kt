@@ -1,5 +1,10 @@
 package com.squaregarden.ui.screens
 
+import android.net.Uri
+import android.widget.Toast
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.PickVisualMediaRequest
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -19,6 +24,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ImageBitmap
+import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.font.FontWeight
@@ -28,15 +35,20 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
+import com.squaregarden.data.AvatarStorage
 import com.squaregarden.data.ProfileRepository
 import com.squaregarden.model.Difficulty
 import com.squaregarden.model.Gender
 import com.squaregarden.model.UserProfile
+import com.squaregarden.ui.components.AvatarCropDialog
 import com.squaregarden.ui.components.BasReliefAvatar
+import com.squaregarden.ui.components.CUSTOM_AVATAR_ID
 import com.squaregarden.ui.components.avatarList
 import com.squaregarden.ui.navigation.Screen
 import com.squaregarden.ui.theme.*
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -55,15 +67,50 @@ fun ProfileScreen(navController: NavHostController, isFirstTime: Boolean = false
     var leaderboardOptIn by remember { mutableStateOf(false) }
     var loaded by remember { mutableStateOf(false) }
 
+    // Custom avatar state
+    var customAvatarPath by remember { mutableStateOf("") }
+    var customAvatarBitmap by remember { mutableStateOf<ImageBitmap?>(null) }
+    var showCropDialog by remember { mutableStateOf(false) }
+    var sourceBitmapForCrop by remember { mutableStateOf<ImageBitmap?>(null) }
+
+    val pickMedia = rememberLauncherForActivityResult(
+        ActivityResultContracts.PickVisualMedia()
+    ) { uri: Uri? ->
+        uri?.let {
+            if (!AvatarStorage.isFileSizeOk(context, it)) {
+                Toast.makeText(context, "Image too large (max 10 MB)", Toast.LENGTH_SHORT).show()
+                return@rememberLauncherForActivityResult
+            }
+            scope.launch {
+                val bmp = withContext(Dispatchers.IO) {
+                    AvatarStorage.decodeSampledBitmap(context, it)
+                }
+                if (bmp != null) {
+                    sourceBitmapForCrop = bmp.asImageBitmap()
+                    showCropDialog = true
+                } else {
+                    Toast.makeText(context, "Could not load image", Toast.LENGTH_SHORT).show()
+                }
+            }
+        }
+    }
+
     LaunchedEffect(Unit) {
         val profile = profileRepo.loadProfile()
         username = profile.username
         avatarId = profile.avatarId
+        customAvatarPath = profile.customAvatarPath
         yearOfBirth = profile.yearOfBirth
         gender = profile.gender
         themeId = profile.themeId
         difficulty = profile.difficulty
         leaderboardOptIn = profile.leaderboardOptIn
+        if (profile.hasCustomAvatar) {
+            withContext(Dispatchers.IO) {
+                customAvatarBitmap = AvatarStorage.loadAvatar(profile.customAvatarPath)
+                    ?.asImageBitmap()
+            }
+        }
         loaded = true
     }
 
@@ -109,9 +156,21 @@ fun ProfileScreen(navController: NavHostController, isFirstTime: Boolean = false
             contentAlignment = Alignment.Center
         ) {
             BasReliefAvatar(
-                emoji = avatarList.getOrElse(avatarId) { avatarList[0] }.emoji,
-                size = 80.dp
+                emoji = if (avatarId == CUSTOM_AVATAR_ID) "" else avatarList.getOrElse(avatarId) { avatarList[0] }.emoji,
+                size = 80.dp,
+                imageBitmap = if (avatarId == CUSTOM_AVATAR_ID) customAvatarBitmap else null
             )
+        }
+
+        // Upload photo button
+        OutlinedButton(
+            onClick = {
+                pickMedia.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
+            },
+            shape = RoundedCornerShape(12.dp),
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Text(if (customAvatarBitmap != null) "Change Photo" else "Upload Photo")
         }
 
         // Avatar grid
@@ -123,6 +182,37 @@ fun ProfileScreen(navController: NavHostController, isFirstTime: Boolean = false
                 .fillMaxWidth()
                 .heightIn(max = 300.dp)
         ) {
+            // Custom avatar cell (if one exists)
+            if (customAvatarBitmap != null) {
+                item {
+                    val selected = avatarId == CUSTOM_AVATAR_ID
+                    Box(
+                        modifier = Modifier
+                            .aspectRatio(1f)
+                            .clip(RoundedCornerShape(10.dp))
+                            .background(
+                                if (selected) MaterialTheme.colorScheme.primaryContainer
+                                else MaterialTheme.colorScheme.surface
+                            )
+                            .then(
+                                if (selected) Modifier.border(
+                                    2.dp,
+                                    MaterialTheme.colorScheme.primary,
+                                    RoundedCornerShape(10.dp)
+                                ) else Modifier
+                            )
+                            .clickable { avatarId = CUSTOM_AVATAR_ID },
+                        contentAlignment = Alignment.Center
+                    ) {
+                        BasReliefAvatar(
+                            emoji = "",
+                            size = 44.dp,
+                            animate = selected,
+                            imageBitmap = customAvatarBitmap
+                        )
+                    }
+                }
+            }
             items(avatarList) { avatar ->
                 val selected = avatar.id == avatarId
                 Box(
@@ -150,6 +240,25 @@ fun ProfileScreen(navController: NavHostController, isFirstTime: Boolean = false
                     )
                 }
             }
+        }
+
+        // Crop dialog
+        if (showCropDialog && sourceBitmapForCrop != null) {
+            AvatarCropDialog(
+                bitmap = sourceBitmapForCrop!!,
+                onCropped = { croppedBitmap ->
+                    scope.launch {
+                        val path = withContext(Dispatchers.IO) {
+                            AvatarStorage.saveCroppedAvatar(context, croppedBitmap)
+                        }
+                        customAvatarPath = path
+                        customAvatarBitmap = croppedBitmap.asImageBitmap()
+                        avatarId = CUSTOM_AVATAR_ID
+                        showCropDialog = false
+                    }
+                },
+                onDismiss = { showCropDialog = false }
+            )
         }
 
         // ── Year of Birth ──
@@ -417,6 +526,7 @@ fun ProfileScreen(navController: NavHostController, isFirstTime: Boolean = false
                         UserProfile(
                             username = username.trim().ifBlank { "Player" },
                             avatarId = avatarId,
+                            customAvatarPath = if (avatarId == CUSTOM_AVATAR_ID) customAvatarPath else "",
                             yearOfBirth = yearOfBirth,
                             gender = gender,
                             themeId = themeId,

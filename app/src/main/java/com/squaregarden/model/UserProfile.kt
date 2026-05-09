@@ -3,6 +3,7 @@ package com.squaregarden.model
 data class UserProfile(
     val username: String = "",
     val avatarId: Int = 0,
+    val customAvatarPath: String = "",
     val yearOfBirth: Int = 2000,
     val gender: String = "prefer_not_to_say",
     val themeId: String = "light",
@@ -11,6 +12,7 @@ data class UserProfile(
     val leaderboardOptIn: Boolean = false
 ) {
     val isSetUp: Boolean get() = username.isNotBlank()
+    val hasCustomAvatar: Boolean get() = avatarId == -1 && customAvatarPath.isNotBlank()
 }
 
 enum class Gender(val id: String, val label: String) {
