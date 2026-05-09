@@ -37,7 +37,13 @@ class AudioManager(private val context: Context) {
     // Sampled world unlock sound
     private val worldUnlockPcm by lazy { SoundGenerator.loadRawResource(context, R.raw.unlock_sample) }
 
-    // Congratulatory sounds for goal completion (played at random via MediaPlayer)
+    // Procedural goal-completion celebration sounds
+    private val goalCelebration1Pcm by lazy { SoundGenerator.generateGoalCelebration1() }
+    private val goalCelebration2Pcm by lazy { SoundGenerator.generateGoalCelebration2() }
+    private val goalCelebration3Pcm by lazy { SoundGenerator.generateGoalCelebration3() }
+    private val goalCelebration4Pcm by lazy { SoundGenerator.generateGoalCelebration4() }
+
+    // Sampled congratulatory sounds for goal completion (played at random via MediaPlayer)
     private val congratsSounds = listOf(
         R.raw.congrats_1, R.raw.congrats_2, R.raw.congrats_3,
         R.raw.congrats_4, R.raw.congrats_5
@@ -66,14 +72,23 @@ class AudioManager(private val context: Context) {
     fun playSwap() = play(swapPcm, 0.7f)
     fun playMatch() {
         if (!soundEnabled) return
-        val resId = congratsSounds.random()
-        try {
-            MediaPlayer.create(context, resId)?.apply {
-                setVolume(0.8f, 0.8f)
-                setOnCompletionListener { it.release() }
-                start()
+        // 9 total options: 5 sampled + 4 procedural
+        when ((1..9).random()) {
+            in 1..5 -> {
+                val resId = congratsSounds[(1..5).random() - 1]
+                try {
+                    MediaPlayer.create(context, resId)?.apply {
+                        setVolume(0.8f, 0.8f)
+                        setOnCompletionListener { it.release() }
+                        start()
+                    }
+                } catch (_: Exception) {}
             }
-        } catch (_: Exception) {}
+            6 -> play(goalCelebration1Pcm, 0.8f)
+            7 -> play(goalCelebration2Pcm, 0.8f)
+            8 -> play(goalCelebration3Pcm, 0.8f)
+            9 -> play(goalCelebration4Pcm, 0.8f)
+        }
     }
     fun playWin(stars: Int = 1) {
         val pcm = when (stars) {

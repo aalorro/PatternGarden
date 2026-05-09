@@ -11,7 +11,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.text.font.FontWeight
@@ -197,7 +200,7 @@ private fun GoalBox(
             }
         }
 
-        // Completed overlay
+        // Completed overlay with white grid
         if (completed) {
             Box(
                 modifier = Modifier
@@ -205,6 +208,31 @@ private fun GoalBox(
                     .background(dimColor, RoundedCornerShape(8.dp)),
                 contentAlignment = Alignment.Center
             ) {
+                // White grid lines showing cell structure
+                Canvas(modifier = Modifier.fillMaxSize().padding(4.dp)) {
+                    val availW = size.width
+                    val availH = size.height
+                    val cellSize = minOf(availW / shapeCols, availH / shapeRows)
+                    val totalW = shapeCols * cellSize
+                    val totalH = shapeRows * cellSize
+                    val offsetX = (availW - totalW) / 2f
+                    val offsetY = (availH - totalH) / 2f
+                    val gridColor = Color.White.copy(alpha = 0.6f)
+                    val lineWidth = (cellSize * 0.06f).coerceIn(1f, 3f)
+
+                    // Draw outline around each occupied cell
+                    for (cell in cells) {
+                        val x = offsetX + cell.col * cellSize
+                        val y = offsetY + cell.row * cellSize
+                        drawRoundRect(
+                            color = gridColor,
+                            topLeft = Offset(x, y),
+                            size = Size(cellSize, cellSize),
+                            cornerRadius = androidx.compose.ui.geometry.CornerRadius(cellSize * 0.18f),
+                            style = Stroke(width = lineWidth)
+                        )
+                    }
+                }
                 Text(
                     text = "\u2714",
                     fontSize = 20.sp,

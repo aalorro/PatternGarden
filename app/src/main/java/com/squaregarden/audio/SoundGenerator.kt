@@ -552,6 +552,87 @@ object SoundGenerator {
         env * 0.7f * (chirp + staticNoise + rumble + dataTone)
     }
 
+    // ---- Procedural goal-completion celebration FX ----
+
+    /** Goal celebration 1: Bright chime cascade — descending xylophone run */
+    fun generateGoalCelebration1(): ShortArray = generatePcm(900) { i, total ->
+        val p = i.toFloat() / total
+        val env = envelope(i, total, 5, 300)
+        // 5 descending bell tones staggered across the duration
+        val note1 = noteGate(p, 0.00f, 0.35f) * sine(1760f, i) * 0.35f  // A6
+        val note2 = noteGate(p, 0.12f, 0.45f) * sine(1568f, i) * 0.30f  // G6
+        val note3 = noteGate(p, 0.24f, 0.58f) * sine(1319f, i) * 0.28f  // E6
+        val note4 = noteGate(p, 0.38f, 0.72f) * sine(1175f, i) * 0.25f  // D6
+        val note5 = noteGate(p, 0.52f, 1.00f) * sine(1047f, i) * 0.30f  // C6 landing
+        // Bell-like overtones on each
+        val overtones = (
+            noteGate(p, 0.00f, 0.35f) * sine(1760f * 2.76f, i) * 0.08f +
+            noteGate(p, 0.24f, 0.58f) * sine(1319f * 2.76f, i) * 0.06f +
+            noteGate(p, 0.52f, 1.00f) * sine(1047f * 2.76f, i) * 0.07f
+        )
+        env * (note1 + note2 + note3 + note4 + note5 + overtones)
+    }
+
+    /** Goal celebration 2: Triumphant horn stab — quick brass chord punch */
+    fun generateGoalCelebration2(): ShortArray = generatePcm(700) { i, total ->
+        val p = i.toFloat() / total
+        val env = envelope(i, total, 8, 250)
+        val vib = 1f + 0.003f * sine(6f, i)
+        // Sharp brass chord: C major triad hit
+        val root = brassChoir(523f * vib, i, 0.8f) * 0.30f   // C5
+        val third = brass(659f * vib, i, 0.7f) * 0.20f        // E5
+        val fifth = brass(784f * vib, i, 0.7f) * 0.18f        // G5
+        val octave = brass(1047f * vib, i, 0.6f) * 0.12f      // C6
+        // Accent punch: quick attack bump
+        val punch = if (p < 0.08f) (1f + 0.4f * (1f - p / 0.08f)) else 1f
+        env * punch * (root + third + fifth + octave)
+    }
+
+    /** Goal celebration 3: Sparkle arpeggio — rising crystalline run with shimmer */
+    fun generateGoalCelebration3(): ShortArray = generatePcm(1100) { i, total ->
+        val p = i.toFloat() / total
+        val env = envelope(i, total, 5, 400)
+        // Rising pentatonic arpeggio with glassy timbre
+        val note1 = noteGate(p, 0.00f, 0.28f) * sine(880f, i)   // A5
+        val note2 = noteGate(p, 0.10f, 0.38f) * sine(1047f, i)  // C6
+        val note3 = noteGate(p, 0.22f, 0.52f) * sine(1175f, i)  // D6
+        val note4 = noteGate(p, 0.34f, 0.65f) * sine(1319f, i)  // E6
+        val note5 = noteGate(p, 0.48f, 1.00f) * sine(1760f, i)  // A6 high landing
+        val melody = (note1 + note2 + note3 + note4 + note5) * 0.22f
+        // Crystalline harmonics (inharmonic bell partials)
+        val crystal = (
+            noteGate(p, 0.00f, 0.28f) * sine(880f * 3.2f, i) * 0.06f +
+            noteGate(p, 0.22f, 0.52f) * sine(1175f * 2.8f, i) * 0.05f +
+            noteGate(p, 0.48f, 1.00f) * sine(1760f * 2.4f, i) * 0.07f
+        )
+        // Twinkling shimmer on the sustained high note
+        val shimmer = if (p > 0.55f) {
+            val s = ((p - 0.55f) / 0.1f).coerceIn(0f, 1f) * ((1f - p) / 0.35f).coerceIn(0f, 1f)
+            sine(4400f, i) * 0.04f * s * sine(8f, i) +
+            sine(5280f, i) * 0.03f * s * sine(11f, i)
+        } else 0f
+        env * (melody + crystal + shimmer)
+    }
+
+    /** Goal celebration 4: Tubular bell hit — warm resonant bell with low sustain */
+    fun generateGoalCelebration4(): ShortArray = generatePcm(1200) { i, total ->
+        val p = i.toFloat() / total
+        // Bell: sharp attack, long exponential decay
+        val decay = if (p < 0.01f) p / 0.01f else (1f - p).pow(0.6f)
+        val env = decay * envelope(i, total, 2, 100)
+        // Tubular bell partials (slightly inharmonic for realistic bell)
+        val fundamental = sine(698f, i) * 0.30f              // F5
+        val partial2 = sine(698f * 2.0f, i) * 0.22f
+        val partial3 = sine(698f * 2.98f, i) * 0.14f         // slightly detuned
+        val partial4 = sine(698f * 4.07f, i) * 0.08f         // inharmonic
+        val partial5 = sine(698f * 5.2f, i) * 0.05f
+        // Warm sub-octave hum that sustains
+        val sub = sine(349f, i) * 0.12f * (1f - p * 0.5f).coerceIn(0f, 1f)
+        // Gentle beating between close partials for warmth
+        val beat = sine(698f * 1.003f, i) * 0.06f * (1f - p).coerceIn(0f, 1f)
+        env * (fundamental + partial2 + partial3 + partial4 + partial5 + sub + beat)
+    }
+
     /** Sad trombone: descending "wah wah wah wahhh" */
     fun generateLose(): ShortArray = generatePcm(2500) { i, total ->
         val master = envelope(i, total, 30, 600)
