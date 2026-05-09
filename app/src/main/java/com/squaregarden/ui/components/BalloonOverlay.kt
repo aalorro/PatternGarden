@@ -15,7 +15,7 @@ import kotlin.random.Random
 
 private data class Balloon(
     val x: Float,           // 0..1 normalized start X
-    val speed: Float,        // rise speed multiplier
+    val speed: Float,        // fall speed multiplier
     val swayAmplitude: Float,
     val swayPhase: Float,
     val bodyWidth: Float,    // balloon width
@@ -36,27 +36,28 @@ private val balloonColors = listOf(
 @Composable
 fun BalloonOverlay(stars: Int) {
     val balloonCount = when (stars) {
-        3 -> 40
-        2 -> 25
-        else -> 15
+        3 -> 80
+        2 -> 50
+        else -> 30
     }
     val durationMs = when (stars) {
-        3 -> 7000
-        2 -> 6000
-        else -> 5000
+        3 -> 8000
+        2 -> 7000
+        else -> 6000
     }
 
     val balloons = remember(stars) {
         List(balloonCount) {
+            val sizeMultiplier = if (Random.nextFloat() < 0.25f) 1.4f + Random.nextFloat() * 0.6f else 1f
             Balloon(
                 x = Random.nextFloat(),
-                speed = 0.6f + Random.nextFloat() * 0.6f,
-                swayAmplitude = 0.015f + Random.nextFloat() * 0.035f,
+                speed = 0.5f + Random.nextFloat() * 0.7f,
+                swayAmplitude = 0.015f + Random.nextFloat() * 0.04f,
                 swayPhase = Random.nextFloat() * 2f * PI.toFloat(),
-                bodyWidth = 20f + Random.nextFloat() * 15f,
-                bodyHeight = 26f + Random.nextFloat() * 18f,
+                bodyWidth = (30f + Random.nextFloat() * 40f) * sizeMultiplier,
+                bodyHeight = (38f + Random.nextFloat() * 50f) * sizeMultiplier,
                 color = balloonColors[Random.nextInt(balloonColors.size)],
-                delay = Random.nextFloat() * 0.3f
+                delay = Random.nextFloat() * 0.35f
             )
         }
     }
@@ -80,9 +81,9 @@ fun BalloonOverlay(stars: Int) {
             val localT = ((t - b.delay) / (1f - b.delay)).coerceIn(0f, 1f)
             if (localT <= 0f) return@forEach
 
-            // Rise from bottom to above top
-            val yPos = h + 40f - (h + 100f) * localT * b.speed
-            if (yPos < -80f) return@forEach
+            // Fall from above top to below bottom
+            val yPos = -120f + (h + 240f) * localT * b.speed
+            if (yPos > h + 120f) return@forEach
 
             val xSway = sin(localT * 6f + b.swayPhase) * b.swayAmplitude * w
             val xPos = b.x * w + xSway
@@ -92,6 +93,32 @@ fun BalloonOverlay(stars: Int) {
 
             val bw = b.bodyWidth
             val bh = b.bodyHeight
+
+            // String — wavy line trailing above balloon
+            val stringPath = Path().apply {
+                val startY = yPos - bh / 2f - 6f
+                moveTo(xPos, startY)
+                val stringLen = 35f
+                for (s in 1..8) {
+                    val sy = startY - stringLen * s / 8f
+                    val sx = xPos + sin(s * 1.2f + b.swayPhase) * 5f
+                    lineTo(sx, sy)
+                }
+            }
+            drawPath(
+                stringPath,
+                Color.Gray.copy(alpha = alpha * 0.5f),
+                style = Stroke(width = 1.5f)
+            )
+
+            // Knot — small triangle at top of balloon
+            val knotPath = Path().apply {
+                moveTo(xPos - 3f, yPos - bh / 2f)
+                lineTo(xPos + 3f, yPos - bh / 2f)
+                lineTo(xPos, yPos - bh / 2f - 6f)
+                close()
+            }
+            drawPath(knotPath, b.color.copy(alpha = alpha * 0.8f))
 
             // Balloon body — oval
             drawOval(
@@ -105,32 +132,6 @@ fun BalloonOverlay(stars: Int) {
                 color = Color.White.copy(alpha = alpha * 0.4f),
                 topLeft = Offset(xPos - bw * 0.25f, yPos - bh * 0.35f),
                 size = Size(bw * 0.3f, bh * 0.25f)
-            )
-
-            // Knot — small triangle at bottom
-            val knotPath = Path().apply {
-                moveTo(xPos - 3f, yPos + bh / 2f)
-                lineTo(xPos + 3f, yPos + bh / 2f)
-                lineTo(xPos, yPos + bh / 2f + 6f)
-                close()
-            }
-            drawPath(knotPath, b.color.copy(alpha = alpha * 0.8f))
-
-            // String — wavy line below knot
-            val stringPath = Path().apply {
-                val startY = yPos + bh / 2f + 6f
-                moveTo(xPos, startY)
-                val stringLen = 30f
-                for (s in 1..8) {
-                    val sy = startY + stringLen * s / 8f
-                    val sx = xPos + sin(s * 1.2f + b.swayPhase) * 4f
-                    lineTo(sx, sy)
-                }
-            }
-            drawPath(
-                stringPath,
-                Color.Gray.copy(alpha = alpha * 0.5f),
-                style = Stroke(width = 1f)
             )
         }
     }

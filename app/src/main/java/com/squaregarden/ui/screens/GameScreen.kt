@@ -251,12 +251,7 @@ fun GameScreen(
     if (state.phase == GamePhase.WON) {
         val stars = state.starsAwarded
 
-        // Visual celebration layers behind the card
-        ConfettiOverlay(stars = stars)
-        BalloonOverlay(stars = stars)
-        StarBurstOverlay(stars = stars)
-
-        // Fullscreen overlay instead of Dialog so star trail renders on top
+        // Fullscreen overlay card (renders first = behind celebration particles)
         WinOverlay(
             stars = stars,
             levelName = state.level.name,
@@ -284,6 +279,11 @@ fun GameScreen(
                 navController.popBackStack()
             }
         )
+
+        // Celebration layers in the foreground, raining down over the card
+        ConfettiOverlay(stars = stars)
+        BalloonOverlay(stars = stars)
+        StarBurstOverlay(stars = stars)
     }
 
     // Life restored celebration splash

@@ -43,19 +43,20 @@ private val confettiColors = listOf(
 @Composable
 fun ConfettiOverlay(stars: Int) {
     val particleCount = when (stars) {
-        3 -> 180
-        2 -> 100
-        else -> 50
+        3 -> 300
+        2 -> 180
+        else -> 100
     }
     val durationMs = when (stars) {
-        3 -> 7000
-        2 -> 5500
-        else -> 4000
+        3 -> 8000
+        2 -> 6500
+        else -> 5000
     }
 
     val particles = remember(stars) {
         val shapes = ConfettiShape.entries
         List(particleCount) {
+            val sizeMultiplier = if (Random.nextFloat() < 0.2f) 1.5f + Random.nextFloat() * 0.8f else 1f
             ConfettiParticle(
                 x = Random.nextFloat(),
                 speed = 0.5f + Random.nextFloat() * 1f,
@@ -63,8 +64,8 @@ fun ConfettiOverlay(stars: Int) {
                 phase = Random.nextFloat() * 2f * PI.toFloat(),
                 rotation = Random.nextFloat() * 360f,
                 rotSpeed = 100f + Random.nextFloat() * 400f,
-                width = 4f + Random.nextFloat() * 6f,
-                height = 6f + Random.nextFloat() * 10f,
+                width = (6f + Random.nextFloat() * 18f) * sizeMultiplier,
+                height = (10f + Random.nextFloat() * 24f) * sizeMultiplier,
                 color = confettiColors[Random.nextInt(confettiColors.size)],
                 shape = shapes[Random.nextInt(shapes.size)],
                 pulsePhase = Random.nextFloat() * 2f * PI.toFloat()

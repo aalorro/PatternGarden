@@ -4,6 +4,7 @@ import android.content.Context
 import com.squaregarden.R
 import com.squaregarden.data.SettingsRepository
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
 class AudioManager(private val context: Context) {
@@ -40,6 +41,11 @@ class AudioManager(private val context: Context) {
         this.scope = scope
         scope.launch {
             settingsRepo.soundEnabled.collect { soundEnabled = it }
+        }
+        // Pre-generate celebration sounds on background thread so they
+        // don't block the main thread on first play (brass synthesis is heavy)
+        scope.launch(Dispatchers.Default) {
+            win1Pcm; win2Pcm; win3Pcm; perfectGamePcm
         }
     }
 
