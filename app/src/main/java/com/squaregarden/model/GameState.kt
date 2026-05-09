@@ -31,8 +31,12 @@ data class GameState(
     val unfreezeMode: Boolean = false,
     val redoTokens: Int = 0,
     val redoTokenAwarded: Boolean = false,
-    val perfectGame: Boolean = false
-)
+    val perfectGame: Boolean = false,
+    val challengeState: ChallengeState? = null,
+    val pendingChallenge: ChallengeType? = null
+) {
+    val isChallenge: Boolean get() = challengeState != null
+}
 
 enum class GameDifficulty(val label: String, val starMultiplier: Float) {
     EASY("Easy", 0.75f),

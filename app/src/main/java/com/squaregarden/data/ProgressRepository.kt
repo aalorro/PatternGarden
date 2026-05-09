@@ -31,6 +31,15 @@ class ProgressRepository(private val context: Context) {
         private val REDO_TOKENS_KEY = intPreferencesKey("redo_tokens")
         private val PERFECT_GAMES_KEY = intPreferencesKey("perfect_games")
         private const val LEVEL_FAVORITE_PREFIX = "level_favorite_"
+        // Challenge tracking
+        private val PROGRESSIVE_WIN_STREAK_KEY = intPreferencesKey("progressive_win_streak")
+        private val LAST_PROGRESSIVE_WIN_LEVEL_KEY = intPreferencesKey("last_progressive_win_level")
+        private val NO_POWERUP_WINS_KEY = intPreferencesKey("no_powerup_wins")
+        private const val OVERGROWN_TRIGGERED_PREFIX = "overgrown_triggered_world_"
+        private val BLITZ_COMPLETIONS_KEY = intPreferencesKey("blitz_completions")
+        private val OVERGROWN_COMPLETIONS_KEY = intPreferencesKey("overgrown_completions")
+        private val SHIFTING_COMPLETIONS_KEY = intPreferencesKey("shifting_completions")
+        private val MEMORY_COMPLETIONS_KEY = intPreferencesKey("memory_completions")
     }
 
     /** One-time migration: seed TOTAL_STARS_KEY from sum of per-level bests. */
@@ -315,6 +324,102 @@ class ProgressRepository(private val context: Context) {
                     prefs[COOLDOWN_UNTIL_KEY] = 0L
                 }
             }
+        }
+    }
+
+    // ── Challenge trigger tracking ──
+
+    /**
+     * Record a progressive win (consecutive levels with increasing IDs).
+     * @return true if streak reached 8 (Blitz trigger)
+     */
+    suspend fun recordProgressiveWin(levelId: Int): Boolean {
+        val world = (levelId - 1) / 9 + 1
+        if (world < 5) return false
+        var triggered = false
+        context.dataStore.edit { prefs ->
+            val lastLevel = prefs[LAST_PROGRESSIVE_WIN_LEVEL_KEY] ?: -1
+            val streak = if (levelId == lastLevel + 1) {
+                (prefs[PROGRESSIVE_WIN_STREAK_KEY] ?: 0) + 1
+            } else {
+                1
+            }
+            prefs[PROGRESSIVE_WIN_STREAK_KEY] = streak
+            prefs[LAST_PROGRESSIVE_WIN_LEVEL_KEY] = levelId
+            if (streak >= 8) {
+                prefs[PROGRESSIVE_WIN_STREAK_KEY] = 0
+                triggered = true
+            }
+        }
+        return triggered
+    }
+
+    /**
+     * Record a win without using any power-ups.
+     * @return true if streak reached 3 (Shifting Sands trigger)
+     */
+    suspend fun recordNoPowerupWin(): Boolean {
+        var triggered = false
+        context.dataStore.edit { prefs ->
+            val streak = (prefs[NO_POWERUP_WINS_KEY] ?: 0) + 1
+            if (streak >= 3) {
+                prefs[NO_POWERUP_WINS_KEY] = 0
+                triggered = true
+            } else {
+                prefs[NO_POWERUP_WINS_KEY] = streak
+            }
+        }
+        return triggered
+    }
+
+    suspend fun resetNoPowerupStreak() {
+        context.dataStore.edit { prefs ->
+            prefs[NO_POWERUP_WINS_KEY] = 0
+        }
+    }
+
+    /**
+     * Check if all 9 levels in a world have at least 1 star.
+     */
+    suspend fun checkWorldComplete(worldId: Int): Boolean {
+        val prefs = context.dataStore.data.first()
+        val firstLevel = (worldId - 1) * 9 + 1
+        for (id in firstLevel until firstLevel + 9) {
+            val key = intPreferencesKey("$LEVEL_STARS_PREFIX$id")
+            if ((prefs[key] ?: 0) <= 0) return false
+        }
+        return true
+    }
+
+    suspend fun hasOvergrownTriggered(worldId: Int): Boolean {
+        val prefs = context.dataStore.data.first()
+        val key = booleanPreferencesKey("$OVERGROWN_TRIGGERED_PREFIX$worldId")
+        return prefs[key] ?: false
+    }
+
+    suspend fun markOvergrownTriggered(worldId: Int) {
+        context.dataStore.edit { prefs ->
+            prefs[booleanPreferencesKey("$OVERGROWN_TRIGGERED_PREFIX$worldId")] = true
+        }
+    }
+
+    suspend fun recordChallengeCompletion(challengeId: Int) {
+        val key = when (challengeId) {
+            -1 -> BLITZ_COMPLETIONS_KEY
+            -2 -> OVERGROWN_COMPLETIONS_KEY
+            -3 -> SHIFTING_COMPLETIONS_KEY
+            -4 -> MEMORY_COMPLETIONS_KEY
+            else -> return
+        }
+        context.dataStore.edit { prefs ->
+            prefs[key] = (prefs[key] ?: 0) + 1
+        }
+    }
+
+    /** Add bonus stars from a challenge win (no per-level save). */
+    suspend fun saveChallengeStars(stars: Int) {
+        context.dataStore.edit { prefs ->
+            prefs[TOTAL_STARS_KEY] = (prefs[TOTAL_STARS_KEY] ?: 0) + stars
         }
     }
 

@@ -30,6 +30,7 @@ fun GameBoardCanvas(
     swapAnim: SwapAnimation?,
     completedGoalCells: Set<CellPos>,
     passthroughActive: Boolean = false,
+    foggedCells: Set<CellPos> = emptySet(),
     onDragSwap: (from: CellPos, to: CellPos) -> Unit,
     onCellTapped: ((row: Int, col: Int) -> Unit)? = null,
     modifier: Modifier = Modifier
@@ -259,6 +260,17 @@ fun GameBoardCanvas(
                         size = Size(tw, th),
                         cornerRadius = CornerRadius(cornerR * 0.9f),
                         style = Stroke(width = 3.5f.dp.toPx())
+                    )
+                }
+
+                // Memory fog overlay — dark cover for hidden tiles
+                if (pos in foggedCells) {
+                    val tileInset = cs * 0.05f
+                    drawRoundRect(
+                        color = Color(0xFF2C2C2C),
+                        topLeft = Offset(x + tileInset, y + tileInset),
+                        size = Size(cs - tileInset * 2, cs - tileInset * 2),
+                        cornerRadius = CornerRadius(cornerR * 0.9f)
                     )
                 }
 

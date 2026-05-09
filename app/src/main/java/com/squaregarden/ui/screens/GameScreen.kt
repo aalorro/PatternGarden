@@ -57,9 +57,9 @@ fun GameScreen(
     // Stop any music when GameScreen exits
     DisposableEffect(Unit) { onDispose { MusicManager.stopAll() } }
 
-    // Safety net: if cooldown is active, pop back immediately
+    // Safety net: if cooldown is active, pop back immediately (skip for challenges)
     LaunchedEffect(lives, cooldownUntil) {
-        if (lives <= 0 && cooldownUntil > System.currentTimeMillis()) {
+        if (levelId > 0 && lives <= 0 && cooldownUntil > System.currentTimeMillis()) {
             navController.popBackStack()
         }
     }
@@ -105,31 +105,34 @@ fun GameScreen(
                 color = MaterialTheme.colorScheme.onBackground,
                 maxLines = 1
             )
-            TextButton(
-                onClick = {
-                    scope.launch {
-                        isFavorite = progressRepo.toggleFavorite(levelId)
-                    }
-                },
-                modifier = Modifier.defaultMinSize(minWidth = 1.dp, minHeight = 1.dp),
-                contentPadding = PaddingValues(horizontal = 4.dp)
-            ) {
-                Text(
-                    text = if (isFavorite) "\u2605" else "\u2606",
-                    fontSize = if (isCompact) 18.sp else 22.sp,
-                    color = if (isFavorite) TileYellow else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f)
-                )
+            if (levelId > 0) {
+                TextButton(
+                    onClick = {
+                        scope.launch {
+                            isFavorite = progressRepo.toggleFavorite(levelId)
+                        }
+                    },
+                    modifier = Modifier.defaultMinSize(minWidth = 1.dp, minHeight = 1.dp),
+                    contentPadding = PaddingValues(horizontal = 4.dp)
+                ) {
+                    Text(
+                        text = if (isFavorite) "\u2605" else "\u2606",
+                        fontSize = if (isCompact) 18.sp else 22.sp,
+                        color = if (isFavorite) TileYellow else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f)
+                    )
+                }
             }
             Spacer(modifier = Modifier.weight(1f))
         }
 
         // Goals + Moves panel (combined, stacked vertically)
+        val isBlitz = state.challengeState?.type == ChallengeType.BLITZ
         GoalPanel(
             goals = state.level.goals,
             completedIds = state.completedGoalIds,
-            movesRemaining = state.movesRemaining,
-            movesMax = state.level.maxMoves,
-            gameDifficulty = state.gameDifficulty,
+            movesRemaining = if (isBlitz) -1 else state.movesRemaining,
+            movesMax = if (isBlitz) -1 else state.level.maxMoves,
+            gameDifficulty = if (state.isChallenge) null else state.gameDifficulty,
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(
@@ -140,6 +143,20 @@ fun GameScreen(
 
         // Game board — full width on phones & 7" tablets, padded on 10"+
         val boardHPad = if (LocalConfiguration.current.screenWidthDp < 800) 0.dp else 12.dp
+        // Memory Garden fog: all cells minus revealed cells (after initial reveal)
+        val foggedCells = remember(state.challengeState) {
+            val cs = state.challengeState
+            if (cs != null && cs.type == ChallengeType.MEMORY && cs.initialRevealDone) {
+                val all = mutableSetOf<CellPos>()
+                for (r in 0 until state.board.height) {
+                    for (c in 0 until state.board.width) {
+                        if (!state.board.isVoid(r, c)) all.add(CellPos(r, c))
+                    }
+                }
+                all - cs.revealedCells
+            } else emptySet()
+        }
+
         GameBoardCanvas(
             board = state.board,
             selectedCell = state.selectedCell,
@@ -147,6 +164,7 @@ fun GameScreen(
             swapAnim = state.swapAnim,
             completedGoalCells = state.completedGoalCells.values.flatten().toSet(),
             passthroughActive = state.passthroughActive,
+            foggedCells = foggedCells,
             onDragSwap = { from, to -> viewModel.onDragSwap(from, to) },
             onCellTapped = { row, col -> viewModel.onCellTapped(row, col) },
             modifier = Modifier
@@ -154,53 +172,90 @@ fun GameScreen(
                 .padding(horizontal = boardHPad, vertical = 4.dp)
         )
 
-        // Bottom bar — circular action buttons
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 12.dp, vertical = 8.dp),
-            horizontalArrangement = Arrangement.SpaceEvenly,
-            verticalAlignment = Alignment.Top
-        ) {
-            ActionCircle(
-                icon = "\uD83D\uDCA1",
-                label = "Hint",
-                onClick = { viewModel.requestHint() },
-                containerColor = MaterialTheme.colorScheme.primary,
-                contentColor = MaterialTheme.colorScheme.onPrimary
-            )
-            ActionCircle(
-                icon = "\uD83D\uDD00",
-                label = if (state.shuffleReady) "Tap" else "\u00D7${state.shuffleTokens}",
-                onClick = { viewModel.toggleShuffle() },
-                enabled = state.shuffleReady || (state.shuffleTokens > 0 && state.phase == GamePhase.PLAYING),
-                containerColor = if (state.shuffleReady) TileYellow else null,
-                contentColor = if (state.shuffleReady) DarkSage else null
-            )
-            ActionCircle(
-                icon = "\uD83D\uDEE1\uFE0F",
-                label = if (state.passthroughActive) "On" else "\u00D7${state.passthroughTokens}",
-                onClick = { viewModel.togglePassthrough() },
-                enabled = state.passthroughActive || (state.passthroughTokens > 0 && state.phase == GamePhase.PLAYING && state.completedGoalIds.isNotEmpty()),
-                containerColor = if (state.passthroughActive) Sage else null,
-                contentColor = if (state.passthroughActive) SoftWhite else null
-            )
-            ActionCircle(
-                icon = "\u2744\uFE0F",
-                label = if (state.unfreezeMode) "Tap" else "\u00D7${state.unfreezeTokens}",
-                onClick = { viewModel.toggleUnfreeze() },
-                enabled = state.unfreezeMode || (state.unfreezeTokens > 0 && state.phase == GamePhase.PLAYING),
-                containerColor = if (state.unfreezeMode) TileBlue else null,
-                contentColor = if (state.unfreezeMode) SoftWhite else null
-            )
-            ActionCircle(
-                icon = "\u21BB",
-                label = "\u00D7${state.redoTokens}",
-                onClick = { viewModel.executeRedo() },
-                enabled = state.redoTokens > 0 && state.phase == GamePhase.PLAYING,
-                containerColor = MaterialTheme.colorScheme.secondaryContainer,
-                contentColor = MaterialTheme.colorScheme.onSecondaryContainer
-            )
+        // Blitz timer + stats bar
+        val blitzState = state.challengeState?.takeIf { it.type == ChallengeType.BLITZ }
+        if (blitzState != null) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp, vertical = 8.dp),
+                horizontalArrangement = Arrangement.SpaceEvenly,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                val seconds = blitzState.timerMillisRemaining / 1000
+                val tenths = (blitzState.timerMillisRemaining % 1000) / 100
+                Text(
+                    text = "\u23F1 ${seconds}.${tenths}s",
+                    fontSize = 22.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = if (seconds < 10) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onBackground
+                )
+                Text(
+                    text = "Goals: ${blitzState.goalsCleared}",
+                    fontSize = 18.sp,
+                    fontWeight = FontWeight.SemiBold,
+                    color = MaterialTheme.colorScheme.onBackground
+                )
+                if (blitzState.comboMultiplier > 1) {
+                    Text(
+                        text = "${blitzState.comboMultiplier}x",
+                        fontSize = 18.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = TileYellow
+                    )
+                }
+            }
+        }
+
+        // Bottom bar — circular action buttons (hidden during challenges)
+        if (!state.isChallenge) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 12.dp, vertical = 8.dp),
+                horizontalArrangement = Arrangement.SpaceEvenly,
+                verticalAlignment = Alignment.Top
+            ) {
+                ActionCircle(
+                    icon = "\uD83D\uDCA1",
+                    label = "Hint",
+                    onClick = { viewModel.requestHint() },
+                    containerColor = MaterialTheme.colorScheme.primary,
+                    contentColor = MaterialTheme.colorScheme.onPrimary
+                )
+                ActionCircle(
+                    icon = "\uD83D\uDD00",
+                    label = if (state.shuffleReady) "Tap" else "\u00D7${state.shuffleTokens}",
+                    onClick = { viewModel.toggleShuffle() },
+                    enabled = state.shuffleReady || (state.shuffleTokens > 0 && state.phase == GamePhase.PLAYING),
+                    containerColor = if (state.shuffleReady) TileYellow else null,
+                    contentColor = if (state.shuffleReady) DarkSage else null
+                )
+                ActionCircle(
+                    icon = "\uD83D\uDEE1\uFE0F",
+                    label = if (state.passthroughActive) "On" else "\u00D7${state.passthroughTokens}",
+                    onClick = { viewModel.togglePassthrough() },
+                    enabled = state.passthroughActive || (state.passthroughTokens > 0 && state.phase == GamePhase.PLAYING && state.completedGoalIds.isNotEmpty()),
+                    containerColor = if (state.passthroughActive) Sage else null,
+                    contentColor = if (state.passthroughActive) SoftWhite else null
+                )
+                ActionCircle(
+                    icon = "\u2744\uFE0F",
+                    label = if (state.unfreezeMode) "Tap" else "\u00D7${state.unfreezeTokens}",
+                    onClick = { viewModel.toggleUnfreeze() },
+                    enabled = state.unfreezeMode || (state.unfreezeTokens > 0 && state.phase == GamePhase.PLAYING),
+                    containerColor = if (state.unfreezeMode) TileBlue else null,
+                    contentColor = if (state.unfreezeMode) SoftWhite else null
+                )
+                ActionCircle(
+                    icon = "\u21BB",
+                    label = "\u00D7${state.redoTokens}",
+                    onClick = { viewModel.executeRedo() },
+                    enabled = state.redoTokens > 0 && state.phase == GamePhase.PLAYING,
+                    containerColor = MaterialTheme.colorScheme.secondaryContainer,
+                    contentColor = MaterialTheme.colorScheme.onSecondaryContainer
+                )
+            }
         }
     }
 
@@ -269,7 +324,9 @@ fun GameScreen(
             onAllStarsLanded = { viewModel.commitWinResult() },
             onPerfectGameSound = { viewModel.playPerfectGameSound() },
             onWorldUnlockSound = { viewModel.playWorldUnlockSound() },
-            onNext = if (state.level.id < 90) {
+            isChallenge = state.isChallenge,
+            challengeGoalsCleared = state.challengeState?.goalsCleared ?: 0,
+            onNext = if (!state.isChallenge && state.level.id < 90) {
                 {
                     MusicManager.stopWinMusic()
                     viewModel.commitWinResult()
@@ -396,10 +453,73 @@ fun GameScreen(
             )
         }
     }
+
+    // Challenge invitation dialog
+    val pendingChallenge = state.pendingChallenge
+    if (pendingChallenge != null && state.phase == GamePhase.WON) {
+        Dialog(onDismissRequest = { viewModel.dismissChallenge() }) {
+            Card(
+                shape = RoundedCornerShape(24.dp),
+                colors = CardDefaults.cardColors(containerColor = SoftWhite)
+            ) {
+                Column(
+                    modifier = Modifier.padding(28.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    Text(
+                        text = "\u2694\uFE0F Challenge Unlocked!",
+                        fontSize = 22.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = DarkSage
+                    )
+                    Text(
+                        text = pendingChallenge.title,
+                        fontSize = 20.sp,
+                        fontWeight = FontWeight.ExtraBold,
+                        color = MaterialTheme.colorScheme.primary
+                    )
+                    Text(
+                        text = pendingChallenge.description,
+                        fontSize = 14.sp,
+                        color = WarmBrown,
+                        textAlign = TextAlign.Center
+                    )
+                    Text(
+                        text = "No lives at stake \u2022 Bonus stars + tokens on win!",
+                        fontSize = 12.sp,
+                        color = Sage,
+                        textAlign = TextAlign.Center
+                    )
+                    Spacer(modifier = Modifier.height(4.dp))
+                    Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                        OutlinedButton(
+                            onClick = { viewModel.dismissChallenge() },
+                            shape = RoundedCornerShape(20.dp)
+                        ) {
+                            Text("Skip", fontSize = 13.sp)
+                        }
+                        Button(
+                            onClick = {
+                                MusicManager.stopWinMusic()
+                                viewModel.dismissChallenge()
+                                navController.navigate(Screen.Game.create(pendingChallenge.id)) {
+                                    popUpTo(Screen.Game.route) { inclusive = true }
+                                }
+                            },
+                            shape = RoundedCornerShape(20.dp)
+                        ) {
+                            Text("Accept", fontSize = 13.sp, fontWeight = FontWeight.Bold)
+                        }
+                    }
+                }
+            }
+        }
+    }
 }
 
 @Composable
-private fun WinOverlay(stars: Int, levelName: String, unlockedWorldName: String? = null, shuffleTokenAwarded: Boolean = false, passthroughTokenAwarded: Boolean = false, unfreezeTokenAwarded: Boolean = false, redoTokenAwarded: Boolean = false, perfectGame: Boolean = false, onStarLanded: () -> Unit = {}, onAllStarsLanded: () -> Unit = {}, onPerfectGameSound: () -> Unit = {}, onWorldUnlockSound: () -> Unit = {}, onNext: (() -> Unit)?, onMenu: () -> Unit) {
+private fun WinOverlay(stars: Int, levelName: String, unlockedWorldName: String? = null, shuffleTokenAwarded: Boolean = false, passthroughTokenAwarded: Boolean = false, unfreezeTokenAwarded: Boolean = false, redoTokenAwarded: Boolean = false, perfectGame: Boolean = false, isChallenge: Boolean = false, challengeGoalsCleared: Int = 0, onStarLanded: () -> Unit = {}, onAllStarsLanded: () -> Unit = {}, onPerfectGameSound: () -> Unit = {}, onWorldUnlockSound: () -> Unit = {}, onNext: (() -> Unit)?, onMenu: () -> Unit) {
     // Pulsing scale animation for the star display
     val infiniteTransition = rememberInfiniteTransition(label = "starPulse")
     val starScale by infiniteTransition.animateFloat(
@@ -452,7 +572,7 @@ private fun WinOverlay(stars: Int, levelName: String, unlockedWorldName: String?
                 verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
                 val headline = remember {
-                    listOf(
+                    if (isChallenge) "Challenge Complete!" else listOf(
                         "Congratulations!",
                         "You did it!",
                         "Brilliant!",
@@ -473,6 +593,15 @@ private fun WinOverlay(stars: Int, levelName: String, unlockedWorldName: String?
                     fontWeight = FontWeight.Bold,
                     color = DarkSage
                 )
+
+                if (isChallenge && challengeGoalsCleared > 0) {
+                    Text(
+                        text = "Goals cleared: $challengeGoalsCleared",
+                        fontSize = 16.sp,
+                        fontWeight = FontWeight.SemiBold,
+                        color = WarmBrown
+                    )
+                }
 
                 Text(
                     text = "You've won $stars ${if (stars == 1) "star" else "stars"}!",

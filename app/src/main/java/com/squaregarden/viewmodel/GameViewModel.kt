@@ -11,11 +11,13 @@ import com.squaregarden.data.PlayGamesManager
 import com.squaregarden.data.ProfileRepository
 import com.squaregarden.data.ProgressRepository
 import com.squaregarden.logic.BoardEngine
+import com.squaregarden.logic.ChallengeGenerator
 import com.squaregarden.logic.HintSolver
 import com.squaregarden.logic.LevelLoader
 import com.squaregarden.logic.PatternMatcher
 import com.squaregarden.model.*
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -47,6 +49,8 @@ class GameViewModel(
     private val progressRepo = ProgressRepository(context)
     private val profileRepo = ProfileRepository(context)
     private val audioManager = AudioManager(context)
+    private var usedPowerUpThisGame: Boolean = false
+    private var blitzTimerJob: Job? = null
     var activity: Activity? = null
 
     private val _state = MutableStateFlow(
@@ -69,10 +73,17 @@ class GameViewModel(
             unfreezeTokens = progressRepo.unfreezeTokensFlow.first()
             redoTokens = progressRepo.redoTokensFlow.first()
 
-            val levels = LevelLoader.loadAllLevels(context)
-            level = levels.first { it.id == levelId }
-            adjustedMaxMoves = max(1, (level.maxMoves * difficulty.moveMultiplier).roundToInt())
-            initLevel()
+            val challengeType = ChallengeType.fromId(levelId)
+            if (challengeType != null) {
+                level = ChallengeGenerator.generateLevel(challengeType)
+                adjustedMaxMoves = level.maxMoves // No difficulty adjustment for challenges
+                initLevel(challengeType)
+            } else {
+                val levels = LevelLoader.loadAllLevels(context)
+                level = levels.first { it.id == levelId }
+                adjustedMaxMoves = max(1, (level.maxMoves * difficulty.moveMultiplier).roundToInt())
+                initLevel()
+            }
         }
     }
 
@@ -394,7 +405,8 @@ class GameViewModel(
         )
     }
 
-    private fun initLevel() {
+    private fun initLevel(challengeType: ChallengeType? = null) {
+        usedPowerUpThisGame = false
         val hasTutorial = level.tutorialSteps != null
 
         if (hasTutorial) {
@@ -423,17 +435,32 @@ class GameViewModel(
             val (board, solution) = generateBoardWithSolution(adjustedMaxMoves)
             precomputedSolution = solution
             val adjustedLevel = level.copy(maxMoves = adjustedMaxMoves)
+
+            val chalState = when (challengeType) {
+                ChallengeType.BLITZ -> ChallengeState(type = ChallengeType.BLITZ, timerMillisRemaining = 60_000L)
+                ChallengeType.OVERGROWN -> ChallengeState(type = ChallengeType.OVERGROWN)
+                ChallengeType.SHIFTING -> ChallengeState(type = ChallengeType.SHIFTING)
+                ChallengeType.MEMORY -> ChallengeState(type = ChallengeType.MEMORY)
+                null -> null
+            }
+
             _state.value = GameState(
                 level = adjustedLevel, board = board,
                 movesRemaining = adjustedMaxMoves, difficulty = difficulty,
                 gameDifficulty = computeGameDifficulty(board),
                 initialBoard = board, hasSolution = solution != null,
                 shuffleTokens = shuffleTokens, passthroughTokens = passthroughTokens, unfreezeTokens = unfreezeTokens, redoTokens = redoTokens,
-                phase = GamePhase.SCRAMBLING
+                phase = GamePhase.SCRAMBLING,
+                challengeState = chalState
             )
             // If reverse-construction failed, try solver in background
             if (solution == null) computeSolutionAsync(board)
-            viewModelScope.launch { animateScramble(board) }
+            viewModelScope.launch {
+                animateScramble(board)
+                // Start challenge-specific setup after scramble
+                if (challengeType == ChallengeType.BLITZ) startBlitzTimer()
+                if (challengeType == ChallengeType.MEMORY) startMemoryReveal()
+            }
         }
     }
 
@@ -629,6 +656,7 @@ class GameViewModel(
     fun toggleUnfreeze() {
         val current = _state.value
         if (current.phase != GamePhase.PLAYING) return
+        if (current.isChallenge) return
         if (current.unfreezeMode) {
             _state.value = current.copy(unfreezeMode = false)
         } else if (current.unfreezeTokens > 0) {
@@ -647,6 +675,7 @@ class GameViewModel(
             val success = progressRepo.useUnfreezeToken()
             if (!success) return@launch
             unfreezeTokens--
+            usedPowerUpThisGame = true
             val newTiles = current.board.tiles.mapIndexed { r, rowTiles ->
                 rowTiles.mapIndexed { c, t ->
                     if (r == row && c == col) t.copy(frozen = false) else t
@@ -798,6 +827,7 @@ class GameViewModel(
                 }
             }
 
+            val isChallenge = current.isChallenge
             val won = BoardEngine.checkWin(newCompleted, current.level.goals)
             val lost = BoardEngine.checkLose(newMoves, won)
 
@@ -805,29 +835,57 @@ class GameViewModel(
 
             var starsAwarded = 0; var winsNeeded = 0; var unlockedWorld: String? = null
             var isPerfect = false
+            var blitzReplenish = false
             val phase = when {
                 won -> {
-                    val baseStars = BoardEngine.calculateStars(newMoves, current.level.starThresholds)
-                    val gameDiff = _state.value.gameDifficulty
-                    val movesUsed = adjustedMaxMoves - newMoves
-                    isPerfect = movesUsed <= current.level.goals.size && level.world >= 5
-                    val perfectMultiplier = if (isPerfect) 2f else 1f
-                    starsAwarded = (baseStars * difficulty.starMultiplier * gameDiff.starMultiplier * perfectMultiplier).roundToInt()
-                    MusicManager.startWinMusic(context, perfectGame = isPerfect)
-                    val oldTotal = progressRepo.totalStarsFlow.first()
-                    unlockedWorld = detectNewWorldUnlock(oldTotal, oldTotal + starsAwarded)
-                    winResultCommitted = false
-                    pendingWinLevelId = current.level.id
-                    pendingWinStars = starsAwarded
-                    GamePhase.WON
+                    if (isChallenge) {
+                        val cs = current.challengeState!!
+                        if (cs.type == ChallengeType.BLITZ) {
+                            // Blitz: replenish goals instead of winning
+                            blitzReplenish = true
+                            GamePhase.PLAYING
+                        } else {
+                            starsAwarded = BoardEngine.calculateStars(newMoves, current.level.starThresholds).coerceAtLeast(1)
+                            MusicManager.startWinMusic(context, perfectGame = false)
+                            winResultCommitted = false
+                            pendingWinLevelId = current.level.id
+                            pendingWinStars = starsAwarded
+                            GamePhase.WON
+                        }
+                    } else {
+                        val baseStars = BoardEngine.calculateStars(newMoves, current.level.starThresholds)
+                        val gameDiff = _state.value.gameDifficulty
+                        val movesUsed = adjustedMaxMoves - newMoves
+                        isPerfect = movesUsed <= current.level.goals.size && level.world >= 5
+                        val perfectMultiplier = if (isPerfect) 2f else 1f
+                        starsAwarded = (baseStars * difficulty.starMultiplier * gameDiff.starMultiplier * perfectMultiplier).roundToInt()
+                        MusicManager.startWinMusic(context, perfectGame = isPerfect)
+                        val oldTotal = progressRepo.totalStarsFlow.first()
+                        unlockedWorld = detectNewWorldUnlock(oldTotal, oldTotal + starsAwarded)
+                        winResultCommitted = false
+                        pendingWinLevelId = current.level.id
+                        pendingWinStars = starsAwarded
+                        GamePhase.WON
+                    }
                 }
                 lost -> {
                     audioManager.playLose()
-                    progressRepo.loseLife(difficulty.ordinal)
+                    if (!isChallenge) progressRepo.loseLife(difficulty.ordinal)
+                    blitzTimerJob?.cancel()
                     GamePhase.LOST
                 }
                 else -> GamePhase.PLAYING
             }
+
+            // Update challenge state after swap
+            val updatedChalState = if (isChallenge && phase == GamePhase.PLAYING) {
+                val cs = current.challengeState!!
+                when (cs.type) {
+                    ChallengeType.SHIFTING -> cs.copy(movesSinceLastScramble = cs.movesSinceLastScramble + 1)
+                    ChallengeType.MEMORY -> cs // reveal handled below
+                    else -> cs
+                }
+            } else current.challengeState
 
             _state.value = _state.value.copy(
                 board = boardAfterCapture, movesRemaining = newMoves,
@@ -839,8 +897,36 @@ class GameViewModel(
                 passthroughTokens = passthroughTokens, passthroughTokenAwarded = ptCaptured,
                 unfreezeTokens = unfreezeTokens, unfreezeTokenAwarded = ufCaptured,
                 redoTokens = redoTokens, redoTokenAwarded = redoCaptured,
-                perfectGame = isPerfect
+                perfectGame = isPerfect,
+                challengeState = updatedChalState
             )
+
+            // Blitz goal replenish
+            if (blitzReplenish) {
+                blitzReplenishGoals()
+            }
+
+            // Challenge post-swap logic
+            if (isChallenge && phase == GamePhase.PLAYING) {
+                val cs = _state.value.challengeState ?: updatedChalState!!
+                when (cs.type) {
+                    ChallengeType.SHIFTING -> {
+                        if (cs.movesSinceLastScramble >= 3) {
+                            _state.value = _state.value.copy(
+                                challengeState = cs.copy(movesSinceLastScramble = 0)
+                            )
+                            val goalCells = allGoalCells()
+                            val numSwaps = boardAfterCapture.width * boardAfterCapture.height
+                            val (scrambled, _) = scrambleBoard(boardAfterCapture, numSwaps, protectedCells = goalCells)
+                            animateScramble(scrambled)
+                        }
+                    }
+                    ChallengeType.MEMORY -> {
+                        revealAroundSwap(from, to)
+                    }
+                    else -> {}
+                }
+            }
         }
     }
 
@@ -867,6 +953,7 @@ class GameViewModel(
             // Consume passthrough token
             progressRepo.usePassthroughToken()
             passthroughTokens--
+            usedPowerUpThisGame = true
             audioManager.playMatch()
 
             // Swap from <-> landing directly; goal cells in between are untouched
@@ -916,6 +1003,7 @@ class GameViewModel(
                 }
             }
 
+            val isChallenge = current.isChallenge
             val won = BoardEngine.checkWin(newCompleted, current.level.goals)
             val lost = BoardEngine.checkLose(newMoves, won)
 
@@ -925,15 +1013,21 @@ class GameViewModel(
             var isPerfect = false
             val phase = when {
                 won -> {
-                    val baseStars = BoardEngine.calculateStars(newMoves, current.level.starThresholds)
-                    val gameDiff = _state.value.gameDifficulty
-                    val movesUsed = adjustedMaxMoves - newMoves
-                    isPerfect = movesUsed <= current.level.goals.size && level.world >= 5
-                    val perfectMultiplier = if (isPerfect) 2f else 1f
-                    starsAwarded = (baseStars * difficulty.starMultiplier * gameDiff.starMultiplier * perfectMultiplier).roundToInt()
-                    MusicManager.startWinMusic(context, perfectGame = isPerfect)
-                    val oldTotal = progressRepo.totalStarsFlow.first()
-                    unlockedWorld = detectNewWorldUnlock(oldTotal, oldTotal + starsAwarded)
+                    if (isChallenge) {
+                        blitzTimerJob?.cancel()
+                        starsAwarded = BoardEngine.calculateStars(newMoves, current.level.starThresholds).coerceAtLeast(1)
+                        MusicManager.startWinMusic(context, perfectGame = false)
+                    } else {
+                        val baseStars = BoardEngine.calculateStars(newMoves, current.level.starThresholds)
+                        val gameDiff = _state.value.gameDifficulty
+                        val movesUsed = adjustedMaxMoves - newMoves
+                        isPerfect = movesUsed <= current.level.goals.size && level.world >= 5
+                        val perfectMultiplier = if (isPerfect) 2f else 1f
+                        starsAwarded = (baseStars * difficulty.starMultiplier * gameDiff.starMultiplier * perfectMultiplier).roundToInt()
+                        MusicManager.startWinMusic(context, perfectGame = isPerfect)
+                        val oldTotal = progressRepo.totalStarsFlow.first()
+                        unlockedWorld = detectNewWorldUnlock(oldTotal, oldTotal + starsAwarded)
+                    }
                     winResultCommitted = false
                     pendingWinLevelId = current.level.id
                     pendingWinStars = starsAwarded
@@ -941,7 +1035,8 @@ class GameViewModel(
                 }
                 lost -> {
                     audioManager.playLose()
-                    progressRepo.loseLife(difficulty.ordinal)
+                    if (!isChallenge) progressRepo.loseLife(difficulty.ordinal)
+                    blitzTimerJob?.cancel()
                     GamePhase.LOST
                 }
                 else -> GamePhase.PLAYING
@@ -990,6 +1085,7 @@ class GameViewModel(
     fun toggleShuffle() {
         val current = _state.value
         if (current.phase != GamePhase.PLAYING) return
+        if (current.isChallenge) return
         if (current.shuffleReady) {
             _state.value = current.copy(shuffleReady = false)
         } else if (current.shuffleTokens > 0) {
@@ -1007,6 +1103,7 @@ class GameViewModel(
             val success = progressRepo.useShuffleToken()
             if (!success) return@launch
             shuffleTokens--
+            usedPowerUpThisGame = true
             val numSwaps = current.board.width * current.board.height
             val goalCells = current.completedGoalCells.values.flatten().toSet()
             val (shuffled, _) = scrambleBoard(current.board, numSwaps, protectedCells = goalCells)
@@ -1025,11 +1122,13 @@ class GameViewModel(
     fun executeRedo() {
         val current = _state.value
         if (current.phase != GamePhase.PLAYING) return
+        if (current.isChallenge) return
         if (redoTokens <= 0) return
         viewModelScope.launch {
             val success = progressRepo.useRedoToken()
             if (!success) return@launch
             redoTokens--
+            usedPowerUpThisGame = true
             redoFullReset = true
             resetLevel()
             redoFullReset = false
@@ -1039,6 +1138,7 @@ class GameViewModel(
     fun togglePassthrough() {
         val current = _state.value
         if (current.phase != GamePhase.PLAYING) return
+        if (current.isChallenge) return
         if (current.passthroughActive) {
             _state.value = current.copy(passthroughActive = false)
         } else if (current.passthroughTokens > 0 &&
@@ -1082,6 +1182,24 @@ class GameViewModel(
         if (winResultCommitted) return
         winResultCommitted = true
         viewModelScope.launch {
+            val state = _state.value
+            if (state.isChallenge) {
+                // Challenge win: bonus stars + 1 of each token, no per-level save
+                progressRepo.saveChallengeStars(pendingWinStars)
+                progressRepo.recordChallengeCompletion(pendingWinLevelId)
+                progressRepo.addShuffleToken(); shuffleTokens++
+                progressRepo.addPassthroughToken(); passthroughTokens++
+                progressRepo.addUnfreezeToken(); unfreezeTokens++
+                progressRepo.addRedoToken(); redoTokens++
+                _state.value = _state.value.copy(
+                    shuffleTokenAwarded = true,
+                    passthroughTokenAwarded = true,
+                    unfreezeTokenAwarded = true,
+                    redoTokenAwarded = true
+                )
+                return@launch
+            }
+
             progressRepo.saveLevelResult(pendingWinLevelId, pendingWinStars)
             val result = progressRepo.recordWin(difficulty.ordinal, pendingWinLevelId)
             profileRepo.incrementPlayerLevel()
@@ -1131,7 +1249,35 @@ class GameViewModel(
                     PlayGamesManager.submitHighestLevel(act, difficulty, highestLevel)
                 }
             }
+
+            // ── Challenge trigger detection (normal games only) ──
+            val world = (pendingWinLevelId - 1) / 9 + 1
+            if (world >= 5) {
+                // Priority: Memory > Blitz > Overgrown > Shifting
+                val triggered: ChallengeType? = when {
+                    _state.value.perfectGame -> ChallengeType.MEMORY
+                    progressRepo.recordProgressiveWin(pendingWinLevelId) -> ChallengeType.BLITZ
+                    run {
+                        val worldComplete = progressRepo.checkWorldComplete(world)
+                        worldComplete && !progressRepo.hasOvergrownTriggered(world)
+                    } -> {
+                        progressRepo.markOvergrownTriggered(world)
+                        ChallengeType.OVERGROWN
+                    }
+                    !usedPowerUpThisGame && progressRepo.recordNoPowerupWin() -> ChallengeType.SHIFTING
+                    else -> null
+                }
+                if (triggered != null) {
+                    _state.value = _state.value.copy(pendingChallenge = triggered)
+                }
+            }
+            // Reset no-powerup streak if a power-up was used
+            if (usedPowerUpThisGame) progressRepo.resetNoPowerupStreak()
         }
+    }
+
+    fun dismissChallenge() {
+        _state.value = _state.value.copy(pendingChallenge = null)
     }
 
     private fun detectNewWorldUnlock(oldStars: Int, newStars: Int): String? {
@@ -1156,7 +1302,130 @@ class GameViewModel(
         return null
     }
 
-    override fun onCleared() { audioManager.release() }
+    // ── Challenge-specific methods ──
+
+    private fun startBlitzTimer() {
+        blitzTimerJob = viewModelScope.launch {
+            while (true) {
+                delay(100)
+                val s = _state.value
+                if (s.phase != GamePhase.PLAYING) continue
+                val cs = s.challengeState ?: break
+                if (cs.type != ChallengeType.BLITZ) break
+                val remaining = cs.timerMillisRemaining - 100
+                if (remaining <= 0) {
+                    // Time's up — win if cleared enough goals, else lose
+                    val phase = if (cs.goalsCleared >= 5) {
+                        pendingWinStars = when {
+                            cs.goalsCleared >= 15 -> 3
+                            cs.goalsCleared >= 10 -> 2
+                            else -> 1
+                        }
+                        pendingWinLevelId = ChallengeType.BLITZ.id
+                        winResultCommitted = false
+                        MusicManager.startWinMusic(context, perfectGame = false)
+                        GamePhase.WON
+                    } else {
+                        audioManager.playLose()
+                        GamePhase.LOST
+                    }
+                    _state.value = s.copy(
+                        challengeState = cs.copy(timerMillisRemaining = 0),
+                        phase = phase,
+                        starsAwarded = if (phase == GamePhase.WON) pendingWinStars else 0
+                    )
+                    break
+                }
+                _state.value = s.copy(
+                    challengeState = cs.copy(timerMillisRemaining = remaining)
+                )
+            }
+        }
+    }
+
+    /** Called when all goals are completed in Blitz — replenish with new goals. */
+    fun blitzReplenishGoals() {
+        val current = _state.value
+        val cs = current.challengeState ?: return
+        if (cs.type != ChallengeType.BLITZ) return
+        val newGoals = ChallengeGenerator.generateBlitzGoalSet(current.board)
+        val newGoalCount = cs.goalsCleared + 1
+        val newCombo = cs.comboCount + 1
+        val newMultiplier = when {
+            newCombo >= 6 -> 3
+            newCombo >= 3 -> 2
+            else -> 1
+        }
+        val newLevel = current.level.copy(goals = newGoals)
+        _state.value = current.copy(
+            level = newLevel,
+            completedGoalIds = emptySet(),
+            completedGoalCells = emptyMap(),
+            challengeState = cs.copy(
+                goalsCleared = newGoalCount,
+                comboCount = newCombo,
+                comboMultiplier = newMultiplier
+            )
+        )
+    }
+
+    private fun startMemoryReveal() {
+        val current = _state.value
+        val cs = current.challengeState ?: return
+        // Reveal all cells for 3 seconds
+        val allCells = mutableSetOf<CellPos>()
+        for (r in 0 until current.board.height) {
+            for (c in 0 until current.board.width) {
+                if (!current.board.isVoid(r, c)) allCells.add(CellPos(r, c))
+            }
+        }
+        _state.value = current.copy(
+            challengeState = cs.copy(revealedCells = allCells)
+        )
+        viewModelScope.launch {
+            delay(3000)
+            val s = _state.value
+            val cState = s.challengeState ?: return@launch
+            _state.value = s.copy(
+                challengeState = cState.copy(revealedCells = emptySet(), initialRevealDone = true)
+            )
+        }
+    }
+
+    private fun revealAroundSwap(from: CellPos, to: CellPos) {
+        val current = _state.value
+        val cs = current.challengeState ?: return
+        if (!cs.initialRevealDone) return
+        // Reveal 1-cell radius around both swapped positions
+        val revealed = cs.revealedCells.toMutableSet()
+        for (pos in listOf(from, to)) {
+            for (dr in -1..1) {
+                for (dc in -1..1) {
+                    val r = pos.row + dr; val c = pos.col + dc
+                    if (current.board.isValidCell(r, c) && !current.board.isVoid(r, c)) {
+                        revealed.add(CellPos(r, c))
+                    }
+                }
+            }
+        }
+        _state.value = current.copy(
+            challengeState = cs.copy(revealedCells = revealed)
+        )
+        // Hide after 1.5 seconds
+        viewModelScope.launch {
+            delay(1500)
+            val s = _state.value
+            val cState = s.challengeState ?: return@launch
+            _state.value = s.copy(
+                challengeState = cState.copy(revealedCells = emptySet())
+            )
+        }
+    }
+
+    override fun onCleared() {
+        blitzTimerJob?.cancel()
+        audioManager.release()
+    }
 }
 
 class GameViewModelFactory(
