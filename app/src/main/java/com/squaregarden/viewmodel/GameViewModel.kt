@@ -428,11 +428,76 @@ class GameViewModel(
                 gameDifficulty = computeGameDifficulty(board),
                 initialBoard = board, hasSolution = solution != null,
                 shuffleTokens = shuffleTokens, passthroughTokens = passthroughTokens, unfreezeTokens = unfreezeTokens, redoTokens = redoTokens,
-                phase = GamePhase.PLAYING
+                phase = GamePhase.SCRAMBLING
             )
             // If reverse-construction failed, try solver in background
             if (solution == null) computeSolutionAsync(board)
+            viewModelScope.launch { animateScramble(board) }
         }
+    }
+
+    private suspend fun animateScramble(finalBoard: Board) {
+        audioManager.playScramble()
+        var displayBoard = randomizeBoard(finalBoard)
+        _state.value = _state.value.copy(board = displayBoard, phase = GamePhase.SCRAMBLING)
+
+        // Fast phase: ~30 swaps over 2.5s
+        repeat(30) {
+            displayBoard = randomSwap(displayBoard)
+            _state.value = _state.value.copy(board = displayBoard)
+            delay(83)
+        }
+        // Slow phase: ~7 swaps over 1s
+        repeat(7) {
+            displayBoard = randomSwap(displayBoard)
+            _state.value = _state.value.copy(board = displayBoard)
+            delay(143)
+        }
+        // Settle phase: ~2 swaps over 0.5s
+        repeat(2) {
+            displayBoard = randomSwap(displayBoard)
+            _state.value = _state.value.copy(board = displayBoard)
+            delay(250)
+        }
+        // Snap to final solvable board
+        _state.value = _state.value.copy(board = finalBoard, phase = GamePhase.PLAYING)
+    }
+
+    private fun randomizeBoard(board: Board): Board {
+        val playable = mutableListOf<Pair<Int, Int>>()
+        for (r in 0 until board.height) {
+            for (c in 0 until board.width) {
+                if (!board.isVoid(r, c)) playable.add(r to c)
+            }
+        }
+        val tiles = playable.map { (r, c) -> board.tileAt(r, c) }.toMutableList()
+        // Fisher-Yates shuffle
+        for (i in tiles.lastIndex downTo 1) {
+            val j = (0..i).random()
+            val tmp = tiles[i]; tiles[i] = tiles[j]; tiles[j] = tmp
+        }
+        val mutable = board.tiles.map { it.toMutableList() }
+        playable.forEachIndexed { idx, (r, c) ->
+            val original = board.tileAt(r, c)
+            mutable[r][c] = tiles[idx].copy(frozen = original.frozen)
+        }
+        return board.copy(tiles = mutable.map { it.toList() })
+    }
+
+    private fun randomSwap(board: Board): Board {
+        val playable = mutableListOf<Pair<Int, Int>>()
+        for (r in 0 until board.height) {
+            for (c in 0 until board.width) {
+                if (!board.isVoid(r, c)) playable.add(r to c)
+            }
+        }
+        if (playable.size < 2) return board
+        val (r1, c1) = playable.random()
+        var r2: Int; var c2: Int
+        do {
+            val p = playable.random(); r2 = p.first; c2 = p.second
+        } while (r1 == r2 && c1 == c2)
+        return board.withSwap(r1, c1, r2, c2)
     }
 
     fun resetLevel() {
@@ -473,6 +538,7 @@ class GameViewModel(
             Difficulty.MEDIUM -> max(1, adjustedMaxMoves - 2)
             Difficulty.HARD -> if (current.movesRemaining > 0) current.movesRemaining else adjustedMaxMoves
         }
+        val shouldScramble = !hasTutorial && hasMovedSinceReset
         hasMovedSinceReset = false
         val adjustedLevel = level.copy(maxMoves = adjustedMaxMoves)
         _state.value = GameState(
@@ -481,9 +547,10 @@ class GameViewModel(
             gameDifficulty = computeGameDifficulty(board),
             initialBoard = board, hasSolution = solution != null,
             shuffleTokens = shuffleTokens, passthroughTokens = passthroughTokens, unfreezeTokens = unfreezeTokens, redoTokens = redoTokens,
-            phase = if (hasTutorial) GamePhase.TUTORIAL_PAUSE else GamePhase.PLAYING
+            phase = if (hasTutorial) GamePhase.TUTORIAL_PAUSE else if (shouldScramble) GamePhase.SCRAMBLING else GamePhase.PLAYING
         )
         if (solution == null) computeSolutionAsync(board)
+        if (shouldScramble) viewModelScope.launch { animateScramble(board) }
     }
 
     // ── Gameplay ──
@@ -539,7 +606,7 @@ class GameViewModel(
                 }
             }
             val newBoard = current.board.copy(tiles = newTiles)
-            audioManager.playMatch()
+            audioManager.playUnfreeze()
             _state.value = current.copy(
                 board = newBoard, unfreezeTokens = unfreezeTokens, unfreezeMode = false
             )
@@ -741,7 +808,7 @@ class GameViewModel(
         )
 
         viewModelScope.launch {
-            audioManager.playSwap()
+            audioManager.playPassthrough()
             val steps = 15; val stepDelay = 17L
             for (i in 1..steps) {
                 val t = i.toFloat() / steps

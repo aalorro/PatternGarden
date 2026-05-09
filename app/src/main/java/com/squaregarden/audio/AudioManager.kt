@@ -20,6 +20,9 @@ class AudioManager(private val context: Context) {
     private val starCollectPcm by lazy { SoundGenerator.generateStarCollect() }
     private val lifeRestoredPcm by lazy { SoundGenerator.generateLifeRestored() }
     private val shufflePcm by lazy { SoundGenerator.generateShuffle() }
+    private val passthroughPcm by lazy { SoundGenerator.generatePassthrough() }
+    private val unfreezePcm by lazy { SoundGenerator.generateUnfreeze() }
+    private val scramblePcm by lazy { SoundGenerator.generateScramble() }
 
     // Sampled celebration sounds from Drift-Loop.mp3 snippets
     private val win1Pcm by lazy { SoundGenerator.loadRawResource(context, R.raw.win1_sample) }
@@ -57,6 +60,9 @@ class AudioManager(private val context: Context) {
     fun playStarCollect() = play(starCollectPcm, 0.6f)
     fun playLifeRestored() = play(lifeRestoredPcm, 1f)
     fun playShuffle() = play(shufflePcm, 0.7f)
+    fun playPassthrough() = play(passthroughPcm, 0.7f)
+    fun playUnfreeze() = play(unfreezePcm, 0.8f)
+    fun playScramble() = play(scramblePcm, 0.7f)
     fun playPerfectGame() = play(perfectGamePcm, 1f)
     fun playWorldUnlock() = play(worldUnlockPcm, 0.9f)
 

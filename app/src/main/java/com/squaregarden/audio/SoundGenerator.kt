@@ -233,13 +233,78 @@ object SoundGenerator {
         )
     }
 
-    /** Quick rising scramble whoosh for board shuffle */
-    fun generateShuffle(): ShortArray = generatePcm(300) { i, total ->
-        val env = envelope(i, total, 10, 100)
+    /** Shuffle: whooshing card-scatter with cascading tones */
+    fun generateShuffle(): ShortArray = generatePcm(500) { i, total ->
+        val env = envelope(i, total, 15, 150)
         val progress = i.toFloat() / total
-        val freq = 200f + 800f * progress
-        val noise = (Math.random().toFloat() - 0.5f) * 0.2f * (1f - progress)
-        env * 0.5f * (sine(freq, i) * 0.4f + sine(freq * 1.5f, i) * 0.3f + noise)
+        // Two sweeps: one up, one down — creates a scrambling feel
+        val freqUp = 200f + 1000f * progress
+        val freqDown = 900f - 500f * progress
+        val noise = (Math.random().toFloat() - 0.5f) * 0.15f * (1f - progress)
+        env * 0.5f * (
+            sine(freqUp, i) * 0.3f +
+            sine(freqDown, i) * 0.2f +
+            sine(freqUp * 1.5f, i) * 0.15f +
+            noise
+        )
+    }
+
+    /** Passthrough: ethereal phase-shift whoosh — tile passing through barriers */
+    fun generatePassthrough(): ShortArray = generatePcm(400) { i, total ->
+        val env = envelope(i, total, 15, 120)
+        val progress = i.toFloat() / total
+        // Phaser-style modulated sweep — sounds like passing through a wall
+        val baseFreq = 350f + 300f * sin(progress * PI.toFloat())
+        val phaser = sine(baseFreq, i) * 0.4f + sine(baseFreq * 1.01f, i) * 0.4f // phase beating
+        val shimmer = 0.2f * sine(2400f * progress, i) * (1f - progress)
+        val whoosh = (Math.random().toFloat() - 0.5f) * 0.08f * sin(progress * PI.toFloat())
+        env * 0.55f * (phaser + shimmer + whoosh)
+    }
+
+    /** Unfreeze: crystalline ice-crack with bright chime */
+    fun generateUnfreeze(): ShortArray = generatePcm(450) { i, total ->
+        val env = envelope(i, total, 5, 180)
+        val progress = i.toFloat() / total
+        // Sharp crack at start, then bright rising chime
+        val crack = if (progress < 0.15f) {
+            val crackEnv = (1f - progress / 0.15f)
+            (Math.random().toFloat() - 0.5f) * 0.6f * crackEnv
+        } else 0f
+        val chimeFreq = 1200f + 800f * (progress - 0.15f).coerceIn(0f, 1f)
+        val chime = if (progress > 0.1f) {
+            val chimeEnv = if (progress < 0.25f) (progress - 0.1f) / 0.15f else 1f
+            chimeEnv * (sine(chimeFreq, i) * 0.4f + sine(chimeFreq * 2f, i) * 0.2f + sine(chimeFreq * 3f, i) * 0.1f)
+        } else 0f
+        // Icy sparkle overtones
+        val sparkle = if (progress > 0.2f) 0.12f * sine(3800f, i) * sin(progress * 18.0).toFloat().coerceIn(0f, 1f) else 0f
+        env * 0.6f * (crack + chime + sparkle)
+    }
+
+    /** Glitchy computer hum for level-transition tile scramble (~4 seconds) */
+    fun generateScramble(): ShortArray = generatePcm(4000) { i, total ->
+        val progress = i.toFloat() / total
+        // Fade out in last 500ms
+        val env = when {
+            i < SAMPLE_RATE * 10 / 1000 -> i.toFloat() / (SAMPLE_RATE * 10 / 1000)
+            progress > 0.875f -> (1f - progress) / 0.125f
+            else -> 1f
+        }.coerceIn(0f, 1f)
+        // Low-frequency base hum with wobble (80-120Hz rising)
+        val baseFreq = 80f + 40f * progress
+        val wobble = 1f + 0.08f * sine(3f + 2f * progress, i)
+        val hum = sine(baseFreq * wobble, i) * 0.35f + sine(baseFreq * 2f * wobble, i) * 0.15f
+        // Digital glitch bursts — periodic noise pops
+        val glitchCycle = sin(progress * 47.0).toFloat() // pseudo-random trigger
+        val glitch = if (glitchCycle > 0.7f) {
+            (Math.random().toFloat() - 0.5f) * 0.4f * (glitchCycle - 0.7f) / 0.3f
+        } else 0f
+        // Rising mid-frequency buzz (tension building)
+        val buzzFreq = 200f + 300f * progress
+        val buzz = sine(buzzFreq, i) * 0.12f * progress
+        // High-freq digital artifacts
+        val artifact = sine(1800f + 600f * sin(progress * 23.0).toFloat(), i) * 0.06f *
+            sin(progress * 31.0).toFloat().coerceIn(0f, 1f)
+        env * 0.7f * (hum + glitch + buzz + artifact)
     }
 
     /** Sad descending tone for losing */
