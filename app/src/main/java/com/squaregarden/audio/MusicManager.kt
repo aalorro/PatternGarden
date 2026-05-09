@@ -15,7 +15,14 @@ object MusicManager {
     private var introPlayer: MediaPlayer? = null
     private var winPlayer: MediaPlayer? = null
     private val handler = Handler(Looper.getMainLooper())
-    private var stopRunnable: Runnable? = null
+
+    // 4 distinct segments of the track for regular wins (start position in ms)
+    private val winSegments = listOf(0, 32_000, 68_000, 105_000)
+    private const val WIN_PLAY_MS = 8000L
+    private const val WIN_FADE_MS = 1000L
+
+    // Perfect game gets its own dedicated segment, loops until Next Level
+    private const val PERFECT_SEGMENT_START = 120_000
 
     /** Start looping intro music (HomeScreen). No-op if already playing. */
     fun startIntro(context: Context) {
@@ -41,30 +48,40 @@ object MusicManager {
     }
 
     /**
-     * Start win celebration music.
-     * @param loop true for perfect-game (loops until stopped), false for regular win (~8 sec with fade-out).
+     * Start win celebration music from the track.
+     * @param loop true for perfect-game (loops dedicated segment until stopped),
+     *             false for regular win (random segment, ~8 sec with 1-sec fade-out).
      */
     fun startWinMusic(context: Context, loop: Boolean) {
         stopWinMusic()
         try {
             winPlayer = MediaPlayer.create(context, R.raw.perfect_game_music)?.apply {
-                isLooping = loop
                 setVolume(0.7f, 0.7f)
+                if (loop) {
+                    // Perfect game: play from dedicated segment, loop back on end
+                    seekTo(PERFECT_SEGMENT_START)
+                    setOnCompletionListener { mp ->
+                        try {
+                            mp.seekTo(PERFECT_SEGMENT_START)
+                            mp.start()
+                        } catch (_: Exception) {}
+                    }
+                } else {
+                    // Regular win: pick a random segment
+                    seekTo(winSegments.random())
+                }
                 start()
             }
         } catch (_: Exception) {}
         if (!loop) {
-            // Start 1-second fade-out at 7 seconds, then stop at 8 seconds
-            val fadeRunnable = Runnable { fadeOutWinMusic() }
-            handler.postDelayed(fadeRunnable, 7000)
-            stopRunnable = fadeRunnable
+            handler.postDelayed({ fadeOutWinMusic() }, WIN_PLAY_MS - WIN_FADE_MS)
         }
     }
 
     private fun fadeOutWinMusic() {
         val player = winPlayer ?: return
         val steps = 20
-        val intervalMs = 1000L / steps // 50ms per step over 1 second
+        val intervalMs = WIN_FADE_MS / steps
         for (i in 1..steps) {
             handler.postDelayed({
                 try {
@@ -73,15 +90,11 @@ object MusicManager {
                 } catch (_: Exception) {}
             }, i * intervalMs)
         }
-        // Stop after fade completes
-        val finalStop = Runnable { stopWinMusic() }
-        handler.postDelayed(finalStop, 1000L + 50)
-        stopRunnable = finalStop
+        handler.postDelayed({ stopWinMusic() }, WIN_FADE_MS + 50)
     }
 
     fun stopWinMusic() {
         handler.removeCallbacksAndMessages(null)
-        stopRunnable = null
         try {
             winPlayer?.let {
                 if (it.isPlaying) it.stop()
