@@ -35,9 +35,7 @@ fun PlayerBadge(
     modifier: Modifier = Modifier
 ) {
     var showMenu by remember { mutableStateOf(false) }
-    val screenWidthDp = LocalConfiguration.current.screenWidthDp
-    val isCompact = screenWidthDp < 600
-    val isLargeTablet = screenWidthDp >= 840
+    val isCompact = LocalConfiguration.current.screenWidthDp < 600
 
     // Animated star counter: counts up over max 5 seconds then snaps to total
     var displayedStars by remember { mutableIntStateOf(totalStars) }
@@ -56,14 +54,15 @@ fun PlayerBadge(
         }
     }
 
-    val avatarSize = when { isCompact -> 38.dp; isLargeTablet -> 80.dp; else -> 58.dp }
-    val cornerRadius = when { isCompact -> 10.dp; isLargeTablet -> 20.dp; else -> 16.dp }
-    val hPad = when { isCompact -> 5.dp; isLargeTablet -> 12.dp; else -> 8.dp }
-    val vPad = when { isCompact -> 3.dp; isLargeTablet -> 8.dp; else -> 6.dp }
-    val gap = when { isCompact -> 4.dp; isLargeTablet -> 8.dp; else -> 6.dp }
-    val levelFontSize = when { isCompact -> 13.sp; isLargeTablet -> 26.sp; else -> 20.sp }
-    val starFontSize = when { isCompact -> 12.sp; isLargeTablet -> 24.sp; else -> 18.sp }
-    val smallFontSize = when { isCompact -> 10.sp; isLargeTablet -> 18.sp; else -> 14.sp }
+    // Tablet = 30% bigger than phone
+    val avatarSize = if (isCompact) 38.dp else 75.dp
+    val cornerRadius = if (isCompact) 10.dp else 21.dp
+    val hPad = if (isCompact) 5.dp else 10.dp
+    val vPad = if (isCompact) 3.dp else 8.dp
+    val gap = if (isCompact) 4.dp else 8.dp
+    val levelFontSize = if (isCompact) 13.sp else 26.sp
+    val starFontSize = if (isCompact) 12.sp else 23.sp
+    val smallFontSize = if (isCompact) 10.sp else 18.sp
 
     Box(modifier = modifier) {
         Row(
