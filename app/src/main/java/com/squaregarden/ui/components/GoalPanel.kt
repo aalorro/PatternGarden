@@ -224,20 +224,13 @@ private fun GoalBox(
                         val x = offsetX + cell.col * cellSize + gap / 2f
                         val y = offsetY + cell.row * cellSize + gap / 2f
                         val s = cellSize - gap
-                        // Filled white cell with high visibility
+                        // Bold black border around each cell
                         drawRoundRect(
-                            color = Color.White.copy(alpha = 0.45f),
-                            topLeft = Offset(x, y),
-                            size = Size(s, s),
-                            cornerRadius = cr
-                        )
-                        // Bold white border
-                        drawRoundRect(
-                            color = Color.White.copy(alpha = 0.9f),
+                            color = Color.Black.copy(alpha = 0.7f),
                             topLeft = Offset(x, y),
                             size = Size(s, s),
                             cornerRadius = cr,
-                            style = Stroke(width = (cellSize * 0.1f).coerceIn(2f, 5f))
+                            style = Stroke(width = (cellSize * 0.12f).coerceIn(2.5f, 6f))
                         )
                     }
                 }
