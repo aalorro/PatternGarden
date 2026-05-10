@@ -951,6 +951,7 @@ class GameViewModel(
                         val perfectMultiplier = if (isPerfect) 2f else 1f
                         starsAwarded = (baseStars * difficulty.starMultiplier * gameDiff.starMultiplier * perfectMultiplier).roundToInt()
                         MusicManager.startWinMusic(context, perfectGame = isPerfect)
+                        audioManager.playWinClap(perfectGame = isPerfect)
                         val oldTotal = progressRepo.totalStarsFlow.first()
                         unlockedWorld = detectNewWorldUnlock(oldTotal, oldTotal + starsAwarded)
                         winResultCommitted = false
@@ -1163,6 +1164,7 @@ class GameViewModel(
                         val perfectMultiplier = if (isPerfect) 2f else 1f
                         starsAwarded = (baseStars * difficulty.starMultiplier * gameDiff.starMultiplier * perfectMultiplier).roundToInt()
                         MusicManager.startWinMusic(context, perfectGame = isPerfect)
+                        audioManager.playWinClap(perfectGame = isPerfect)
                         val oldTotal = progressRepo.totalStarsFlow.first()
                         unlockedWorld = detectNewWorldUnlock(oldTotal, oldTotal + starsAwarded)
                         winResultCommitted = false
@@ -1351,7 +1353,10 @@ class GameViewModel(
     fun playWinSound(stars: Int = 1) { audioManager.playWin(stars) }
     fun playPerfectGameSound() { audioManager.playPerfectGame() }
     fun playWorldUnlockSound() { audioManager.playWorldUnlock() }
-    fun playChallengeMusic() { MusicManager.startWinMusic(context, perfectGame = true) }
+    fun playChallengeMusic() {
+        MusicManager.startWinMusic(context, perfectGame = true)
+        audioManager.playWinClap(perfectGame = true)
+    }
 
     fun advanceTutorial() {
         val current = _state.value

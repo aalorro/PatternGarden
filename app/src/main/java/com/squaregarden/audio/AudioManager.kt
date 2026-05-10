@@ -52,6 +52,9 @@ class AudioManager(private val context: Context) {
     // Sampled fail sounds (played at random via MediaPlayer)
     private val failSounds = listOf(R.raw.fail1, R.raw.fail2, R.raw.fail3, R.raw.fail4)
 
+    // Sampled clapping/cheers sounds for wins
+    private val winClaps = listOf(R.raw.cheers, R.raw.clapping)
+
     fun observeSettings(scope: CoroutineScope) {
         this.scope = scope
         scope.launch {
@@ -113,6 +116,17 @@ class AudioManager(private val context: Context) {
         } catch (_: Exception) {
             play(losePcm, 0.8f)
         }
+    }
+    fun playWinClap(perfectGame: Boolean = false) {
+        if (!soundEnabled) return
+        val resId = if (perfectGame) R.raw.more_clapping else winClaps.random()
+        try {
+            MediaPlayer.create(context, resId)?.apply {
+                setVolume(0.7f, 0.7f)
+                setOnCompletionListener { it.release() }
+                start()
+            }
+        } catch (_: Exception) {}
     }
     fun playStarCollect() = play(starCollectPcm, 0.6f)
     fun playLifeRestored() = play(lifeRestoredPcm, 1f)
