@@ -2,6 +2,28 @@
 
 All notable changes to Square Garden are documented in this file.
 
+## [1.5.0] - 2026-05-10 (Build 8)
+
+### New Features
+- **4 Challenge Game Modes** — Special reward events triggered by exceptional play on World 5+. Challenges cost no lives and award bonus stars + one of every power-up token on completion.
+  - **Blitz Garden** — 60-second time attack! Clear as many goals as possible. Combo multipliers increase every 3 goals (2x, 3x, 4x...). Trigger: 8 consecutive progressive level wins on World 5+.
+  - **Overgrown Garden** — Massive 9x9 board with 8 goals, frozen tiles, and 16 moves. Get 3 tries with increasing multipliers (1x, 2x, 3x). Choose to retry (forfeit stars) or keep your score. 2x win bonus! Trigger: Complete all 9 levels in a world (once per world, World 5+).
+  - **Shifting Sands** — Every 3 swaps, uncompleted tiles scramble! Stars earned are doubled (2x). Trigger: Win 5 consecutive levels without using any power-ups on World 5+.
+  - **Memory Garden** — Tiles are hidden! They reveal briefly at start, then only near where you swap. Stars earned are tripled (3x). Trigger: Every perfect game on World 5+ (immediate).
+
+### Audio
+- **Win clapping/cheers sounds** — Perfect games play extended applause; regular wins play random cheers or clapping alongside celebration music.
+- **Fail sound effects** — 4 sampled fail sounds played at random on game loss, replacing the procedural sad trombone.
+
+### Gameplay
+- **Improved board generation** — Complex levels (5+ goals, 8+ width) now attempt up to 300 board generation retries with larger goals placed first, greatly reducing unsolvable boards.
+- **Pre-met goal detection** — Goals already formed on the initial board are now immediately detected and marked complete.
+
+### Bug Fixes
+- Fixed Overgrown Garden triggering incorrectly on already-completed worlds — now only triggers when the current win actually completes the world.
+- Fixed duplicate goals appearing in challenge boards (same color + pattern type).
+- Fixed screen freeze during Overgrown board generation — now shows loading indicator while generating on background thread.
+
 ## [1.4.0] - 2026-05-09 (Build 7)
 
 ### New Features

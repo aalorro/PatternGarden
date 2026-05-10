@@ -47,6 +47,17 @@ Players start at a world matching their skill level — no grinding through easy
 - **Redo** — Special tiles appear on World 4+ boards (~25% chance). Capture one in a goal to earn a redo token for a free level restart
 - **Perfect Game** — Complete all goals in minimal moves (World 5+) for 2x stars and +1 of every token
 
+### Challenge Modes (World 5+)
+
+Special reward events triggered by exceptional play. Challenges cost no lives and award bonus stars + power-up tokens on completion.
+
+| Challenge | Mechanic | Star Bonus | Trigger |
+|-----------|----------|------------|---------|
+| **Blitz Garden** | 60-second time attack, combo multipliers (2x/3x/4x...) | Combo-based | 8 consecutive progressive wins |
+| **Overgrown Garden** | 9x9 board, 8 goals, 3 tries with increasing multipliers | 2x win bonus | Complete all 9 levels in a world (once per world) |
+| **Shifting Sands** | Tiles scramble every 3 swaps | 2x | 5 consecutive wins without power-ups |
+| **Memory Garden** | Tiles hidden, revealed near swaps only | 3x | Every perfect game (immediate) |
+
 ### Features
 - Difficulty-based starting worlds (skip easy content if you're experienced)
 - Drag-to-swap with animated sliding
@@ -68,7 +79,7 @@ Players start at a world matching their skill level — no grinding through easy
 - **Architecture**: MVVM (ViewModel + StateFlow)
 - **Storage**: DataStore Preferences
 - **Navigation**: Navigation Compose
-- **Audio**: Procedural PCM via AudioTrack
+- **Audio**: Procedural PCM via AudioTrack + sampled clips via MediaPlayer
 - **Min SDK**: 26 (Android 8.0)
 - **Target SDK**: 35
 
@@ -84,14 +95,14 @@ Requires Android Studio with JBR (JetBrains Runtime) and Android SDK installed.
 
 ```
 com.squaregarden/
-  model/       - Tile, Board, Goal, Level, GameState, PlayerProgress
-  logic/       - BoardEngine, PatternMatcher, HintSolver, LevelLoader
+  model/       - Tile, Board, Goal, Level, GameState, PlayerProgress, ChallengeMode
+  logic/       - BoardEngine, PatternMatcher, HintSolver, LevelLoader, ChallengeGenerator
   viewmodel/   - GameViewModel
   ui/
     theme/     - 6 themes with Material3 ColorScheme
     navigation/- Screen routes
     screens/   - Splash, Home, WorldSelect, LevelSelect, Game, Settings, Profile
     components/- GameBoardCanvas, GoalPanel, MoveCounter, StarDisplay, etc.
-  data/        - ProgressRepository, SettingsRepository, ProfileRepository
-  audio/       - AudioManager
+  data/        - ProgressRepository, SettingsRepository, ProfileRepository, PlayGamesManager
+  audio/       - AudioManager, SoundGenerator, MusicManager
 ```

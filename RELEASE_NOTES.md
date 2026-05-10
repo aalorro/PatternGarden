@@ -43,7 +43,24 @@ FEATURES
 
 ---
 
-## Release Notes — Version 1.4.0 (What's New)
+## Release Notes — Version 1.5.0 (What's New)
+
+What's new in 1.5.0:
+
+- 4 Challenge Game Modes! Unlock special reward events through exceptional play on World 5+:
+  - Blitz Garden — 60-second time attack with combo multipliers
+  - Overgrown Garden — Conquer a massive 9x9 board in 3 tries
+  - Shifting Sands — Tiles scramble every 3 swaps (2x stars)
+  - Memory Garden — Hidden tiles revealed only near your swaps (3x stars)
+- Challenges cost no lives and award bonus stars + power-up tokens on completion.
+- Win clapping and cheers sound effects on victories.
+- Improved board generation for complex levels — fewer unsolvable boards.
+- Goals already formed on the initial board are now detected immediately.
+- Bug fixes for challenge triggers, duplicate goals, and loading screens.
+
+Happy gardening!
+
+## Release Notes — Version 1.4.0
 
 What's new in 1.4.0:
 
