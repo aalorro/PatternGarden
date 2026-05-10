@@ -243,19 +243,24 @@ fun GameScreen(
                     color = if (seconds < 10) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onBackground
                 )
                 Text(
-                    text = "Goals: ${blitzState.goalsCleared}",
+                    text = "\u2B50 ${blitzState.blitzStarScore}",
                     fontSize = 18.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = TileYellow
+                )
+                Text(
+                    text = "Goals: ${blitzState.goalsCleared}",
+                    fontSize = 16.sp,
                     fontWeight = FontWeight.SemiBold,
                     color = MaterialTheme.colorScheme.onBackground
                 )
-                if (blitzState.comboMultiplier > 1) {
-                    Text(
-                        text = "${blitzState.comboMultiplier}x",
-                        fontSize = 18.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = TileYellow
-                    )
-                }
+                Text(
+                    text = "${blitzState.comboMultiplier}x",
+                    fontSize = 18.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = if (blitzState.comboMultiplier > 1) TileYellow
+                    else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
+                )
             }
         }
 
@@ -633,89 +638,155 @@ private fun WinOverlay(stars: Int, levelName: String, unlockedWorldName: String?
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
-                val headline = remember {
-                    if (isChallenge) "Challenge Complete!" else listOf(
-                        "Congratulations!",
-                        "You did it!",
-                        "Brilliant!",
-                        "Amazing!",
-                        "Well played!",
-                        "Superb!",
-                        "Fantastic!",
-                        "Wonderful!",
-                        "Bravo!",
-                        "Nicely done!",
-                        "Spectacular!",
-                        "Outstanding!"
-                    ).random()
-                }
-                Text(
-                    text = headline,
-                    fontSize = 26.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = DarkSage
-                )
-
-                if (isChallenge && challengeGoalsCleared > 0) {
-                    Text(
-                        text = "Goals cleared: $challengeGoalsCleared",
-                        fontSize = 16.sp,
-                        fontWeight = FontWeight.SemiBold,
-                        color = WarmBrown
-                    )
-                }
-
-                Text(
-                    text = "You've won $stars ${if (stars == 1) "star" else "stars"}!",
-                    fontSize = 18.sp,
-                    fontWeight = FontWeight.SemiBold,
-                    color = TileYellow
-                )
-
-                Spacer(modifier = Modifier.height(4.dp))
-
-                StarDisplay(
-                    stars = stars,
-                    fontSize = 40.sp,
-                    modifier = Modifier.scale(starScale)
-                )
-
-                Spacer(modifier = Modifier.height(4.dp))
-
-                val subtitle = remember(stars) {
-                    when (stars) {
-                        3 -> listOf(
-                            "Perfect! Flawless victory!",
-                            "Three stars! You're a natural!",
-                            "Maximum stars! Incredible!",
-                            "Perfection! Not a move wasted!",
-                            "Masterful! A perfect score!",
-                            "Stunning! All three stars!"
-                        ).random()
-                        2 -> listOf(
-                            "Great job! Almost perfect!",
-                            "So close to perfection!",
-                            "Two stars! Impressive work!",
-                            "Nearly flawless! Great effort!",
-                            "Solid win! One more star awaits!",
-                            "Strong finish! Can you get three?"
-                        ).random()
-                        else -> listOf(
-                            "Well done! Try again for more stars!",
-                            "A win is a win! Keep going!",
-                            "Good start! Room to grow!",
-                            "You cleared it! Aim higher next time!",
-                            "Nice work! More stars await!",
-                            "Victory! Replay for a better score!"
+                if (isChallenge) {
+                    // Challenge-specific congratulation
+                    val chalHeadline = remember {
+                        listOf(
+                            "Challenge Complete!",
+                            "Challenge Conquered!",
+                            "Challenge Crushed!",
+                            "You Nailed It!"
                         ).random()
                     }
+                    Text(
+                        text = chalHeadline,
+                        fontSize = 26.sp,
+                        fontWeight = FontWeight.ExtraBold,
+                        color = DarkSage
+                    )
+
+                    if (challengeGoalsCleared > 0) {
+                        Text(
+                            text = "$challengeGoalsCleared goals cleared",
+                            fontSize = 16.sp,
+                            fontWeight = FontWeight.SemiBold,
+                            color = WarmBrown
+                        )
+                    }
+
+                    // Big animated star score
+                    val scoreScale = remember { Animatable(0f) }
+                    LaunchedEffect(Unit) {
+                        delay(300)
+                        scoreScale.animateTo(1f, animationSpec = spring(dampingRatio = 0.4f, stiffness = 200f))
+                    }
+                    Text(
+                        text = "\u2B50 +$stars stars!",
+                        fontSize = 32.sp,
+                        fontWeight = FontWeight.ExtraBold,
+                        color = TileYellow,
+                        modifier = Modifier.scale(scoreScale.value)
+                    )
+
+                    Spacer(modifier = Modifier.height(4.dp))
+
+                    val chalSubtitle = remember(stars) {
+                        when {
+                            stars >= 20 -> listOf(
+                                "Absolutely legendary!",
+                                "Unstoppable! What a performance!",
+                                "You're on fire! Incredible score!"
+                            ).random()
+                            stars >= 10 -> listOf(
+                                "Impressive! You've got serious skills!",
+                                "Amazing run! Keep that energy going!",
+                                "That was epic! Well played!"
+                            ).random()
+                            stars >= 5 -> listOf(
+                                "Great effort! Challenge rewards earned!",
+                                "Solid performance! Stars well deserved!",
+                                "Nice job! Every star counts!"
+                            ).random()
+                            else -> listOf(
+                                "Good start! Try again for more stars!",
+                                "Not bad! Practice makes perfect!",
+                                "You did it! Aim higher next time!"
+                            ).random()
+                        }
+                    }
+                    Text(
+                        text = chalSubtitle,
+                        fontSize = 14.sp,
+                        color = WarmBrown,
+                        textAlign = TextAlign.Center
+                    )
+                } else {
+                    // Regular level win
+                    val headline = remember {
+                        listOf(
+                            "Congratulations!",
+                            "You did it!",
+                            "Brilliant!",
+                            "Amazing!",
+                            "Well played!",
+                            "Superb!",
+                            "Fantastic!",
+                            "Wonderful!",
+                            "Bravo!",
+                            "Nicely done!",
+                            "Spectacular!",
+                            "Outstanding!"
+                        ).random()
+                    }
+                    Text(
+                        text = headline,
+                        fontSize = 26.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = DarkSage
+                    )
+
+                    Text(
+                        text = "You've won $stars ${if (stars == 1) "star" else "stars"}!",
+                        fontSize = 18.sp,
+                        fontWeight = FontWeight.SemiBold,
+                        color = TileYellow
+                    )
+
+                    Spacer(modifier = Modifier.height(4.dp))
+
+                    StarDisplay(
+                        stars = stars,
+                        fontSize = 40.sp,
+                        modifier = Modifier.scale(starScale)
+                    )
+
+                    Spacer(modifier = Modifier.height(4.dp))
+
+                    val subtitle = remember(stars) {
+                        when (stars) {
+                            3 -> listOf(
+                                "Perfect! Flawless victory!",
+                                "Three stars! You're a natural!",
+                                "Maximum stars! Incredible!",
+                                "Perfection! Not a move wasted!",
+                                "Masterful! A perfect score!",
+                                "Stunning! All three stars!"
+                            ).random()
+                            2 -> listOf(
+                                "Great job! Almost perfect!",
+                                "So close to perfection!",
+                                "Two stars! Impressive work!",
+                                "Nearly flawless! Great effort!",
+                                "Solid win! One more star awaits!",
+                                "Strong finish! Can you get three?"
+                            ).random()
+                            else -> listOf(
+                                "Well done! Try again for more stars!",
+                                "A win is a win! Keep going!",
+                                "Good start! Room to grow!",
+                                "You cleared it! Aim higher next time!",
+                                "Nice work! More stars await!",
+                                "Victory! Replay for a better score!"
+                            ).random()
+                        }
+                    }
+                    Text(
+                        text = subtitle,
+                        fontSize = 14.sp,
+                        color = WarmBrown,
+                        textAlign = TextAlign.Center
+                    )
                 }
-                Text(
-                    text = subtitle,
-                    fontSize = 14.sp,
-                    color = WarmBrown,
-                    textAlign = TextAlign.Center
-                )
 
                 // World unlock celebration
                 if (unlockedWorldName != null) {

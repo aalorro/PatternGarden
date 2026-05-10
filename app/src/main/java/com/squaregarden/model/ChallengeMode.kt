@@ -18,6 +18,7 @@ data class ChallengeState(
     val goalsCleared: Int = 0,
     val comboCount: Int = 0,
     val comboMultiplier: Int = 1,
+    val blitzStarScore: Int = 0,
     // Overgrown Garden
     val triesRemaining: Int = 3,
     // Shifting Sands

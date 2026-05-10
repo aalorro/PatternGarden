@@ -908,7 +908,10 @@ class GameViewModel(
                 val cs = current.challengeState!!
                 when (cs.type) {
                     ChallengeType.BLITZ -> {
-                        if (newlyCompleted.isNotEmpty()) cs.copy(goalsCleared = cs.goalsCleared + newlyCompleted.size)
+                        if (newlyCompleted.isNotEmpty()) cs.copy(
+                            goalsCleared = cs.goalsCleared + newlyCompleted.size,
+                            blitzStarScore = cs.blitzStarScore + newlyCompleted.size * cs.comboMultiplier
+                        )
                         else cs
                     }
                     ChallengeType.SHIFTING -> cs.copy(movesSinceLastScramble = cs.movesSinceLastScramble + 1)
@@ -1380,15 +1383,11 @@ class GameViewModel(
                 if (cs.type != ChallengeType.BLITZ) break
                 val remaining = cs.timerMillisRemaining - 100
                 if (remaining <= 0) {
-                    // Time's up — Blitz always wins, stars based on goals cleared
-                    pendingWinStars = when {
-                        cs.goalsCleared >= 15 -> 3
-                        cs.goalsCleared >= 10 -> 2
-                        else -> 1
-                    }
+                    // Time's up — Blitz always wins, stars = accumulated score
+                    pendingWinStars = cs.blitzStarScore.coerceAtLeast(1)
                     pendingWinLevelId = ChallengeType.BLITZ.id
                     winResultCommitted = false
-                    MusicManager.startWinMusic(context, perfectGame = false)
+                    MusicManager.startWinMusic(context, perfectGame = cs.blitzStarScore >= 15)
                     _state.value = s.copy(
                         challengeState = cs.copy(timerMillisRemaining = 0),
                         phase = GamePhase.WON,
@@ -1410,11 +1409,8 @@ class GameViewModel(
         if (cs.type != ChallengeType.BLITZ) return
         val newGoals = ChallengeGenerator.generateBlitzGoalSet(current.board, difficulty)
         val newCombo = cs.comboCount + 1
-        val newMultiplier = when {
-            newCombo >= 6 -> 3
-            newCombo >= 3 -> 2
-            else -> 1
-        }
+        // Each completed round increases multiplier by 1 (1x, 2x, 3x, 4x...)
+        val newMultiplier = newCombo + 1
         val newLevel = current.level.copy(goals = newGoals)
         _state.value = current.copy(
             level = newLevel,
