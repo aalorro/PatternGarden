@@ -15,7 +15,7 @@ object ChallengeGenerator {
 
     /**
      * Generate a fresh set of goals achievable on the current board (for Blitz replenish).
-     * Goals are guaranteed NOT to be already met on the board.
+     * Each goal is individually verified NOT to be already met on the board.
      */
     fun generateBlitzGoalSet(board: Board, skill: Difficulty = Difficulty.MEDIUM): List<Goal> {
         val colorCounts = mutableMapOf<TileColor, Int>()
@@ -27,42 +27,65 @@ object ChallengeGenerator {
                 }
             }
         }
-        val abundant = colorCounts.entries
-            .filter { it.value >= 3 }
-            .sortedByDescending { it.value }
-            .map { it.key }
-            .shuffled()
-
-        if (abundant.isEmpty()) {
-            val fallback = colorCounts.keys.toList().shuffled().first()
-            return listOf(Goal.Line(fallback, 3))
-        }
+        val colors = colorCounts.keys.toList()
+        if (colors.isEmpty()) return listOf(Goal.Line(TileColor.RED, 3))
 
         val goalCount = when (skill) {
             Difficulty.EASY -> 2
             Difficulty.MEDIUM -> 3
             Difficulty.HARD -> 4
-        }.coerceAtMost(abundant.size)
+        }
 
-        // Try multiple times to find goals not already met
-        repeat(30) {
-            val goals = mutableListOf<Goal>()
-            val shuffledColors = abundant.shuffled()
-            for (i in 0 until goalCount) {
-                val color = shuffledColors[i]
-                val count = colorCounts[color] ?: 0
-                val useSquare = skill != Difficulty.EASY && count >= 4 && Math.random() < 0.3
-                goals.add(if (useSquare) Goal.Square(color) else Goal.Line(color, 3))
+        val simpleShapes = listOf(ShapeType.L_SHAPE, ShapeType.T_SHAPE)
+        val hardShapes = listOf(ShapeType.CROSS, ShapeType.Z_SHAPE, ShapeType.U_SHAPE)
+
+        // Build candidate goals per color, ordered hardest-first so we prefer unmet ones
+        fun candidatesForColor(color: TileColor): List<Goal> {
+            val count = colorCounts[color] ?: 0
+            val candidates = mutableListOf<Goal>()
+            // Shapes are hardest to accidentally form
+            hardShapes.forEach { candidates.add(Goal.Shape(color, it)) }
+            simpleShapes.forEach { candidates.add(Goal.Shape(color, it)) }
+            if (count >= 4) candidates.add(Goal.Square(color))
+            candidates.add(Goal.Line(color, 4))
+            candidates.add(Goal.Line(color, 3))
+            return candidates
+        }
+
+        // Pick goals one at a time, each verified unmet
+        val picked = mutableListOf<Goal>()
+        val usedColors = mutableSetOf<TileColor>()
+        val shuffledColors = colors.shuffled()
+
+        repeat(goalCount) {
+            // Try each color, preferring unused ones
+            val colorOrder = shuffledColors.sortedBy { if (it in usedColors) 1 else 0 }
+            var found = false
+            for (color in colorOrder) {
+                for (candidate in candidatesForColor(color).shuffled()) {
+                    // Skip duplicates
+                    if (candidate in picked) continue
+                    // Verify this goal is NOT already met on the board
+                    val met = BoardEngine.evaluateGoals(board, listOf(candidate))
+                    if (met.isEmpty()) {
+                        picked.add(candidate)
+                        usedColors.add(color)
+                        found = true
+                        break
+                    }
+                }
+                if (found) break
             }
-            // Verify none are already met
-            val met = BoardEngine.evaluateGoals(board, goals)
-            if (met.isEmpty()) return goals
+            // If no unmet goal found for any color, skip this slot
         }
 
-        // Last resort: just pick goals (shouldn't normally reach here)
-        return (0 until goalCount).map { i ->
-            Goal.Line(abundant[i % abundant.size], 3)
+        // Must return at least 1 goal — if nothing was unmet, use a shape (least likely met)
+        if (picked.isEmpty()) {
+            val color = shuffledColors.first()
+            picked.add(Goal.Shape(color, hardShapes.random()))
         }
+
+        return picked
     }
 
     // ── Blitz: timer-based, skill-scaled ──

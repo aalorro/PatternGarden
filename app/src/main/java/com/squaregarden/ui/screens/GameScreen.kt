@@ -468,11 +468,19 @@ fun GameScreen(
 
     // Lose dialog
     if (state.phase == GamePhase.LOST) {
-        LoseDialog(
-            onRetry = { viewModel.resetLevel() },
-            onMenu = { navController.popBackStack() },
-            onShowSolution = if (state.hasSolution) {{ viewModel.showSolution() }} else null
-        )
+        if (state.isChallenge) {
+            LoseDialog(
+                onRetry = null,
+                onMenu = { navController.popBackStack() },
+                onShowSolution = null
+            )
+        } else {
+            LoseDialog(
+                onRetry = { viewModel.resetLevel() },
+                onMenu = { navController.popBackStack() },
+                onShowSolution = if (state.hasSolution) {{ viewModel.showSolution() }} else null
+            )
+        }
     }
 
     // Solution replay overlay
@@ -926,7 +934,7 @@ private fun WinOverlay(stars: Int, levelName: String, unlockedWorldName: String?
 }
 
 @Composable
-private fun LoseDialog(onRetry: () -> Unit, onMenu: () -> Unit, onShowSolution: (() -> Unit)?) {
+private fun LoseDialog(onRetry: (() -> Unit)?, onMenu: () -> Unit, onShowSolution: (() -> Unit)?) {
     Dialog(onDismissRequest = {}) {
         Card(
             shape = RoundedCornerShape(24.dp),
@@ -938,14 +946,14 @@ private fun LoseDialog(onRetry: () -> Unit, onMenu: () -> Unit, onShowSolution: 
                 verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
                 Text(
-                    text = "Out of Moves",
+                    text = if (onRetry != null) "Out of Moves" else "Challenge Failed",
                     fontSize = 24.sp,
                     fontWeight = FontWeight.Bold,
                     color = TileRed
                 )
 
                 Text(
-                    text = "Don't give up!\nTry a different approach.",
+                    text = if (onRetry != null) "Don't give up!\nTry a different approach." else "Better luck next time!",
                     fontSize = 14.sp,
                     color = WarmBrown,
                     textAlign = TextAlign.Center
@@ -963,23 +971,32 @@ private fun LoseDialog(onRetry: () -> Unit, onMenu: () -> Unit, onShowSolution: 
                     }
                 }
 
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(12.dp)
-                ) {
-                    OutlinedButton(
-                        onClick = onMenu,
-                        shape = RoundedCornerShape(20.dp),
-                        modifier = Modifier.weight(1f)
+                if (onRetry != null) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(12.dp)
                     ) {
-                        Text("Menu", maxLines = 1, fontSize = 13.sp)
+                        OutlinedButton(
+                            onClick = onMenu,
+                            shape = RoundedCornerShape(20.dp),
+                            modifier = Modifier.weight(1f)
+                        ) {
+                            Text("Menu", maxLines = 1, fontSize = 13.sp)
+                        }
+                        Button(
+                            onClick = onRetry,
+                            shape = RoundedCornerShape(20.dp),
+                            modifier = Modifier.weight(1f)
+                        ) {
+                            Text("Try Again", maxLines = 1, fontSize = 13.sp)
+                        }
                     }
+                } else {
                     Button(
-                        onClick = onRetry,
-                        shape = RoundedCornerShape(20.dp),
-                        modifier = Modifier.weight(1f)
+                        onClick = onMenu,
+                        shape = RoundedCornerShape(20.dp)
                     ) {
-                        Text("Try Again", maxLines = 1, fontSize = 13.sp)
+                        Text("Back to Menu", fontSize = 13.sp)
                     }
                 }
             }
