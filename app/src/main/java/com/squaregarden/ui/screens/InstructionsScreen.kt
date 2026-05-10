@@ -143,8 +143,8 @@ fun InstructionsScreen(navController: NavHostController) {
             title = "Challenge Rounds",
             body = "Starting from World 5, special challenge rounds can be unlocked by exceptional play. " +
                 "Challenges cost no lives and award bonus stars + one of every power-up token on completion.\n\n" +
-                "\u23F1 Blitz Garden — 60-second time attack! Clear as many goal sets as possible before time runs out. " +
-                "Timer starts on your first swap. Clear 5+ goals to win. " +
+                "\u23F1 Blitz Garden — 60-second time attack! Clear as many goals as possible before time runs out. " +
+                "Timer starts on your first swap. More goals = more stars! " +
                 "Build combos for score multipliers (2\u00D7 at 3, 3\u00D7 at 6).\n" +
                 "Trigger: 8 consecutive progressive level wins on World 5+.\n\n" +
                 "\uD83C\uDF3F Overgrown Garden — Conquer a massive 9\u00D79 board loaded with goals and frozen tiles " +

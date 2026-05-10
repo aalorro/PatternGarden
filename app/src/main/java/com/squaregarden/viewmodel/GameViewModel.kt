@@ -907,6 +907,10 @@ class GameViewModel(
             val updatedChalState = if (isChallenge && phase == GamePhase.PLAYING) {
                 val cs = current.challengeState!!
                 when (cs.type) {
+                    ChallengeType.BLITZ -> {
+                        if (newlyCompleted.isNotEmpty()) cs.copy(goalsCleared = cs.goalsCleared + newlyCompleted.size)
+                        else cs
+                    }
                     ChallengeType.SHIFTING -> cs.copy(movesSinceLastScramble = cs.movesSinceLastScramble + 1)
                     ChallengeType.MEMORY -> cs // reveal handled below
                     else -> cs
@@ -1376,25 +1380,19 @@ class GameViewModel(
                 if (cs.type != ChallengeType.BLITZ) break
                 val remaining = cs.timerMillisRemaining - 100
                 if (remaining <= 0) {
-                    // Time's up — win if cleared enough goals, else lose
-                    val phase = if (cs.goalsCleared >= 5) {
-                        pendingWinStars = when {
-                            cs.goalsCleared >= 15 -> 3
-                            cs.goalsCleared >= 10 -> 2
-                            else -> 1
-                        }
-                        pendingWinLevelId = ChallengeType.BLITZ.id
-                        winResultCommitted = false
-                        MusicManager.startWinMusic(context, perfectGame = false)
-                        GamePhase.WON
-                    } else {
-                        audioManager.playLose()
-                        GamePhase.LOST
+                    // Time's up — Blitz always wins, stars based on goals cleared
+                    pendingWinStars = when {
+                        cs.goalsCleared >= 15 -> 3
+                        cs.goalsCleared >= 10 -> 2
+                        else -> 1
                     }
+                    pendingWinLevelId = ChallengeType.BLITZ.id
+                    winResultCommitted = false
+                    MusicManager.startWinMusic(context, perfectGame = false)
                     _state.value = s.copy(
                         challengeState = cs.copy(timerMillisRemaining = 0),
-                        phase = phase,
-                        starsAwarded = if (phase == GamePhase.WON) pendingWinStars else 0
+                        phase = GamePhase.WON,
+                        starsAwarded = pendingWinStars
                     )
                     break
                 }
@@ -1411,7 +1409,6 @@ class GameViewModel(
         val cs = current.challengeState ?: return
         if (cs.type != ChallengeType.BLITZ) return
         val newGoals = ChallengeGenerator.generateBlitzGoalSet(current.board, difficulty)
-        val newGoalCount = cs.goalsCleared + 1
         val newCombo = cs.comboCount + 1
         val newMultiplier = when {
             newCombo >= 6 -> 3
@@ -1424,7 +1421,6 @@ class GameViewModel(
             completedGoalIds = emptySet(),
             completedGoalCells = emptyMap(),
             challengeState = cs.copy(
-                goalsCleared = newGoalCount,
                 comboCount = newCombo,
                 comboMultiplier = newMultiplier
             )

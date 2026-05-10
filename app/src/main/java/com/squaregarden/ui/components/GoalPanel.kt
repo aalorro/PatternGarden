@@ -191,10 +191,16 @@ private fun GoalBox(
             val offsetY = (availH - totalH) / 2f
             val cornerR = cellSize * 0.18f
 
+            val isYellow = tileColor == com.squaregarden.model.TileColor.YELLOW
             for (cell in cells) {
                 val x = offsetX + cell.col * cellSize
                 val y = offsetY + cell.row * cellSize
-                drawEmbossedTile(tileColor, x, y, cellSize, cornerR)
+                drawEmbossedTile(
+                    tileColor, x, y, cellSize, cornerR,
+                    mainOverride = if (isYellow) com.squaregarden.ui.theme.GoalYellow else null,
+                    lightOverride = if (isYellow) com.squaregarden.ui.theme.GoalYellowLight else null,
+                    darkOverride = if (isYellow) com.squaregarden.ui.theme.GoalYellowDark else null
+                )
                 if (cellSize > 20f) {
                     drawTileMotif(tileColor, x, y, cellSize)
                 }

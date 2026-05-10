@@ -1,5 +1,6 @@
 package com.squaregarden.ui.screens
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.animation.core.*
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
@@ -54,6 +55,9 @@ fun GameScreen(
     val lives by progressRepo.livesFlow.collectAsState(initial = 3)
     val cooldownUntil by progressRepo.cooldownUntilFlow.collectAsState(initial = 0L)
 
+    // Block back button during challenge rounds (prevent restart exploit)
+    BackHandler(enabled = state.isChallenge && state.phase != GamePhase.LOST && state.phase != GamePhase.WON) { }
+
     // Stop any music when GameScreen exits
     DisposableEffect(Unit) { onDispose { MusicManager.stopAll() } }
 
@@ -84,7 +88,8 @@ fun GameScreen(
             verticalAlignment = Alignment.CenterVertically
         ) {
             val hasNotMoved = state.movesRemaining == state.level.maxMoves
-            val canGoBack = hasNotMoved || state.phase == GamePhase.WON || state.phase == GamePhase.LOST
+            val challengeBlocked = state.isChallenge && state.phase != GamePhase.WON && state.phase != GamePhase.LOST
+            val canGoBack = !challengeBlocked && (hasNotMoved || state.phase == GamePhase.WON || state.phase == GamePhase.LOST)
             TextButton(
                 onClick = { navController.popBackStack() },
                 enabled = canGoBack
@@ -164,6 +169,28 @@ fun GameScreen(
                     )
                 }
             }
+        }
+
+        // Challenge round label above board
+        if (state.isChallenge) {
+            val infiniteTransition = rememberInfiniteTransition(label = "challengePulse")
+            val glowAlpha by infiniteTransition.animateFloat(
+                initialValue = 0.5f,
+                targetValue = 1f,
+                animationSpec = infiniteRepeatable(
+                    animation = tween(1000, easing = EaseInOutCubic),
+                    repeatMode = RepeatMode.Reverse
+                ),
+                label = "challengeGlow"
+            )
+            Text(
+                text = "CHALLENGE ROUND",
+                fontSize = 16.sp,
+                fontWeight = FontWeight.ExtraBold,
+                letterSpacing = 2.sp,
+                color = MaterialTheme.colorScheme.primary.copy(alpha = glowAlpha),
+                modifier = Modifier.padding(vertical = 4.dp)
+            )
         }
 
         // Game board — full width on phones & 7" tablets, padded on 10"+
@@ -283,27 +310,7 @@ fun GameScreen(
             }
         }
 
-        // Challenge banner
-        if (state.isChallenge) {
-            val infiniteTransition = rememberInfiniteTransition(label = "challengePulse")
-            val bannerAlpha by infiniteTransition.animateFloat(
-                initialValue = 0.5f,
-                targetValue = 1f,
-                animationSpec = infiniteRepeatable(
-                    animation = tween(800, easing = EaseInOutCubic),
-                    repeatMode = RepeatMode.Reverse
-                ),
-                label = "bannerAlpha"
-            )
-            Text(
-                text = "\u2694\uFE0F ${state.level.name} \u2694\uFE0F",
-                fontSize = 14.sp,
-                fontWeight = FontWeight.ExtraBold,
-                color = MaterialTheme.colorScheme.primary.copy(alpha = bannerAlpha),
-                letterSpacing = 1.sp,
-                modifier = Modifier.padding(bottom = 6.dp)
-            )
-        }
+        // (challenge banner moved above game board)
     }
 
     // Token captured celebrations (mid-game) — staggered if multiple captured at once

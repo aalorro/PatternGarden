@@ -32,6 +32,11 @@ val TileYellowDark = Color(0xFFC68400)
 val TileGreenDark = Color(0xFF1B5E20)
 val TileOrangeDark = Color(0xFFBB4D00)
 
+// Goal panel yellow (lighter to distinguish from orange)
+val GoalYellow = Color(0xFFFFD740)
+val GoalYellowLight = Color(0xFFFFEB3B)
+val GoalYellowDark = Color(0xFFFFC400)
+
 // ── Theme color sets ──────────────────────────────────────────
 
 data class ThemeColors(

@@ -38,7 +38,10 @@ fun DrawScope.drawEmbossedTile(
     x: Float,
     y: Float,
     cs: Float,
-    cornerR: Float
+    cornerR: Float,
+    mainOverride: Color? = null,
+    lightOverride: Color? = null,
+    darkOverride: Color? = null
 ) {
     val tileInset = cs * 0.08f
     val embossWidth = cs * 0.065f
@@ -47,6 +50,10 @@ fun DrawScope.drawEmbossedTile(
     val tileY = y + tileInset
     val tileW = cs - tileInset * 2
     val tileH = cs - tileInset * 2
+
+    val mainColor = mainOverride ?: color.toComposeColor()
+    val lightColor = lightOverride ?: color.toLightColor()
+    val darkColor = darkOverride ?: color.toDarkColor()
 
     // Drop shadow (soft outer shadow for depth)
     drawRoundRect(
@@ -58,7 +65,7 @@ fun DrawScope.drawEmbossedTile(
 
     // Shadow edge (bottom-right bevel)
     drawRoundRect(
-        color = color.toDarkColor().copy(alpha = 0.9f),
+        color = darkColor.copy(alpha = 0.9f),
         topLeft = Offset(tileX + embossWidth * 0.35f, tileY + embossWidth * 0.6f),
         size = Size(tileW, tileH),
         cornerRadius = CornerRadius(tileCorner)
@@ -66,7 +73,7 @@ fun DrawScope.drawEmbossedTile(
 
     // Highlight edge (top-left bevel)
     drawRoundRect(
-        color = color.toLightColor().copy(alpha = 0.9f),
+        color = lightColor.copy(alpha = 0.9f),
         topLeft = Offset(tileX, tileY),
         size = Size(tileW, tileH),
         cornerRadius = CornerRadius(tileCorner)
@@ -74,7 +81,7 @@ fun DrawScope.drawEmbossedTile(
 
     // Main tile body (inset to reveal bevel edges)
     drawRoundRect(
-        color = color.toComposeColor(),
+        color = mainColor,
         topLeft = Offset(tileX + embossWidth * 0.5f, tileY + embossWidth * 0.5f),
         size = Size(tileW - embossWidth, tileH - embossWidth),
         cornerRadius = CornerRadius(tileCorner * 0.85f)
