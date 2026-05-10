@@ -526,6 +526,33 @@ class GameViewModel(
             delay(settleInterval)
         }
         _state.value = _state.value.copy(board = finalBoard, phase = GamePhase.PLAYING)
+
+        // Check if any goals are already met on the initial board
+        val current = _state.value
+        val metGoalIds = BoardEngine.evaluateGoals(finalBoard, current.level.goals)
+        if (metGoalIds.isNotEmpty()) {
+            val goalCells = mutableMapOf<String, Set<CellPos>>()
+            for (goal in current.level.goals) {
+                if (goal.id in metGoalIds) {
+                    val cells = PatternMatcher.findGoalPositions(finalBoard, goal)
+                    if (cells != null) goalCells[goal.id] = cells
+                }
+            }
+            // Update challenge state for Overgrown star tracking
+            val updatedChal = if (current.challengeState?.type == ChallengeType.OVERGROWN && metGoalIds.isNotEmpty()) {
+                val cs = current.challengeState
+                cs.copy(
+                    goalsCleared = cs.goalsCleared + metGoalIds.size,
+                    overgrownStarScore = cs.overgrownStarScore + metGoalIds.size * cs.overgrownTryMultiplier
+                )
+            } else current.challengeState
+            audioManager.playMatch()
+            _state.value = current.copy(
+                completedGoalIds = metGoalIds,
+                completedGoalCells = goalCells,
+                challengeState = updatedChal
+            )
+        }
     }
 
     /** Find positions where displayBoard differs from finalBoard. */
