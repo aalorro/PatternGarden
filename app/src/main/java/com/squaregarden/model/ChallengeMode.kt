@@ -21,6 +21,8 @@ data class ChallengeState(
     val blitzStarScore: Int = 0,
     // Overgrown Garden
     val triesRemaining: Int = 3,
+    val overgrownStarScore: Int = 0,
+    val overgrownTryMultiplier: Int = 1,
     // Shifting Sands
     val movesSinceLastScramble: Int = 0,
     // Memory Garden

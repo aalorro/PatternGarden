@@ -148,7 +148,8 @@ fun InstructionsScreen(navController: NavHostController) {
                 "Complete a full round of goals to increase your multiplier (2\u00D7, 3\u00D7, 4\u00D7...)!\n" +
                 "Trigger: 8 consecutive progressive level wins on World 5+.\n\n" +
                 "\uD83C\uDF3F Overgrown Garden — Conquer a massive 9\u00D79 board loaded with goals and frozen tiles " +
-                "in just 16 moves. You get 3 tries with a fresh board each time.\n" +
+                "in 16 moves. You get 3 tries — each goal earns stars \u00D7 your try multiplier (1\u00D7, 2\u00D7, 3\u00D7). " +
+                "All stars carry over between tries!\n" +
                 "Trigger: Complete all 9 levels in a world (once per world).\n\n" +
                 "\uD83C\uDF0A Shifting Sands — Every 3 swaps, all uncompleted tiles scramble into new positions! " +
                 "Plan your moves around the chaos.\n" +

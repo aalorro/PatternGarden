@@ -876,6 +876,15 @@ class GameViewModel(
                             // Blitz: replenish goals instead of winning
                             blitzReplenish = true
                             GamePhase.PLAYING
+                        } else if (cs.type == ChallengeType.OVERGROWN) {
+                            // Overgrown win: use accumulated star score (goals already tracked per-swap)
+                            val completedGoalStars = newlyCompleted.size * cs.overgrownTryMultiplier
+                            val finalStars = (cs.overgrownStarScore + completedGoalStars).coerceAtLeast(1)
+                            starsAwarded = finalStars
+                            winResultCommitted = false
+                            pendingWinLevelId = current.level.id
+                            pendingWinStars = finalStars
+                            GamePhase.WON
                         } else {
                             starsAwarded = BoardEngine.calculateStars(newMoves, current.level.starThresholds).coerceAtLeast(1)
                             // Music delayed — triggered after count-up animation in UI
@@ -906,6 +915,14 @@ class GameViewModel(
                         // Overgrown retry — will reset after state update
                         audioManager.playLose()
                         GamePhase.PLAYING // temporary, reset below
+                    } else if (cs?.type == ChallengeType.OVERGROWN) {
+                        // Last Overgrown try — always win with accumulated stars
+                        val finalStars = cs.overgrownStarScore.coerceAtLeast(1)
+                        starsAwarded = finalStars
+                        pendingWinLevelId = current.level.id
+                        pendingWinStars = finalStars
+                        winResultCommitted = false
+                        GamePhase.WON
                     } else {
                         audioManager.playLose()
                         if (!isChallenge) progressRepo.loseLife(difficulty.ordinal)
@@ -917,13 +934,20 @@ class GameViewModel(
             }
 
             // Update challenge state after swap
-            val updatedChalState = if (isChallenge && phase == GamePhase.PLAYING) {
+            val updatedChalState = if (isChallenge && (phase == GamePhase.PLAYING || phase == GamePhase.WON)) {
                 val cs = current.challengeState!!
                 when (cs.type) {
                     ChallengeType.BLITZ -> {
                         if (newlyCompleted.isNotEmpty()) cs.copy(
                             goalsCleared = cs.goalsCleared + newlyCompleted.size,
                             blitzStarScore = cs.blitzStarScore + newlyCompleted.size * cs.comboMultiplier
+                        )
+                        else cs
+                    }
+                    ChallengeType.OVERGROWN -> {
+                        if (newlyCompleted.isNotEmpty()) cs.copy(
+                            goalsCleared = cs.goalsCleared + newlyCompleted.size,
+                            overgrownStarScore = cs.overgrownStarScore + newlyCompleted.size * cs.overgrownTryMultiplier
                         )
                         else cs
                     }
@@ -1064,12 +1088,29 @@ class GameViewModel(
 
             var starsAwarded = 0; var winsNeeded = 0; var unlockedWorld: String? = null
             var isPerfect = false
+            var blitzReplenishPt = false
             val phase = when {
                 won -> {
                     if (isChallenge) {
-                        blitzTimerJob?.cancel()
-                        starsAwarded = BoardEngine.calculateStars(newMoves, current.level.starThresholds).coerceAtLeast(1)
-                        // Music delayed — triggered after count-up animation in UI
+                        val cs = current.challengeState!!
+                        if (cs.type == ChallengeType.BLITZ) {
+                            blitzReplenishPt = true
+                            GamePhase.PLAYING
+                        } else if (cs.type == ChallengeType.OVERGROWN) {
+                            val completedGoalStars = newlyCompletedPt.size * cs.overgrownTryMultiplier
+                            val finalStars = (cs.overgrownStarScore + completedGoalStars).coerceAtLeast(1)
+                            starsAwarded = finalStars
+                            winResultCommitted = false
+                            pendingWinLevelId = current.level.id
+                            pendingWinStars = finalStars
+                            GamePhase.WON
+                        } else {
+                            starsAwarded = BoardEngine.calculateStars(newMoves, current.level.starThresholds).coerceAtLeast(1)
+                            winResultCommitted = false
+                            pendingWinLevelId = current.level.id
+                            pendingWinStars = starsAwarded
+                            GamePhase.WON
+                        }
                     } else {
                         val baseStars = BoardEngine.calculateStars(newMoves, current.level.starThresholds)
                         val gameDiff = _state.value.gameDifficulty
@@ -1080,18 +1121,26 @@ class GameViewModel(
                         MusicManager.startWinMusic(context, perfectGame = isPerfect)
                         val oldTotal = progressRepo.totalStarsFlow.first()
                         unlockedWorld = detectNewWorldUnlock(oldTotal, oldTotal + starsAwarded)
+                        winResultCommitted = false
+                        pendingWinLevelId = current.level.id
+                        pendingWinStars = starsAwarded
+                        GamePhase.WON
                     }
-                    winResultCommitted = false
-                    pendingWinLevelId = current.level.id
-                    pendingWinStars = starsAwarded
-                    GamePhase.WON
                 }
                 lost -> {
                     val cs = current.challengeState
                     if (cs?.type == ChallengeType.OVERGROWN && cs.triesRemaining > 1) {
-                        // Overgrown retry — will reset after state update
                         audioManager.playLose()
                         GamePhase.PLAYING // temporary, reset below
+                    } else if (cs?.type == ChallengeType.OVERGROWN) {
+                        // Last Overgrown try — always win with accumulated stars
+                        val completedGoalStars = newlyCompletedPt.size * cs.overgrownTryMultiplier
+                        val finalStars = (cs.overgrownStarScore + completedGoalStars).coerceAtLeast(1)
+                        starsAwarded = finalStars
+                        winResultCommitted = false
+                        pendingWinLevelId = current.level.id
+                        pendingWinStars = finalStars
+                        GamePhase.WON
                     } else {
                         audioManager.playLose()
                         if (!isChallenge) progressRepo.loseLife(difficulty.ordinal)
@@ -1101,6 +1150,30 @@ class GameViewModel(
                 }
                 else -> GamePhase.PLAYING
             }
+
+            // Update challenge state after passthrough swap
+            val updatedChalStatePt = if (isChallenge && (phase == GamePhase.PLAYING || phase == GamePhase.WON)) {
+                val cs = current.challengeState!!
+                when (cs.type) {
+                    ChallengeType.BLITZ -> {
+                        if (newlyCompletedPt.isNotEmpty()) cs.copy(
+                            goalsCleared = cs.goalsCleared + newlyCompletedPt.size,
+                            blitzStarScore = cs.blitzStarScore + newlyCompletedPt.size * cs.comboMultiplier
+                        )
+                        else cs
+                    }
+                    ChallengeType.OVERGROWN -> {
+                        if (newlyCompletedPt.isNotEmpty()) cs.copy(
+                            goalsCleared = cs.goalsCleared + newlyCompletedPt.size,
+                            overgrownStarScore = cs.overgrownStarScore + newlyCompletedPt.size * cs.overgrownTryMultiplier
+                        )
+                        else cs
+                    }
+                    ChallengeType.SHIFTING -> cs.copy(movesSinceLastScramble = cs.movesSinceLastScramble + 1)
+                    ChallengeType.MEMORY -> cs
+                    else -> cs
+                }
+            } else current.challengeState
 
             _state.value = _state.value.copy(
                 board = boardAfterCapture, movesRemaining = newMoves,
@@ -1113,8 +1186,40 @@ class GameViewModel(
                 phase = phase, starsAwarded = starsAwarded, winsToRestoreLife = winsNeeded,
                 unlockedWorldName = unlockedWorld,
                 redoTokens = redoTokens, redoTokenAwarded = redoCaptured,
-                perfectGame = isPerfect
+                perfectGame = isPerfect,
+                challengeState = updatedChalStatePt
             )
+
+            // Blitz goal replenish (passthrough)
+            if (blitzReplenishPt) {
+                blitzReplenishGoals()
+            }
+
+            // Challenge post-swap logic (passthrough)
+            if (isChallenge && phase == GamePhase.PLAYING) {
+                val cs = _state.value.challengeState ?: updatedChalStatePt!!
+                when (cs.type) {
+                    ChallengeType.SHIFTING -> {
+                        if (cs.movesSinceLastScramble >= 3) {
+                            _state.value = _state.value.copy(
+                                challengeState = cs.copy(movesSinceLastScramble = 0)
+                            )
+                            animateScramble(_state.value.board)
+                        }
+                    }
+                    ChallengeType.MEMORY -> {
+                        revealAroundSwap(from, landing)
+                    }
+                    else -> {}
+                }
+            }
+
+            // Overgrown retry (passthrough): reset board with decremented tries
+            if (lost && current.challengeState?.type == ChallengeType.OVERGROWN
+                && current.challengeState.triesRemaining > 1) {
+                delay(800)
+                overgrownRetry(current.challengeState.triesRemaining - 1)
+            }
         }
     }
 
@@ -1366,6 +1471,12 @@ class GameViewModel(
     // ── Challenge-specific methods ──
 
     private fun overgrownRetry(triesLeft: Int) {
+        // Carry over accumulated star score and bump multiplier
+        val prevChalState = _state.value.challengeState
+        val carryOverStars = prevChalState?.overgrownStarScore ?: 0
+        val carryOverGoals = prevChalState?.goalsCleared ?: 0
+        val nextMultiplier = (prevChalState?.overgrownTryMultiplier ?: 1) + 1
+
         // Regenerate level until we get a solvable board
         var result: Pair<Board, List<Pair<CellPos, CellPos>>?>
         var attempts = 0
@@ -1392,7 +1503,13 @@ class GameViewModel(
             unfreezeTokens = unfreezeTokens,
             redoTokens = redoTokens,
             phase = GamePhase.SCRAMBLING,
-            challengeState = ChallengeState(type = ChallengeType.OVERGROWN, triesRemaining = triesLeft)
+            challengeState = ChallengeState(
+                type = ChallengeType.OVERGROWN,
+                triesRemaining = triesLeft,
+                overgrownStarScore = carryOverStars,
+                goalsCleared = carryOverGoals,
+                overgrownTryMultiplier = nextMultiplier
+            )
         )
         if (solution == null) computeSolutionAsync(board)
         viewModelScope.launch { animateScramble(board) }
