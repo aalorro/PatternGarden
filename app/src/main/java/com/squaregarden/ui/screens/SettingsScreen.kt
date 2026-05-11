@@ -19,6 +19,7 @@ import com.squaregarden.data.PlayGamesManager
 import com.squaregarden.data.ProfileRepository
 import com.squaregarden.data.ProgressRepository
 import com.squaregarden.data.SettingsRepository
+import com.squaregarden.model.Difficulty
 import com.squaregarden.ui.navigation.Screen
 import com.squaregarden.ui.theme.*
 import kotlinx.coroutines.flow.first
@@ -37,6 +38,8 @@ fun SettingsScreen(navController: NavHostController) {
     var currentThemeId by remember { mutableStateOf("light") }
     var currentProfile by remember { mutableStateOf(com.squaregarden.model.UserProfile()) }
     var showResetDialog by remember { mutableStateOf(false) }
+    var showUpgradeDialog by remember { mutableStateOf(false) }
+    var confirmUpgradeTo by remember { mutableStateOf<Difficulty?>(null) }
 
     LaunchedEffect(Unit) {
         soundEnabled = settingsRepo.soundEnabled.first()
@@ -169,6 +172,23 @@ fun SettingsScreen(navController: NavHostController) {
 
         Spacer(modifier = Modifier.height(12.dp))
 
+        // Upgrade Skill button (only for non-Pro players)
+        val currentDifficulty = Difficulty.fromId(currentProfile.difficulty)
+        if (currentDifficulty != Difficulty.HARD) {
+            OutlinedButton(
+                onClick = { showUpgradeDialog = true },
+                modifier = Modifier.fillMaxWidth().height(48.dp),
+                shape = RoundedCornerShape(50)
+            ) {
+                Text(
+                    "\u2B06  Upgrade Skill",
+                    fontWeight = FontWeight.Bold
+                )
+            }
+
+            Spacer(modifier = Modifier.height(12.dp))
+        }
+
         // Leaderboards button (only if opted in)
         if (currentProfile.leaderboardOptIn) {
             OutlinedButton(
@@ -180,7 +200,7 @@ fun SettingsScreen(navController: NavHostController) {
                             scope.launch {
                                 val totalStars = progressRepo.totalStarsFlow.first()
                                 val progress = progressRepo.loadProgress()
-                                val diff = com.squaregarden.model.Difficulty.fromId(currentProfile.difficulty)
+                                val diff = Difficulty.fromId(currentProfile.difficulty)
                                 val effectiveStart = if (currentProfile.overrideStartingLevel > 0)
                                     currentProfile.overrideStartingLevel else diff.startingLevel
                                 val highestLevel = progress.highestUnlockedLevel(effectiveStart)
@@ -292,6 +312,88 @@ fun SettingsScreen(navController: NavHostController) {
             },
             dismissButton = {
                 TextButton(onClick = { showResetDialog = false }) {
+                    Text("Cancel")
+                }
+            }
+        )
+    }
+
+    // Upgrade Skill selection dialog
+    if (showUpgradeDialog) {
+        val currentDiff = Difficulty.fromId(currentProfile.difficulty)
+        val options = Difficulty.entries.filter { it.ordinal > currentDiff.ordinal }
+        AlertDialog(
+            onDismissRequest = { showUpgradeDialog = false },
+            title = { Text("Upgrade Skill") },
+            text = {
+                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Text(
+                        "Choose a higher skill level. Your progress and unlocked worlds are preserved." +
+                        "\n\nThis cannot be undone.",
+                        fontSize = 14.sp
+                    )
+                    Spacer(modifier = Modifier.height(4.dp))
+                    options.forEach { diff ->
+                        Button(
+                            onClick = {
+                                showUpgradeDialog = false
+                                confirmUpgradeTo = diff
+                            },
+                            modifier = Modifier.fillMaxWidth(),
+                            shape = RoundedCornerShape(50)
+                        ) {
+                            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                                Text(diff.label, fontWeight = FontWeight.Bold)
+                                Text(
+                                    "${diff.starMultiplier}x stars \u00B7 ${diff.moveMultiplier}x moves",
+                                    fontSize = 12.sp
+                                )
+                            }
+                        }
+                    }
+                }
+            },
+            confirmButton = {},
+            dismissButton = {
+                TextButton(onClick = { showUpgradeDialog = false }) {
+                    Text("Cancel")
+                }
+            }
+        )
+    }
+
+    // Upgrade confirmation dialog
+    if (confirmUpgradeTo != null) {
+        val target = confirmUpgradeTo!!
+        AlertDialog(
+            onDismissRequest = { confirmUpgradeTo = null },
+            title = { Text("Upgrade to ${target.label}?") },
+            text = {
+                Text(
+                    "Your skill level will change to ${target.label}. " +
+                    "You'll earn ${target.starMultiplier}x stars but get ${target.moveMultiplier}x moves per level.\n\n" +
+                    "Your progress and unlocked worlds are preserved. This cannot be undone."
+                )
+            },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        val currentDiff = Difficulty.fromId(currentProfile.difficulty)
+                        val effectiveStart = if (currentProfile.overrideStartingLevel > 0)
+                            currentProfile.overrideStartingLevel
+                        else currentDiff.startingLevel
+                        scope.launch {
+                            profileRepo.upgradeSkill(target, effectiveStart)
+                            currentProfile = profileRepo.loadProfile()
+                        }
+                        confirmUpgradeTo = null
+                    }
+                ) {
+                    Text("Upgrade", fontWeight = FontWeight.Bold)
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { confirmUpgradeTo = null }) {
                     Text("Cancel")
                 }
             }

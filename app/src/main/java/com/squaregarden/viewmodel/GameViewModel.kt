@@ -1524,33 +1524,11 @@ class GameViewModel(
             // Reset no-powerup streak if a power-up was used
             if (usedPowerUpThisGame) progressRepo.resetNoPowerupStreak()
 
-            // ── Skill upgrade offer when completing level 90 ──
-            if (pendingWinLevelId == 90 && difficulty != Difficulty.HARD) {
-                _state.value = _state.value.copy(pendingSkillUpgrade = true)
-            }
         }
     }
 
     fun dismissChallenge() {
         _state.value = _state.value.copy(pendingChallenge = null)
-    }
-
-    fun upgradeSkill(newDifficulty: Difficulty) {
-        val overrideLevel = when (newDifficulty) {
-            Difficulty.MEDIUM -> 19  // World 3
-            Difficulty.HARD -> 28    // World 4
-            else -> 0
-        }
-        viewModelScope.launch {
-            profileRepo.upgradeSkill(newDifficulty, overrideLevel)
-            difficulty = newDifficulty
-            effectiveStartingLevel = overrideLevel
-            _state.value = _state.value.copy(pendingSkillUpgrade = false)
-        }
-    }
-
-    fun dismissSkillUpgrade() {
-        _state.value = _state.value.copy(pendingSkillUpgrade = false)
     }
 
     private fun detectNewWorldUnlock(oldStars: Int, newStars: Int): String? {
