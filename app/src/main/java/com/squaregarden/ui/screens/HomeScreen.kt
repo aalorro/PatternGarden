@@ -54,7 +54,7 @@ fun HomeScreen(navController: NavHostController) {
         val effectiveStart = if (profile.overrideStartingLevel > 0)
             profile.overrideStartingLevel else difficulty.startingLevel
         val highestUnlocked = progress.highestUnlockedLevel(effectiveStart)
-        currentWorld = ((highestUnlocked - 1) / 9) + 1
+        currentWorld = (((highestUnlocked - 1) / 9) + 1).coerceAtMost(10)
     }
 
     // Intro music: plays while HomeScreen is visible, respects music toggle
