@@ -22,7 +22,9 @@
       "Bash(ffmpeg:*)",
       "Bash(ffprobe:*)",
       "Bash(curl:*)",
-      "Bash(ls:*)"
+      "Bash(ls:*)",
+      "Bash(mv web:*)",
+      "Bash(mv:*)"
     ]
   }
 }
