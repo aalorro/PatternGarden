@@ -12,6 +12,7 @@ import com.squaregarden.data.ProfileRepository
 import com.squaregarden.data.ProgressRepository
 import com.squaregarden.logic.BoardEngine
 import com.squaregarden.logic.ChallengeGenerator
+import com.squaregarden.logic.GoalSetGenerator
 import com.squaregarden.logic.HintSolver
 import com.squaregarden.logic.LevelLoader
 import com.squaregarden.logic.PatternMatcher
@@ -34,6 +35,7 @@ class GameViewModel(
 ) : ViewModel() {
 
     private lateinit var level: Level
+    private lateinit var baseLevel: Level
     private var difficulty: Difficulty = Difficulty.MEDIUM
     private var adjustedMaxMoves: Int = 0
     private var hasMovedSinceReset: Boolean = false
@@ -84,7 +86,9 @@ class GameViewModel(
                 initLevel(challengeType)
             } else {
                 val levels = LevelLoader.loadAllLevels(context)
-                level = levels.first { it.id == levelId }
+                baseLevel = levels.first { it.id == levelId }
+                val goalSets = GoalSetGenerator.generateGoalSets(baseLevel)
+                level = baseLevel.copy(goals = goalSets.random())
                 adjustedMaxMoves = max(1, (level.maxMoves * difficulty.moveMultiplier).roundToInt())
                 initLevel()
             }
@@ -650,6 +654,12 @@ class GameViewModel(
     fun resetLevel() {
         val current = _state.value
         val hasTutorial = level.tutorialSteps != null
+
+        // Re-randomize goals when generating a new board
+        if (!hasTutorial && hasMovedSinceReset && ::baseLevel.isInitialized) {
+            val goalSets = GoalSetGenerator.generateGoalSets(baseLevel)
+            level = baseLevel.copy(goals = goalSets.random())
+        }
 
         val board: Board
         var solution: List<Pair<CellPos, CellPos>>? = null
