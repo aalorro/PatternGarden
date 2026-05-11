@@ -123,14 +123,8 @@ class AudioManager(private val context: Context) {
         try {
             MediaPlayer.create(context, resId)?.apply {
                 setVolume(0.7f, 0.7f)
-                isLooping = true
-                val clipDuration = duration.toLong()
+                setOnCompletionListener { it.release() }
                 start()
-                // Play for clip duration + 2 seconds then stop
-                scope?.launch {
-                    kotlinx.coroutines.delay(clipDuration + 2000L)
-                    try { stop(); release() } catch (_: Exception) {}
-                }
             }
         } catch (_: Exception) {}
     }
