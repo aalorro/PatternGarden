@@ -181,7 +181,9 @@ fun SettingsScreen(navController: NavHostController) {
                                 val totalStars = progressRepo.totalStarsFlow.first()
                                 val progress = progressRepo.loadProgress()
                                 val diff = com.squaregarden.model.Difficulty.fromId(currentProfile.difficulty)
-                                val highestLevel = progress.highestUnlockedLevel(diff.startingLevel)
+                                val effectiveStart = if (currentProfile.overrideStartingLevel > 0)
+                                    currentProfile.overrideStartingLevel else diff.startingLevel
+                                val highestLevel = progress.highestUnlockedLevel(effectiveStart)
                                 PlayGamesManager.submitTotalStars(activity, diff, totalStars)
                                 PlayGamesManager.submitHighestLevel(activity, diff, highestLevel)
                             }

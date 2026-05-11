@@ -9,7 +9,8 @@ data class UserProfile(
     val themeId: String = "light",
     val difficulty: String = "medium",
     val playerLevel: Int = 0,
-    val leaderboardOptIn: Boolean = false
+    val leaderboardOptIn: Boolean = false,
+    val overrideStartingLevel: Int = 0
 ) {
     val isSetUp: Boolean get() = username.isNotBlank()
     val hasCustomAvatar: Boolean get() = avatarId == -1 && customAvatarPath.isNotBlank()

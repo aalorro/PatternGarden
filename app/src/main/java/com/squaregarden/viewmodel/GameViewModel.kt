@@ -50,6 +50,7 @@ class GameViewModel(
     private val profileRepo = ProfileRepository(context)
     private val audioManager = AudioManager(context)
     private var usedPowerUpThisGame: Boolean = false
+    private var effectiveStartingLevel: Int = 1
     private var blitzTimerJob: Job? = null
     private var blitzTimerStarted: Boolean = false
     var activity: Activity? = null
@@ -68,6 +69,8 @@ class GameViewModel(
         viewModelScope.launch {
             val profile = profileRepo.loadProfile()
             difficulty = Difficulty.fromId(profile.difficulty)
+            effectiveStartingLevel = if (profile.overrideStartingLevel > 0)
+                profile.overrideStartingLevel else difficulty.startingLevel
 
             shuffleTokens = progressRepo.shuffleTokensFlow.first()
             passthroughTokens = progressRepo.passthroughTokensFlow.first()
@@ -1449,7 +1452,7 @@ class GameViewModel(
                 activity?.let { act ->
                     val totalStars = progressRepo.totalStarsFlow.first()
                     val progress = progressRepo.loadProgress()
-                    val highestLevel = progress.highestUnlockedLevel(difficulty.startingLevel)
+                    val highestLevel = progress.highestUnlockedLevel(effectiveStartingLevel)
                     PlayGamesManager.submitTotalStars(act, difficulty, totalStars)
                     PlayGamesManager.submitHighestLevel(act, difficulty, highestLevel)
                 }
@@ -1480,6 +1483,11 @@ class GameViewModel(
             }
             // Reset no-powerup streak if a power-up was used
             if (usedPowerUpThisGame) progressRepo.resetNoPowerupStreak()
+
+            // ── Skill upgrade offer when completing level 90 ──
+            if (pendingWinLevelId == 90 && difficulty != Difficulty.HARD) {
+                _state.value = _state.value.copy(pendingSkillUpgrade = true)
+            }
         }
     }
 
@@ -1487,8 +1495,27 @@ class GameViewModel(
         _state.value = _state.value.copy(pendingChallenge = null)
     }
 
+    fun upgradeSkill(newDifficulty: Difficulty) {
+        val overrideLevel = when (newDifficulty) {
+            Difficulty.MEDIUM -> 19  // World 3
+            Difficulty.HARD -> 28    // World 4
+            else -> 0
+        }
+        viewModelScope.launch {
+            profileRepo.upgradeSkill(newDifficulty, overrideLevel)
+            difficulty = newDifficulty
+            effectiveStartingLevel = overrideLevel
+            _state.value = _state.value.copy(pendingSkillUpgrade = false)
+        }
+    }
+
+    fun dismissSkillUpgrade() {
+        _state.value = _state.value.copy(pendingSkillUpgrade = false)
+    }
+
     private fun detectNewWorldUnlock(oldStars: Int, newStars: Int): String? {
-        val startingWorld = difficulty.startingWorld
+        val effectiveStartWorld = (effectiveStartingLevel - 1) / 9 + 1
+        val startingWorld = effectiveStartWorld
         val skillMultiplier = difficulty.starMultiplier
         val worldThresholds = listOf(
             Triple(2, 8, "Blooming Meadow"),

@@ -4,6 +4,7 @@ import android.content.Context
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.*
 import androidx.datastore.preferences.preferencesDataStore
+import com.squaregarden.model.Difficulty
 import com.squaregarden.model.UserProfile
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
@@ -23,6 +24,7 @@ class ProfileRepository(private val context: Context) {
         private val PLAYER_LEVEL = intPreferencesKey("player_level")
         private val LEADERBOARD_OPT_IN = booleanPreferencesKey("leaderboard_opt_in")
         private val CUSTOM_AVATAR_PATH = stringPreferencesKey("custom_avatar_path")
+        private val OVERRIDE_STARTING_LEVEL = intPreferencesKey("override_starting_level")
     }
 
     val profileFlow: Flow<UserProfile> = context.profileDataStore.data.map { prefs ->
@@ -35,7 +37,8 @@ class ProfileRepository(private val context: Context) {
             themeId = prefs[THEME_ID] ?: "light",
             difficulty = prefs[DIFFICULTY] ?: "medium",
             playerLevel = prefs[PLAYER_LEVEL] ?: 0,
-            leaderboardOptIn = prefs[LEADERBOARD_OPT_IN] ?: false
+            leaderboardOptIn = prefs[LEADERBOARD_OPT_IN] ?: false,
+            overrideStartingLevel = prefs[OVERRIDE_STARTING_LEVEL] ?: 0
         )
     }
 
@@ -67,6 +70,13 @@ class ProfileRepository(private val context: Context) {
     suspend fun resetPlayerLevel() {
         context.profileDataStore.edit { prefs ->
             prefs[PLAYER_LEVEL] = 0
+        }
+    }
+
+    suspend fun upgradeSkill(newDifficulty: Difficulty, overrideStartingLevel: Int) {
+        context.profileDataStore.edit { prefs ->
+            prefs[DIFFICULTY] = newDifficulty.id
+            prefs[OVERRIDE_STARTING_LEVEL] = overrideStartingLevel
         }
     }
 

@@ -203,7 +203,9 @@ fun LevelSelectScreen(worldId: Int, navController: NavHostController) {
             } else {
                 items(levels) { level ->
                     val stars = progress.levelStars[level.id] ?: 0
-                    val unlocked = level.id <= progress.highestUnlockedLevel(difficulty?.startingLevel ?: 1)
+                    val overrideLevel = profile?.overrideStartingLevel ?: 0
+                    val effectiveStart = if (overrideLevel > 0) overrideLevel else (difficulty?.startingLevel ?: 1)
+                    val unlocked = level.id <= progress.highestUnlockedLevel(effectiveStart)
                     val isLastWon = level.id == lastWonLevel
                     val isFavorite = level.id in progress.favoriteLevels
 

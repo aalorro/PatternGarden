@@ -118,7 +118,9 @@ fun WorldSelectScreen(navController: NavHostController) {
                 .verticalScroll(scrollState),
             verticalArrangement = Arrangement.spacedBy(14.dp)
         ) {
-            val startingWorld = difficulty?.startingWorld ?: 1
+            val overrideLevel = profile?.overrideStartingLevel ?: 0
+            val effectiveStartingLevel = if (overrideLevel > 0) overrideLevel else (difficulty?.startingLevel ?: 1)
+            val startingWorld = (effectiveStartingLevel - 1) / 9 + 1
             val skillMultiplier = difficulty?.starMultiplier ?: 1
             worlds.forEach { world ->
                 val starsToUnlock = world.baseStarsToUnlock * skillMultiplier

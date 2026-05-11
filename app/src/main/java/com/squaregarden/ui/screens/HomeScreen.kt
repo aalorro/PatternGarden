@@ -51,7 +51,9 @@ fun HomeScreen(navController: NavHostController) {
         profile = profileRepo.loadProfile()
         val progress = progressRepo.loadProgress()
         val difficulty = Difficulty.fromId(profile.difficulty)
-        val highestUnlocked = progress.highestUnlockedLevel(difficulty.startingLevel)
+        val effectiveStart = if (profile.overrideStartingLevel > 0)
+            profile.overrideStartingLevel else difficulty.startingLevel
+        val highestUnlocked = progress.highestUnlockedLevel(effectiveStart)
         currentWorld = ((highestUnlocked - 1) / 9) + 1
     }
 
