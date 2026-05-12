@@ -87,7 +87,7 @@ class GameViewModel(
             } else {
                 val levels = LevelLoader.loadAllLevels(context)
                 baseLevel = levels.first { it.id == levelId }
-                val goalSets = GoalSetGenerator.generateGoalSets(baseLevel)
+                val goalSets = GoalSetGenerator.generateGoalSets(baseLevel, difficulty)
                 level = baseLevel.copy(goals = goalSets.random())
                 adjustedMaxMoves = max(1, (level.maxMoves * difficulty.moveMultiplier).roundToInt())
                 initLevel()
@@ -660,7 +660,7 @@ class GameViewModel(
 
         // Re-randomize goals when generating a new board
         if (!hasTutorial && hasMovedSinceReset && ::baseLevel.isInitialized) {
-            val goalSets = GoalSetGenerator.generateGoalSets(baseLevel)
+            val goalSets = GoalSetGenerator.generateGoalSets(baseLevel, difficulty)
             level = baseLevel.copy(goals = goalSets.random())
         }
 

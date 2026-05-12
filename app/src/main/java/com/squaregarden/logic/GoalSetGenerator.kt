@@ -57,21 +57,44 @@ object GoalSetGenerator {
     /**
      * Generate 4 goal sets for a level: the original + 3 alternatives.
      * Tutorial levels return only the original set.
+     * Casual players get a minimum of 3 goals per level after tutorials.
      */
-    fun generateGoalSets(level: Level): List<List<Goal>> {
+    fun generateGoalSets(level: Level, difficulty: Difficulty = Difficulty.MEDIUM): List<List<Goal>> {
         if (level.tutorialSteps != null) return listOf(level.goals)
+        val minGoals = if (difficulty == Difficulty.EASY) 3 else 0
+        val padded = if (minGoals > level.goals.size) padGoals(level, minGoals) else level.goals
+        val paddedLevel = if (padded !== level.goals) level.copy(goals = padded) else level
         return listOf(
-            level.goals,
-            generateAlternateSet(level, 1),
-            generateAlternateSet(level, 2),
-            generateAlternateSet(level, 3)
+            padded,
+            generateAlternateSet(paddedLevel, 1, minGoals),
+            generateAlternateSet(paddedLevel, 2, minGoals),
+            generateAlternateSet(paddedLevel, 3, minGoals)
         )
     }
 
-    private fun generateAlternateSet(level: Level, setIndex: Int): List<Goal> {
+    /** Pad a goal list to the minimum count by generating extra goals. */
+    private fun padGoals(level: Level, minGoals: Int): List<Goal> {
+        val rng = Random(level.id.toLong() * 97)
+        val constraints = worldConstraints[level.world] ?: worldConstraints[10]!!
+        val goals = level.goals.toMutableList()
+        val usedIds = goals.map { it.id }.toMutableSet()
+        var retries = 0
+        while (goals.size < minGoals && retries < 100) {
+            val goal = generateSingleGoal(rng, constraints, 0.6f, 0.2f)
+            if (goal.id !in usedIds) {
+                goals.add(goal)
+                usedIds.add(goal.id)
+            } else {
+                retries++
+            }
+        }
+        return goals
+    }
+
+    private fun generateAlternateSet(level: Level, setIndex: Int, minGoals: Int = 0): List<Goal> {
         val rng = Random(level.id.toLong() * 31 + setIndex.toLong())
         val constraints = worldConstraints[level.world] ?: worldConstraints[10]!!
-        val goalCount = level.goals.size
+        val goalCount = maxOf(level.goals.size, minGoals)
 
         // Analyze original type distribution for weighted selection
         val lineCount = level.goals.count { it is Goal.Line }

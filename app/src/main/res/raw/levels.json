@@ -48,6 +48,11 @@
         "type": "line",
         "color": "RED",
         "length": 3
+      },
+      {
+        "type": "line",
+        "color": "BLUE",
+        "length": 3
       }
     ],
     "stars": {
@@ -62,7 +67,7 @@
         "message": "Drag any tile up, down, left, or right to make a swap."
       },
       {
-        "message": "Create a line of 3 RED tiles to win!"
+        "message": "Complete both goals to win!\nCreate lines of 3 RED and 3 BLUE tiles."
       }
     ]
   },
@@ -115,6 +120,11 @@
         "type": "line",
         "color": "BLUE",
         "length": 4
+      },
+      {
+        "type": "line",
+        "color": "GREEN",
+        "length": 3
       }
     ],
     "stars": {
@@ -126,7 +136,7 @@
         "message": "Each swap uses one move.\nWatch your move counter!"
       },
       {
-        "message": "Now try a longer line \u00e2\u20ac\u201d 4 BLUE tiles!\nUse fewer moves to earn more stars."
+        "message": "Complete both goals!\n4 BLUE and 3 GREEN in a line.\nUse fewer moves to earn more stars."
       }
     ]
   },
