@@ -1,7 +1,11 @@
 package com.squaregarden.ui.components
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.expandHorizontally
+import androidx.compose.animation.shrinkHorizontally
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.detectHorizontalDragGestures
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
@@ -9,6 +13,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ImageBitmap
@@ -35,6 +40,7 @@ fun PlayerBadge(
     modifier: Modifier = Modifier
 ) {
     var showMenu by remember { mutableStateOf(false) }
+    var expanded by remember { mutableStateOf(true) }
     val isCompact = LocalConfiguration.current.screenWidthDp < 600
 
     // Animated star counter: counts up over max 5 seconds then snaps to total
@@ -72,57 +78,78 @@ fun PlayerBadge(
                     MaterialTheme.colorScheme.surface,
                     RoundedCornerShape(cornerRadius)
                 )
-                .clickable { showMenu = true }
                 .padding(horizontal = hPad, vertical = vPad),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(gap)
         ) {
-            // Avatar
-            BasReliefAvatar(
-                emoji = avatarEmoji,
-                size = avatarSize,
-                animate = false,
-                imageBitmap = avatarImageBitmap
-            )
-
-            // Level
-            Text(
-                text = "Lv$playerLevel",
-                fontSize = levelFontSize,
-                fontWeight = FontWeight.ExtraBold,
-                color = MaterialTheme.colorScheme.primary
-            )
-
-            // Stars (with position tracking)
-            Text(
-                text = "$displayedStars\u2605",
-                fontSize = starFontSize,
-                fontWeight = FontWeight.ExtraBold,
-                color = Color(0xFFD4A017),
-                modifier = Modifier.onGloballyPositioned { coords ->
-                    val pos = coords.positionInWindow()
-                    val size = coords.size
-                    onStarPositioned?.invoke(
-                        Offset(pos.x + size.width / 2f, pos.y + size.height / 2f)
-                    )
-                }
-            )
-
-            // Lives
-            Text(
-                text = "\u2764".repeat(lives),
-                fontSize = smallFontSize,
-                color = Color(0xFFE53935)
-            )
-
-            // Perfect games (only if > 0)
-            if (perfectGames > 0) {
-                Text(
-                    text = "\uD83C\uDFC6$perfectGames",
-                    fontSize = smallFontSize,
-                    fontWeight = FontWeight.Bold,
-                    color = Color(0xFFD4A017)
+            // Avatar — tap opens menu, horizontal swipe toggles collapse/expand
+            Box(
+                modifier = Modifier
+                    .clickable { showMenu = true }
+                    .pointerInput(Unit) {
+                        detectHorizontalDragGestures { _, dragAmount ->
+                            if (dragAmount < -20f) expanded = false
+                            else if (dragAmount > 20f) expanded = true
+                        }
+                    }
+            ) {
+                BasReliefAvatar(
+                    emoji = avatarEmoji,
+                    size = avatarSize,
+                    animate = false,
+                    imageBitmap = avatarImageBitmap
                 )
+            }
+
+            AnimatedVisibility(
+                visible = expanded,
+                enter = expandHorizontally(expandFrom = Alignment.Start),
+                exit = shrinkHorizontally(shrinkTowards = Alignment.Start)
+            ) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(gap)
+                ) {
+                    // Level
+                    Text(
+                        text = "Lv$playerLevel",
+                        fontSize = levelFontSize,
+                        fontWeight = FontWeight.ExtraBold,
+                        color = MaterialTheme.colorScheme.primary
+                    )
+
+                    // Stars (with position tracking)
+                    Text(
+                        text = "$displayedStars\u2605",
+                        fontSize = starFontSize,
+                        fontWeight = FontWeight.ExtraBold,
+                        color = Color(0xFFD4A017),
+                        modifier = Modifier.onGloballyPositioned { coords ->
+                            val pos = coords.positionInWindow()
+                            val size = coords.size
+                            onStarPositioned?.invoke(
+                                Offset(pos.x + size.width / 2f, pos.y + size.height / 2f)
+                            )
+                        }
+                    )
+
+                    // Lives
+                    Text(
+                        text = "\u2764".repeat(lives),
+                        fontSize = smallFontSize,
+                        color = Color(0xFFE53935)
+                    )
+
+                    // Perfect games (only if > 0)
+                    if (perfectGames > 0) {
+                        Text(
+                            text = "\uD83C\uDFC6$perfectGames",
+                            fontSize = smallFontSize,
+                            fontWeight = FontWeight.Bold,
+                            color = Color(0xFFD4A017)
+                        )
+                    }
+                }
             }
         }
 
