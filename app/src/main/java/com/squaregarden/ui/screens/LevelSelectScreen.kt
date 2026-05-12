@@ -30,6 +30,11 @@ import com.squaregarden.model.PlayerProgress
 import com.squaregarden.ui.navigation.Screen
 import com.squaregarden.ui.theme.*
 
+private val worldStarsToUnlock = mapOf(
+    1 to 0, 2 to 8, 3 to 20, 4 to 35, 5 to 55,
+    6 to 80, 7 to 110, 8 to 145, 9 to 185, 10 to 230
+)
+
 // World theme colors: (tile background, tile text, accent/star color, gradient)
 private data class WorldTheme(
     val tileColor: Color,
@@ -78,6 +83,7 @@ fun LevelSelectScreen(worldId: Int, navController: NavHostController) {
     val lives by progressRepo.livesFlow.collectAsState(initial = 3)
     val cooldownUntil by progressRepo.cooldownUntilFlow.collectAsState(initial = 0L)
     val cooldownActive = lives <= 0 && cooldownUntil > System.currentTimeMillis()
+    val totalStars by progressRepo.totalStarsFlow.collectAsState(initial = 0)
 
     // TODO: World 11 challenge lab — remove before release
     val challengeEntries = remember {
@@ -155,7 +161,7 @@ fun LevelSelectScreen(worldId: Int, navController: NavHostController) {
             horizontalArrangement = Arrangement.spacedBy(10.dp),
             verticalArrangement = Arrangement.spacedBy(10.dp),
             modifier = Modifier.weight(1f).padding(horizontal = 16.dp),
-            contentPadding = PaddingValues(top = 60.dp, bottom = 4.dp)
+            contentPadding = PaddingValues(top = 60.dp, bottom = 16.dp)
         ) {
             // TODO: Challenge lab cards — remove before release
             if (worldId == 11) {
@@ -293,5 +299,46 @@ fun LevelSelectScreen(worldId: Int, navController: NavHostController) {
             }
         }
 
+        // "Next World" button at the bottom
+        if (worldId in 1..9) {
+            val nextWorld = worldId + 1
+            val nextThreshold = worldStarsToUnlock[nextWorld] ?: Int.MAX_VALUE
+            val skillMultiplier = difficulty?.starMultiplier ?: 1
+            val starsNeeded = nextThreshold * skillMultiplier
+            val overrideLevel = profile?.overrideStartingLevel ?: 0
+            val effectiveStart = if (overrideLevel > 0) overrideLevel else (difficulty?.startingLevel ?: 1)
+            val startingWorld = (effectiveStart - 1) / 9 + 1
+            val nextUnlocked = nextWorld <= startingWorld || totalStars >= starsNeeded
+
+            val nextWorldNames = mapOf(
+                2 to "Blooming Meadow", 3 to "Ancient Grove", 4 to "Crystal Cavern",
+                5 to "Shattered Isles", 6 to "Void Fortress", 7 to "Molten Core",
+                8 to "Starfall Summit", 9 to "Abyssal Depths", 10 to "Prism Citadel"
+            )
+
+            Button(
+                onClick = {
+                    navController.navigate(Screen.LevelSelect.create(nextWorld)) {
+                        popUpTo(Screen.LevelSelect.create(worldId)) { inclusive = true }
+                    }
+                },
+                enabled = nextUnlocked,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp, vertical = 8.dp),
+                shape = RoundedCornerShape(14.dp),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = theme.tileColor,
+                    contentColor = Color.White
+                )
+            ) {
+                Text(
+                    text = if (nextUnlocked) "Next World \u2192 ${nextWorldNames[nextWorld]}"
+                           else "\uD83D\uDD12 ${nextWorldNames[nextWorld]} (\u2605$starsNeeded)",
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 14.sp
+                )
+            }
+        }
     }
 }
