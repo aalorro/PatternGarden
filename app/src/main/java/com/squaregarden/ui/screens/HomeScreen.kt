@@ -7,6 +7,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import kotlinx.coroutines.flow.first
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
@@ -19,12 +20,14 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.navigation.NavHostController
 import com.squaregarden.audio.MusicManager
+import com.squaregarden.data.PlayGamesManager
 import com.squaregarden.data.ProfileRepository
 import com.squaregarden.data.ProgressRepository
 import com.squaregarden.data.SettingsRepository
 import com.squaregarden.model.Difficulty
 import com.squaregarden.model.PlayerProgress
 import com.squaregarden.model.UserProfile
+import kotlinx.coroutines.launch
 import com.squaregarden.ui.components.BasReliefAvatar
 import com.squaregarden.ui.components.getAvatar
 import com.squaregarden.ui.components.LogoMark
@@ -46,6 +49,7 @@ fun HomeScreen(navController: NavHostController) {
 
     val settingsRepo = remember { SettingsRepository(context) }
     val musicEnabled by settingsRepo.musicEnabled.collectAsState(initial = true)
+    val scope = rememberCoroutineScope()
 
     LaunchedEffect(Unit) {
         profile = profileRepo.loadProfile()
@@ -223,6 +227,42 @@ fun HomeScreen(navController: NavHostController) {
                 shape = RoundedCornerShape(50)
             ) {
                 Text("How to Play", fontSize = 16.sp, fontWeight = FontWeight.Bold)
+            }
+
+            if (profile.leaderboardOptIn) {
+                OutlinedButton(
+                    onClick = {
+                        val activity = context as? android.app.Activity ?: return@OutlinedButton
+                        PlayGamesManager.checkSignIn(activity) { signedIn ->
+                            val openLeaderboards = {
+                                scope.launch {
+                                    val diff = Difficulty.fromId(profile.difficulty)
+                                    val effectiveStart = if (profile.overrideStartingLevel > 0)
+                                        profile.overrideStartingLevel else diff.startingLevel
+                                    val progress = progressRepo.loadProgress()
+                                    val stars = progressRepo.totalStarsFlow.first()
+                                    val highestLevel = progress.highestUnlockedLevel(effectiveStart)
+                                    PlayGamesManager.submitTotalStars(activity, diff, stars)
+                                    PlayGamesManager.submitHighestLevel(activity, diff, highestLevel)
+                                }
+                                PlayGamesManager.showAllLeaderboards(activity)
+                            }
+                            if (signedIn) {
+                                openLeaderboards()
+                            } else {
+                                PlayGamesManager.signIn(activity) { success ->
+                                    if (success) openLeaderboards()
+                                }
+                            }
+                        }
+                    },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(48.dp),
+                    shape = RoundedCornerShape(50)
+                ) {
+                    Text("\uD83C\uDFC6  Leaderboards", fontSize = 16.sp, fontWeight = FontWeight.Bold)
+                }
             }
         }
 

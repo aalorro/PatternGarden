@@ -15,7 +15,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
-import com.squaregarden.data.PlayGamesManager
 import com.squaregarden.data.ProfileRepository
 import com.squaregarden.data.ProgressRepository
 import com.squaregarden.data.SettingsRepository
@@ -188,44 +187,6 @@ fun SettingsScreen(navController: NavHostController) {
 
             Spacer(modifier = Modifier.height(12.dp))
         }
-
-        // Leaderboards button (only if opted in)
-        if (currentProfile.leaderboardOptIn) {
-            OutlinedButton(
-                onClick = {
-                    val activity = context as? android.app.Activity ?: return@OutlinedButton
-                    PlayGamesManager.checkSignIn(activity) { signedIn ->
-                        val openLeaderboards = {
-                            // Submit current progress before showing leaderboards
-                            scope.launch {
-                                val totalStars = progressRepo.totalStarsFlow.first()
-                                val progress = progressRepo.loadProgress()
-                                val diff = Difficulty.fromId(currentProfile.difficulty)
-                                val effectiveStart = if (currentProfile.overrideStartingLevel > 0)
-                                    currentProfile.overrideStartingLevel else diff.startingLevel
-                                val highestLevel = progress.highestUnlockedLevel(effectiveStart)
-                                PlayGamesManager.submitTotalStars(activity, diff, totalStars)
-                                PlayGamesManager.submitHighestLevel(activity, diff, highestLevel)
-                            }
-                            PlayGamesManager.showAllLeaderboards(activity)
-                        }
-                        if (signedIn) {
-                            openLeaderboards()
-                        } else {
-                            PlayGamesManager.signIn(activity) { success ->
-                                if (success) openLeaderboards()
-                            }
-                        }
-                    }
-                },
-                modifier = Modifier.fillMaxWidth().height(48.dp),
-                shape = RoundedCornerShape(50)
-            ) {
-                Text("\uD83C\uDFC6  Leaderboards", fontWeight = FontWeight.Bold)
-            }
-        }
-
-        Spacer(modifier = Modifier.height(12.dp))
 
         // How to Play
         OutlinedButton(
