@@ -87,8 +87,8 @@ fun PlayerBadge(
                 modifier = Modifier
                     .pointerInput(Unit) {
                         detectDragGestures { _, dragAmount ->
-                            if (dragAmount.x < -8f) expanded = false
-                            else if (dragAmount.x > 8f) expanded = true
+                            if (dragAmount.x > 8f) expanded = false
+                            else if (dragAmount.x < -8f) expanded = true
                         }
                     }
                     .pointerInput(Unit) {
