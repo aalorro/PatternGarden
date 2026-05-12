@@ -242,10 +242,10 @@ fun HomeScreen(navController: NavHostController) {
                                     val progress = progressRepo.loadProgress()
                                     val stars = progressRepo.totalStarsFlow.first()
                                     val highestLevel = progress.highestUnlockedLevel(effectiveStart)
-                                    PlayGamesManager.submitTotalStars(activity, diff, stars)
-                                    PlayGamesManager.submitHighestLevel(activity, diff, highestLevel)
+                                    PlayGamesManager.submitAndShowLeaderboards(
+                                        activity, diff, stars, highestLevel
+                                    )
                                 }
-                                PlayGamesManager.showAllLeaderboards(activity)
                             }
                             if (signedIn) {
                                 openLeaderboards()

@@ -4,7 +4,10 @@ import android.app.Activity
 import android.content.Context
 import android.util.Log
 import com.google.android.gms.games.PlayGames
+import com.google.android.gms.tasks.Tasks
 import com.squaregarden.model.Difficulty
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 
 object PlayGamesManager {
 
@@ -48,6 +51,36 @@ object PlayGamesManager {
         PlayGames.getLeaderboardsClient(activity)
             .submitScore(id, level.toLong())
         Log.d(TAG, "Submitted highestLevel=$level for ${difficulty.name}")
+    }
+
+    /** Submit scores immediately to server (blocks until complete) then open leaderboards. */
+    suspend fun submitAndShowLeaderboards(
+        activity: Activity,
+        difficulty: Difficulty,
+        totalStars: Int,
+        highestLevel: Int
+    ) {
+        val client = PlayGames.getLeaderboardsClient(activity)
+        // Submit scores with immediate server sync
+        withContext(Dispatchers.IO) {
+            try {
+                val starsId = totalStarsLeaderboardId(activity, difficulty)
+                val levelId = highestLevelLeaderboardId(activity, difficulty)
+                if (starsId != null) {
+                    Tasks.await(client.submitScoreImmediate(starsId, totalStars.toLong()))
+                    Log.d(TAG, "Immediate submit totalStars=$totalStars for ${difficulty.name}")
+                }
+                if (levelId != null) {
+                    Tasks.await(client.submitScoreImmediate(levelId, highestLevel.toLong()))
+                    Log.d(TAG, "Immediate submit highestLevel=$highestLevel for ${difficulty.name}")
+                }
+            } catch (e: Exception) {
+                Log.e(TAG, "Immediate submit failed, falling back to cached submit", e)
+                submitTotalStars(activity, difficulty, totalStars)
+                submitHighestLevel(activity, difficulty, highestLevel)
+            }
+        }
+        showAllLeaderboards(activity)
     }
 
     private const val RC_LEADERBOARD_UI = 9004
